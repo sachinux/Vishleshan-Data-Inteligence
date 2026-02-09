@@ -4,6 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import {
   Upload,
@@ -14,6 +22,14 @@ import {
   AlertCircle,
   CheckCircle,
   Loader2,
+  Info,
+  TrendingUp,
+  Hash,
+  Type,
+  Calendar,
+  CircleDot,
+  AlertTriangle,
+  Sparkles,
 } from "lucide-react";
 
 export const WorkspaceView = ({
