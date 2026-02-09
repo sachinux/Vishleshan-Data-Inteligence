@@ -1,53 +1,316 @@
-import { useEffect } from "react";
-import "@/App.css";
+import { useState, useEffect, useCallback } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "@/App.css";
 import axios from "axios";
+import { Toaster } from "@/components/ui/sonner";
+import { WorkspaceView } from "@/components/WorkspaceView";
+import { ChatView } from "@/components/ChatView";
+import { StoryboardView } from "@/components/StoryboardView";
+import { Sidebar } from "@/components/Sidebar";
+import { Database, MessageSquare, LayoutDashboard } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const Home = () => {
-  const helloWorldApi = async () => {
+function AppContent() {
+  const [workspaces, setWorkspaces] = useState([]);
+  const [currentWorkspace, setCurrentWorkspace] = useState(null);
+  const [datasets, setDatasets] = useState([]);
+  const [selectedDataset, setSelectedDataset] = useState(null);
+  const [dataProfile, setDataProfile] = useState(null);
+  const [activeView, setActiveView] = useState("workspace");
+  const [storyTiles, setStoryTiles] = useState([]);
+  const [storyboards, setStoryboards] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch workspaces
+  const fetchWorkspaces = useCallback(async () => {
     try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
+      const response = await axios.get(`${API}/workspaces`);
+      setWorkspaces(response.data);
+      if (response.data.length > 0 && !currentWorkspace) {
+        setCurrentWorkspace(response.data[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching workspaces:", error);
+    }
+  }, [currentWorkspace]);
+
+  // Fetch datasets for workspace
+  const fetchDatasets = useCallback(async (workspaceId) => {
+    try {
+      const response = await axios.get(`${API}/datasets/${workspaceId}`);
+      setDatasets(response.data);
+      if (response.data.length > 0) {
+        setSelectedDataset(response.data[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching datasets:", error);
+    }
+  }, []);
+
+  // Fetch data profile
+  const fetchDataProfile = useCallback(async (datasetId) => {
+    try {
+      const response = await axios.get(`${API}/datasets/${datasetId}/profile`);
+      setDataProfile(response.data);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      setDataProfile(null);
+    }
+  }, []);
+
+  // Fetch story tiles
+  const fetchStoryTiles = useCallback(async (workspaceId) => {
+    try {
+      const response = await axios.get(`${API}/story-tiles/${workspaceId}`);
+      setStoryTiles(response.data);
+    } catch (error) {
+      console.error("Error fetching story tiles:", error);
+    }
+  }, []);
+
+  // Fetch storyboards
+  const fetchStoryboards = useCallback(async (workspaceId) => {
+    try {
+      const response = await axios.get(`${API}/storyboards/${workspaceId}`);
+      setStoryboards(response.data);
+    } catch (error) {
+      console.error("Error fetching storyboards:", error);
+    }
+  }, []);
+
+  // Create workspace
+  const createWorkspace = async (name, description = "") => {
+    try {
+      setLoading(true);
+      const response = await axios.post(`${API}/workspaces`, { name, description });
+      setWorkspaces([...workspaces, response.data]);
+      setCurrentWorkspace(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating workspace:", error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Upload file
+  const uploadFile = async (file) => {
+    if (!currentWorkspace) return null;
+    
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("workspace_id", currentWorkspace.id);
+      
+      const response = await axios.post(`${API}/datasets/upload`, formData);
+      const newDataset = response.data.dataset;
+      setDatasets([...datasets, newDataset]);
+      setSelectedDataset(newDataset);
+      setDataProfile(response.data.profile);
+      return response.data;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Import Google Sheets
+  const importGoogleSheet = async (url) => {
+    if (!currentWorkspace) return null;
+    
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("url", url);
+      formData.append("workspace_id", currentWorkspace.id);
+      
+      const response = await axios.post(`${API}/datasets/google-sheets`, formData);
+      const newDataset = response.data.dataset;
+      setDatasets([...datasets, newDataset]);
+      setSelectedDataset(newDataset);
+      setDataProfile(response.data.profile);
+      return response.data;
+    } catch (error) {
+      console.error("Error importing Google Sheet:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create story tile from message
+  const createStoryTile = async (messageId) => {
+    if (!currentWorkspace) return null;
+    
+    try {
+      const formData = new FormData();
+      formData.append("workspace_id", currentWorkspace.id);
+      formData.append("message_id", messageId);
+      
+      const response = await axios.post(`${API}/story-tiles/from-message`, formData);
+      setStoryTiles([...storyTiles, response.data]);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating story tile:", error);
+      throw error;
+    }
+  };
+
+  // Generate storyboard
+  const generateStoryboard = async (title = "Data Story") => {
+    if (!currentWorkspace) return null;
+    
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("workspace_id", currentWorkspace.id);
+      formData.append("title", title);
+      
+      const response = await axios.post(`${API}/storyboards/generate`, formData);
+      setStoryboards([...storyboards, response.data]);
+      return response.data;
+    } catch (error) {
+      console.error("Error generating storyboard:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update storyboard
+  const updateStoryboard = async (storyboardId, updates) => {
+    try {
+      const response = await axios.put(`${API}/storyboards/${storyboardId}`, updates);
+      setStoryboards(storyboards.map(sb => 
+        sb.id === storyboardId ? response.data : sb
+      ));
+      return response.data;
+    } catch (error) {
+      console.error("Error updating storyboard:", error);
+      throw error;
+    }
+  };
+
+  // Export storyboard
+  const exportStoryboard = async (storyboardId, format) => {
+    try {
+      const response = await axios.post(
+        `${API}/export/${format}/${storyboardId}`,
+        {},
+        { responseType: "blob" }
+      );
+      
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `storyboard.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error exporting storyboard:", error);
+      throw error;
+    }
+  };
+
+  // Effects
   useEffect(() => {
-    helloWorldApi();
-  }, []);
+    fetchWorkspaces();
+  }, [fetchWorkspaces]);
+
+  useEffect(() => {
+    if (currentWorkspace) {
+      fetchDatasets(currentWorkspace.id);
+      fetchStoryTiles(currentWorkspace.id);
+      fetchStoryboards(currentWorkspace.id);
+    }
+  }, [currentWorkspace, fetchDatasets, fetchStoryTiles, fetchStoryboards]);
+
+  useEffect(() => {
+    if (selectedDataset) {
+      fetchDataProfile(selectedDataset.id);
+    }
+  }, [selectedDataset, fetchDataProfile]);
+
+  const navItems = [
+    { id: "workspace", label: "Workspace", icon: Database },
+    { id: "chat", label: "Chat & Charts", icon: MessageSquare },
+    { id: "storyboard", label: "Storyboard", icon: LayoutDashboard },
+  ];
 
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
+    <div className="app-layout">
+      <Sidebar
+        workspaces={workspaces}
+        currentWorkspace={currentWorkspace}
+        setCurrentWorkspace={setCurrentWorkspace}
+        createWorkspace={createWorkspace}
+        navItems={navItems}
+        activeView={activeView}
+        setActiveView={setActiveView}
+        datasets={datasets}
+        selectedDataset={selectedDataset}
+        setSelectedDataset={setSelectedDataset}
+        dataProfile={dataProfile}
+        loading={loading}
+      />
+      
+      <main className="main-content">
+        {activeView === "workspace" && (
+          <WorkspaceView
+            workspace={currentWorkspace}
+            datasets={datasets}
+            selectedDataset={selectedDataset}
+            setSelectedDataset={setSelectedDataset}
+            dataProfile={dataProfile}
+            uploadFile={uploadFile}
+            importGoogleSheet={importGoogleSheet}
+            loading={loading}
+          />
+        )}
+        
+        {activeView === "chat" && (
+          <ChatView
+            workspace={currentWorkspace}
+            selectedDataset={selectedDataset}
+            createStoryTile={createStoryTile}
+            API={API}
+          />
+        )}
+        
+        {activeView === "storyboard" && (
+          <StoryboardView
+            workspace={currentWorkspace}
+            storyTiles={storyTiles}
+            storyboards={storyboards}
+            generateStoryboard={generateStoryboard}
+            updateStoryboard={updateStoryboard}
+            exportStoryboard={exportStoryboard}
+            loading={loading}
+          />
+        )}
+      </main>
+      
+      <Toaster position="bottom-right" />
     </div>
   );
-};
+}
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/*" element={<AppContent />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
