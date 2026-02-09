@@ -325,26 +325,37 @@ Charlie Wilson,32,Phoenix,72000"""
             print("❌ Skipped - No workspace ID available")
             return False
 
+        # Use form data for this endpoint
+        url = f"{self.api_url}/storyboards/generate"
         data = {
             'workspace_id': self.workspace_id,
             'title': 'Test Data Story'
         }
         
-        success, response = self.run_test(
-            "Generate Storyboard",
-            "POST",
-            "storyboards/generate",
-            200,
-            data=data,
-            files={}  # This endpoint expects form data
-        )
+        self.tests_run += 1
+        print(f"\n🔍 Testing Generate Storyboard...")
+        print(f"   URL: {url}")
         
-        if success and 'id' in response:
-            self.storyboard_id = response['id']
-            print(f"   Storyboard ID: {self.storyboard_id}")
-            print(f"   Frames: {len(response.get('frames', []))}")
-        
-        return success
+        try:
+            response = requests.post(url, data=data)
+            success = response.status_code == 200
+            
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                response_data = response.json()
+                if 'id' in response_data:
+                    self.storyboard_id = response_data['id']
+                    print(f"   Storyboard ID: {self.storyboard_id}")
+                    print(f"   Frames: {len(response_data.get('frames', []))}")
+                return True
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                print(f"   Response: {response.text[:200]}")
+                return False
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False
 
     def test_get_storyboards(self):
         """Test getting storyboards"""
