@@ -262,10 +262,12 @@ export const WorkspaceView = ({
               })}
             </div>
           </div>
+          </div>
         </div>
 
-        {/* Data Profile Section */}
-        <div className="w-1/2 p-6 overflow-y-auto">
+        {/* Data Profile Section - Right Panel */}
+        <div className="workspace-right">
+          <div className="workspace-right-content">
           {dataProfile && selectedDataset ? (
             <TooltipProvider>
               <div data-testid="data-profile-panel">
