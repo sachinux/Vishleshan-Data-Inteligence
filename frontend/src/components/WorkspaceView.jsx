@@ -505,7 +505,7 @@ export const WorkspaceView = ({
                   </CardContent>
                 </Card>
               </div>
-            </TooltipProvider>}
+            </TooltipProvider>
           ) : (
             <div className="flex-1 flex items-center justify-center h-full">
               <div className="text-center">
