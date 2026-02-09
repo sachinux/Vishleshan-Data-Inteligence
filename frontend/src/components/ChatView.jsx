@@ -410,11 +410,11 @@ export const ChatView = ({
               )}
               <div ref={messagesEndRef} />
             </div>
-          </ScrollArea>
+          </div>
 
-          {/* Workflow Shortcuts (shown when there are messages) */}
+          {/* Workflow Shortcuts - FIXED */}
           {messages.length > 0 && selectedDataset && (
-            <div className="px-4 py-2 border-t border-border bg-card/30">
+            <div className="workflow-bar px-4 py-2">
               <div className="flex items-center gap-2 overflow-x-auto">
                 <span className="text-xs text-muted-foreground uppercase tracking-wider shrink-0">
                   Workflows:
@@ -445,7 +445,7 @@ export const ChatView = ({
             </div>
           )}
 
-          {/* Input Area */}
+          {/* Input Area - FIXED at bottom */}
           <div className="chat-input-area">
             <div className="flex gap-3">
               <Input
