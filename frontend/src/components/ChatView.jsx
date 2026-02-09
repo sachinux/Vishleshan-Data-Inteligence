@@ -234,11 +234,11 @@ export const ChatView = ({
 
   return (
     <TooltipProvider>
-      <div className="chat-area flex" data-testid="chat-view">
-        {/* Query Navigator Sidebar */}
+      <div className="chat-area flex h-full" data-testid="chat-view">
+        {/* Query Navigator Sidebar - FIXED */}
         {showQueryNav && (
-          <div className="w-64 border-r border-border bg-card/50 flex flex-col animate-slide-in">
-            <div className="p-3 border-b border-border flex items-center justify-between">
+          <div className="query-navigator animate-slide-in">
+            <div className="query-navigator-header flex items-center justify-between">
               <span className="font-heading text-xs uppercase tracking-wider text-primary">
                 Query Navigator
               </span>
@@ -251,7 +251,7 @@ export const ChatView = ({
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <ScrollArea className="flex-1">
+            <div className="query-navigator-content">
               <div className="p-2 space-y-1">
                 {userQueries.length === 0 ? (
                   <p className="text-xs text-muted-foreground text-center py-4">
@@ -280,14 +280,14 @@ export const ChatView = ({
                   ))
                 )}
               </div>
-            </ScrollArea>
+            </div>
           </div>
         )}
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Header */}
-          <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          {/* Header - FIXED */}
+          <div className="chat-header p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
@@ -321,8 +321,8 @@ export const ChatView = ({
             )}
           </div>
 
-          {/* Messages */}
-          <ScrollArea className="flex-1">
+          {/* Messages - SCROLLABLE */}
+          <div className="flex-1 overflow-y-auto min-h-0">
             <div className="chat-messages">
               {messages.length === 0 ? (
                 <div className="py-8">
