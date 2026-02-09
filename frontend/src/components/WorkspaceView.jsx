@@ -131,9 +131,9 @@ export const WorkspaceView = ({
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden" data-testid="workspace-view">
-      {/* Header */}
-      <div className="p-6 border-b border-border">
+    <div className="flex-1 flex flex-col h-full overflow-hidden" data-testid="workspace-view">
+      {/* Header - FIXED */}
+      <div className="flex-shrink-0 p-6 border-b border-border bg-card">
         <h2 className="font-heading text-2xl uppercase tracking-wider text-primary">
           {workspace.name}
         </h2>
@@ -142,20 +142,22 @@ export const WorkspaceView = ({
         </p>
       </div>
 
-      <div className="flex-1 overflow-hidden flex">
-        {/* Upload Section */}
-        <div className="w-1/2 border-r border-border p-6 overflow-y-auto">
-          <Tabs defaultValue="upload" className="w-full">
-            <TabsList className="w-full mb-6">
-              <TabsTrigger value="upload" className="flex-1 font-mono uppercase text-xs">
-                <Upload className="h-4 w-4 mr-2" />
-                Upload
-              </TabsTrigger>
-              <TabsTrigger value="google" className="flex-1 font-mono uppercase text-xs">
-                <Link className="h-4 w-4 mr-2" />
-                Google Sheets
-              </TabsTrigger>
-            </TabsList>
+      {/* Main Content - SCROLLABLE sections */}
+      <div className="workspace-layout">
+        {/* Upload Section - Left Panel */}
+        <div className="workspace-left">
+          <div className="workspace-left-content">
+            <Tabs defaultValue="upload" className="w-full">
+              <TabsList className="w-full mb-6">
+                <TabsTrigger value="upload" className="flex-1 font-mono uppercase text-xs">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload
+                </TabsTrigger>
+                <TabsTrigger value="google" className="flex-1 font-mono uppercase text-xs">
+                  <Link className="h-4 w-4 mr-2" />
+                  Google Sheets
+                </TabsTrigger>
+              </TabsList>
 
             <TabsContent value="upload">
               <div
