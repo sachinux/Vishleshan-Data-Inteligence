@@ -363,7 +363,7 @@ export const StoryboardView = ({
                   </div>
                 ))}
               </div>
-            </ScrollArea>
+            </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
