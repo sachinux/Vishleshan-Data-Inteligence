@@ -506,32 +506,6 @@ export const WorkspaceView = ({
                 </Card>
               </div>
             </TooltipProvider>}
-                            {col.mean_value !== null && col.mean_value !== undefined && (
-                              <div className="flex justify-between col-span-2">
-                                <span className="text-muted-foreground">Mean:</span>
-                                <span className="font-mono">
-                                  {col.mean_value.toFixed(2)}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          {col.sample_values.length > 0 && (
-                            <div className="mt-2 pt-2 border-t border-border/50">
-                              <span className="text-xs text-muted-foreground">
-                                Sample:{" "}
-                              </span>
-                              <span className="text-xs font-mono">
-                                {col.sample_values.slice(0, 3).join(", ")}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </div>
           ) : (
             <div className="flex-1 flex items-center justify-center h-full">
               <div className="text-center">
