@@ -523,6 +523,7 @@ export const WorkspaceView = ({
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>
