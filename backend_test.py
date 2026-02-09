@@ -269,26 +269,37 @@ Charlie Wilson,32,Phoenix,72000"""
             print("❌ Skipped - No workspace or message ID available")
             return False
 
+        # Use form data for this endpoint
+        url = f"{self.api_url}/story-tiles/from-message"
         data = {
             'workspace_id': self.workspace_id,
             'message_id': self.message_id
         }
         
-        success, response = self.run_test(
-            "Create Story Tile from Message",
-            "POST",
-            "story-tiles/from-message",
-            200,
-            data=data,
-            files={}  # This endpoint expects form data
-        )
+        self.tests_run += 1
+        print(f"\n🔍 Testing Create Story Tile from Message...")
+        print(f"   URL: {url}")
         
-        if success and 'id' in response:
-            self.story_tile_id = response['id']
-            print(f"   Story tile ID: {self.story_tile_id}")
-            print(f"   Title: {response.get('title', 'N/A')}")
-        
-        return success
+        try:
+            response = requests.post(url, data=data)
+            success = response.status_code == 200
+            
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                response_data = response.json()
+                if 'id' in response_data:
+                    self.story_tile_id = response_data['id']
+                    print(f"   Story tile ID: {self.story_tile_id}")
+                    print(f"   Title: {response_data.get('title', 'N/A')}")
+                return True
+            else:
+                print(f"❌ Failed - Expected 200, got {response.status_code}")
+                print(f"   Response: {response.text[:200]}")
+                return False
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False
 
     def test_get_story_tiles(self):
         """Test getting story tiles"""
