@@ -183,8 +183,8 @@ export const StoryboardView = ({
           )}
         </div>
 
-        {/* Storyboard List */}
-        <ScrollArea className="flex-1">
+        {/* Storyboard List - SCROLLABLE */}
+        <div className="storyboard-sidebar-content">
           <div className="p-4 space-y-2">
             {storyboards.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-4">
@@ -210,15 +210,13 @@ export const StoryboardView = ({
               ))
             )}
           </div>
-        </ScrollArea>
 
-        {/* Story Tiles Count */}
-        <div className="p-4 border-t border-border">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-            Story Tiles: {storyTiles.length}
-          </p>
-          <ScrollArea className="h-32">
-            <div className="space-y-1">
+          {/* Story Tiles Count */}
+          <div className="p-4 border-t border-border">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+              Story Tiles: {storyTiles.length}
+            </p>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
               {storyTiles.map((tile) => (
                 <div
                   key={tile.id}
@@ -230,16 +228,16 @@ export const StoryboardView = ({
                 </div>
               ))}
             </div>
-          </ScrollArea>
+          </div>
         </div>
       </div>
 
       {/* Right Panel - Storyboard Editor */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="storyboard-main">
         {selectedStoryboard ? (
           <>
-            {/* Storyboard Header */}
-            <div className="p-4 border-b border-border flex items-center justify-between">
+            {/* Storyboard Header - FIXED */}
+            <div className="storyboard-main-header flex items-center justify-between">
               <div>
                 <h3 className="font-heading text-xl uppercase tracking-wider">
                   {selectedStoryboard.title}
