@@ -265,96 +265,247 @@ export const WorkspaceView = ({
         {/* Data Profile Section */}
         <div className="w-1/2 p-6 overflow-y-auto">
           {dataProfile && selectedDataset ? (
-            <div data-testid="data-profile-panel">
-              <h3 className="font-heading text-lg uppercase tracking-wider mb-4 text-primary">
-                Data Profile
-              </h3>
+            <TooltipProvider>
+              <div data-testid="data-profile-panel">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-heading text-lg uppercase tracking-wider text-primary">
+                    Data Profile
+                  </h3>
+                  <Badge variant="outline" className="font-mono">
+                    {selectedDataset.file_type.toUpperCase()}
+                  </Badge>
+                </div>
 
-              {/* Summary Stats */}
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="font-heading text-sm uppercase tracking-wider">
-                    Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-4 border border-border">
-                      <p className="text-2xl font-mono text-primary">
-                        {dataProfile.row_count.toLocaleString()}
-                      </p>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                        Rows
-                      </p>
+                {/* Data Quality Score */}
+                <Card className="mb-6 border-primary/30">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="font-heading text-sm uppercase tracking-wider flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        Data Quality Score
+                      </CardTitle>
+                      <span className="text-2xl font-mono text-primary">
+                        {Math.round(100 - (dataProfile.columns.reduce((acc, col) => acc + col.null_percentage, 0) / dataProfile.columns.length))}%
+                      </span>
                     </div>
-                    <div className="text-center p-4 border border-border">
-                      <p className="text-2xl font-mono text-primary">
-                        {dataProfile.column_count}
-                      </p>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                        Columns
-                      </p>
-                    </div>
-                    <div className="text-center p-4 border border-border">
-                      <p className="text-2xl font-mono text-primary">
-                        {dataProfile.memory_usage}
-                      </p>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                        Memory
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardHeader>
+                  <CardContent>
+                    <Progress 
+                      value={100 - (dataProfile.columns.reduce((acc, col) => acc + col.null_percentage, 0) / dataProfile.columns.length)} 
+                      className="h-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Based on completeness, data types, and value distribution
+                    </p>
+                  </CardContent>
+                </Card>
 
-              {/* Column Details */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-heading text-sm uppercase tracking-wider">
-                    Column Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-3">
-                      {dataProfile.columns.map((col, idx) => (
-                        <div
-                          key={idx}
-                          className="p-3 border border-border hover:border-primary/50 transition-colors"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-mono text-sm text-primary">
-                              {col.name}
-                            </span>
-                            <span className="text-xs px-2 py-1 bg-muted text-muted-foreground font-mono">
-                              {col.dtype}
-                            </span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Unique:</span>
-                              <span className="font-mono">{col.unique_count}</span>
+                {/* Summary Stats */}
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="font-heading text-sm uppercase tracking-wider">
+                      Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center p-4 border border-border">
+                        <p className="text-2xl font-mono text-primary">
+                          {dataProfile.row_count.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                          Rows
+                        </p>
+                      </div>
+                      <div className="text-center p-4 border border-border">
+                        <p className="text-2xl font-mono text-primary">
+                          {dataProfile.column_count}
+                        </p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                          Columns
+                        </p>
+                      </div>
+                      <div className="text-center p-4 border border-border">
+                        <p className="text-2xl font-mono text-primary">
+                          {dataProfile.memory_usage}
+                        </p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                          Memory
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Column Type Distribution */}
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="font-heading text-sm uppercase tracking-wider">
+                      Column Types
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {(() => {
+                        const typeCount = {};
+                        dataProfile.columns.forEach(col => {
+                          const type = col.dtype.includes('int') || col.dtype.includes('float') ? 'numeric' : 
+                                       col.dtype.includes('date') || col.dtype.includes('time') ? 'datetime' :
+                                       col.dtype.includes('bool') ? 'boolean' : 'text';
+                          typeCount[type] = (typeCount[type] || 0) + 1;
+                        });
+                        return Object.entries(typeCount).map(([type, count]) => {
+                          const icons = { numeric: Hash, text: Type, datetime: Calendar, boolean: CircleDot };
+                          const Icon = icons[type] || Type;
+                          return (
+                            <div key={type} className="flex items-center gap-2 px-3 py-2 border border-border">
+                              <Icon className="h-4 w-4 text-primary" />
+                              <span className="text-xs font-mono uppercase">{type}</span>
+                              <Badge variant="secondary" className="text-xs">{count}</Badge>
                             </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Nulls:</span>
-                              <span className="font-mono">{col.null_percentage}%</span>
-                            </div>
-                            {col.min_value && (
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Min:</span>
-                                <span className="font-mono truncate max-w-[80px]">
-                                  {col.min_value}
+                          );
+                        });
+                      })()}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Column Details */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-heading text-sm uppercase tracking-wider">
+                      Column Details
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px]">
+                      <div className="space-y-3">
+                        {dataProfile.columns.map((col, idx) => {
+                          const isNumeric = col.dtype.includes('int') || col.dtype.includes('float');
+                          const hasHighNulls = col.null_percentage > 20;
+                          const hasLowCardinality = col.unique_count < 10 && col.unique_count > 1;
+                          
+                          return (
+                            <div
+                              key={idx}
+                              className="p-3 border border-border hover:border-primary/50 transition-colors"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-mono text-sm text-primary">
+                                    {col.name}
+                                  </span>
+                                  {hasHighNulls && (
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <AlertTriangle className="h-3 w-3 text-amber-500" />
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p className="text-xs">High null percentage ({col.null_percentage}%)</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                  {hasLowCardinality && (
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <Info className="h-3 w-3 text-blue-500" />
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p className="text-xs">Low cardinality - good for grouping</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                </div>
+                                <span className="text-xs px-2 py-1 bg-muted text-muted-foreground font-mono">
+                                  {col.dtype}
                                 </span>
                               </div>
-                            )}
-                            {col.max_value && (
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Max:</span>
-                                <span className="font-mono truncate max-w-[80px]">
-                                  {col.max_value}
-                                </span>
+                              
+                              {/* Completeness Bar */}
+                              <div className="mb-2">
+                                <div className="flex justify-between text-xs mb-1">
+                                  <span className="text-muted-foreground">Completeness</span>
+                                  <span className="font-mono">{(100 - col.null_percentage).toFixed(1)}%</span>
+                                </div>
+                                <Progress value={100 - col.null_percentage} className="h-1" />
                               </div>
-                            )}
+                              
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Unique:</span>
+                                  <span className="font-mono">{col.unique_count}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Nulls:</span>
+                                  <span className="font-mono">{col.null_percentage}%</span>
+                                </div>
+                                {col.min_value && (
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Min:</span>
+                                    <span className="font-mono truncate max-w-[80px]">
+                                      {col.min_value}
+                                    </span>
+                                  </div>
+                                )}
+                                {col.max_value && (
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Max:</span>
+                                    <span className="font-mono truncate max-w-[80px]">
+                                      {col.max_value}
+                                    </span>
+                                  </div>
+                                )}
+                                {col.mean_value !== null && col.mean_value !== undefined && (
+                                  <div className="flex justify-between col-span-2">
+                                    <span className="text-muted-foreground">Mean:</span>
+                                    <span className="font-mono">
+                                      {col.mean_value.toFixed(2)}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Sample Values */}
+                              {col.sample_values.length > 0 && (
+                                <div className="mt-2 pt-2 border-t border-border/50">
+                                  <span className="text-xs text-muted-foreground">
+                                    Sample:{" "}
+                                  </span>
+                                  <span className="text-xs font-mono">
+                                    {col.sample_values.slice(0, 3).join(", ")}
+                                  </span>
+                                </div>
+                              )}
+                              
+                              {/* AI-suggested column insight */}
+                              {isNumeric && col.mean_value && (
+                                <div className="mt-2 p-2 bg-primary/5 border-l-2 border-primary">
+                                  <p className="text-xs text-muted-foreground">
+                                    <TrendingUp className="h-3 w-3 inline mr-1 text-primary" />
+                                    {col.mean_value > 0 ? 
+                                      `Average: ${col.mean_value.toFixed(2)} | Range: ${parseFloat(col.max_value) - parseFloat(col.min_value)}` :
+                                      "Numeric column suitable for aggregations"
+                                    }
+                                  </p>
+                                </div>
+                              )}
+                              {hasLowCardinality && (
+                                <div className="mt-2 p-2 bg-blue-500/5 border-l-2 border-blue-500">
+                                  <p className="text-xs text-muted-foreground">
+                                    <Info className="h-3 w-3 inline mr-1 text-blue-500" />
+                                    Categorical column - ideal for grouping & filtering
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </div>
+            </TooltipProvider>}
                             {col.mean_value !== null && col.mean_value !== undefined && (
                               <div className="flex justify-between col-span-2">
                                 <span className="text-muted-foreground">Mean:</span>
