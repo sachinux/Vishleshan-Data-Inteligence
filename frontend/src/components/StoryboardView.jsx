@@ -159,11 +159,11 @@ export const StoryboardView = ({
   }
 
   return (
-    <div className="flex-1 flex overflow-hidden" data-testid="storyboard-view">
-      {/* Left Panel - Storyboard List & Tiles */}
-      <div className="w-80 border-r border-border flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b border-border">
+    <div className="storyboard-layout" data-testid="storyboard-view">
+      {/* Left Panel - Storyboard List & Tiles - FIXED sidebar with scrollable content */}
+      <div className="storyboard-sidebar">
+        {/* Header - FIXED */}
+        <div className="storyboard-sidebar-header">
           <h2 className="font-heading text-lg uppercase tracking-wider text-primary mb-4">
             Storyboards
           </h2>
