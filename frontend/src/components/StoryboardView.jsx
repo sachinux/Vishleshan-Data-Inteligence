@@ -281,9 +281,9 @@ export const StoryboardView = ({
               </div>
             </div>
 
-            {/* Frames List */}
-            <ScrollArea className="flex-1">
-              <div className="p-6 space-y-4">
+            {/* Frames List - SCROLLABLE */}
+            <div className="storyboard-main-content">
+              <div className="space-y-4">
                 {selectedStoryboard.frames?.map((frame, index) => (
                   <div
                     key={frame.id}
