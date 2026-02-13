@@ -754,9 +754,9 @@ const MessageBubble = ({
               {savingTile === message.id ? (
                 <Loader2 className="h-3 w-3 animate-spin mr-2" />
               ) : (
-                <Bookmark className="h-3 w-3 mr-2" />
+                <Pin className="h-3 w-3 mr-2" />
               )}
-              Save as Tile
+              Pin Insight
             </Button>
           )}
         </div>
