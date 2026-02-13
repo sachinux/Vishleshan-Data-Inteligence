@@ -31,7 +31,7 @@ import {
   Code,
   ChevronDown,
   ChevronUp,
-  Bookmark,
+  Pin,
   AlertCircle,
   Sparkles,
   BarChart3,
