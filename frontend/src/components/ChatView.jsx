@@ -105,6 +105,8 @@ export const ChatView = ({
   selectedDataset,
   createStoryTile,
   API,
+  chatMessages,
+  setChatMessages,
 }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -116,16 +118,24 @@ export const ChatView = ({
   const [clarifying, setClarifying] = useState(null);
   const messagesEndRef = useRef(null);
 
+  // Sync messages with parent
+  useEffect(() => {
+    if (chatMessages) {
+      setMessages(chatMessages);
+    }
+  }, [chatMessages]);
+
   // Fetch chat history
   const fetchMessages = useCallback(async () => {
     if (!workspace) return;
     try {
       const response = await axios.get(`${API}/chat/${workspace.id}`);
       setMessages(response.data);
+      if (setChatMessages) setChatMessages(response.data);
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
-  }, [API, workspace]);
+  }, [API, workspace, setChatMessages]);
 
   useEffect(() => {
     fetchMessages();
