@@ -205,60 +205,6 @@ export const RightSidebar = ({
 
         <Separator />
 
-        {/* Generated Slides Section */}
-        <div className="right-sidebar-section">
-          <span className="text-xs text-muted-foreground uppercase tracking-wider mb-3 block">
-            Generated Slides
-          </span>
-
-          {!latestStoryboard || latestStoryboard.frames?.length === 0 ? (
-            <div className="text-center py-6 border border-dashed border-border rounded">
-              <Sparkles className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">
-                {storyTiles.length === 0
-                  ? "Pin insights to generate slides"
-                  : "Click + to generate slides"}
-              </p>
-            </div>
-          ) : (
-            <ScrollArea className="h-[200px]">
-              <div className="space-y-2 pr-2">
-                {latestStoryboard.frames.map((frame, idx) => (
-                  <div
-                    key={frame.id}
-                    className="p-3 border border-border hover:border-primary/50 transition-colors bg-card/50"
-                    data-testid={`slide-${frame.id}`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-mono text-primary">
-                        #{idx + 1}
-                      </span>
-                      <span className="text-xs font-medium truncate">
-                        {frame.title}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground line-clamp-2">
-                      {frame.summary}
-                    </p>
-                    {frame.narrative_notes && (
-                      <div className="mt-2 p-2 bg-muted/30 rounded">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
-                          Speaker Notes
-                        </p>
-                        <p className="text-xs italic text-muted-foreground line-clamp-2">
-                          {frame.narrative_notes}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          )}
-        </div>
-
-        <Separator />
-
         {/* Narrative Coach Section */}
         <div className="right-sidebar-section flex-1 flex flex-col">
           <div className="flex items-center gap-2 mb-3">
