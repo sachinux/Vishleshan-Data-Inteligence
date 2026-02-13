@@ -7,6 +7,7 @@ import { WorkspaceView } from "@/components/WorkspaceView";
 import { ChatView } from "@/components/ChatView";
 import { StoryboardView } from "@/components/StoryboardView";
 import { Sidebar } from "@/components/Sidebar";
+import { RightSidebar } from "@/components/RightSidebar";
 import { Database, MessageSquare, LayoutDashboard } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -18,10 +19,11 @@ function AppContent() {
   const [datasets, setDatasets] = useState([]);
   const [selectedDataset, setSelectedDataset] = useState(null);
   const [dataProfile, setDataProfile] = useState(null);
-  const [activeView, setActiveView] = useState("workspace");
+  const [activeView, setActiveView] = useState("chat");
   const [storyTiles, setStoryTiles] = useState([]);
   const [storyboards, setStoryboards] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
 
   // Fetch workspaces
   const fetchWorkspaces = useCallback(async () => {
@@ -77,6 +79,16 @@ function AppContent() {
       setStoryboards(response.data);
     } catch (error) {
       console.error("Error fetching storyboards:", error);
+    }
+  }, []);
+
+  // Fetch chat messages
+  const fetchChatMessages = useCallback(async (workspaceId) => {
+    try {
+      const response = await axios.get(`${API}/chat/${workspaceId}`);
+      setChatMessages(response.data);
+    } catch (error) {
+      console.error("Error fetching chat messages:", error);
     }
   }, []);
 
@@ -231,8 +243,9 @@ function AppContent() {
       fetchDatasets(currentWorkspace.id);
       fetchStoryTiles(currentWorkspace.id);
       fetchStoryboards(currentWorkspace.id);
+      fetchChatMessages(currentWorkspace.id);
     }
-  }, [currentWorkspace, fetchDatasets, fetchStoryTiles, fetchStoryboards]);
+  }, [currentWorkspace, fetchDatasets, fetchStoryTiles, fetchStoryboards, fetchChatMessages]);
 
   useEffect(() => {
     if (selectedDataset) {
@@ -242,12 +255,13 @@ function AppContent() {
 
   const navItems = [
     { id: "workspace", label: "Workspace", icon: Database },
-    { id: "chat", label: "Chat & Charts", icon: MessageSquare },
+    { id: "chat", label: "Analysis Chat", icon: MessageSquare },
     { id: "storyboard", label: "Storyboard", icon: LayoutDashboard },
   ];
 
   return (
     <div className="app-layout">
+      {/* Left Sidebar */}
       <Sidebar
         workspaces={workspaces}
         currentWorkspace={currentWorkspace}
@@ -263,6 +277,7 @@ function AppContent() {
         loading={loading}
       />
       
+      {/* Main Content */}
       <main className="main-content">
         {activeView === "workspace" && (
           <WorkspaceView
@@ -283,6 +298,8 @@ function AppContent() {
             selectedDataset={selectedDataset}
             createStoryTile={createStoryTile}
             API={API}
+            chatMessages={chatMessages}
+            setChatMessages={setChatMessages}
           />
         )}
         
@@ -298,6 +315,18 @@ function AppContent() {
           />
         )}
       </main>
+      
+      {/* Right Sidebar - Always Visible */}
+      <RightSidebar
+        workspace={currentWorkspace}
+        storyTiles={storyTiles}
+        storyboards={storyboards}
+        chatMessages={chatMessages}
+        generateStoryboard={generateStoryboard}
+        exportStoryboard={exportStoryboard}
+        API={API}
+        loading={loading}
+      />
       
       <Toaster position="bottom-right" />
     </div>
