@@ -159,11 +159,13 @@ export const ChatView = ({
         dataset_id: selectedDataset?.id,
       });
 
-      setMessages((prev) => [
-        ...prev,
+      const newMessages = [
+        ...messages,
         { role: "user", content: messageText, id: Date.now().toString() },
         response.data,
-      ]);
+      ];
+      setMessages(newMessages);
+      if (setChatMessages) setChatMessages(newMessages);
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to process your question");
@@ -178,9 +180,9 @@ export const ChatView = ({
     setSavingTile(message.id);
     try {
       await createStoryTile(message.id);
-      toast.success("Saved as Story Tile");
+      toast.success("Pinned to Insights!");
     } catch (error) {
-      toast.error("Failed to save as tile");
+      toast.error("Failed to pin insight");
     } finally {
       setSavingTile(null);
     }
