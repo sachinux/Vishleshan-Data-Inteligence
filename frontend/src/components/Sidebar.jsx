@@ -68,6 +68,8 @@ export const Sidebar = ({
   onDatasetDeleted,
   dataViewTab,
   setDataViewTab,
+  showGridSplit,
+  setShowGridSplit,
 }) => {
   const [showNewWorkspace, setShowNewWorkspace] = useState(false);
   const [showEditWorkspace, setShowEditWorkspace] = useState(false);
