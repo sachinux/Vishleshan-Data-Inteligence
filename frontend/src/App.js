@@ -313,6 +313,9 @@ function AppContent() {
         setSelectedDataset={setSelectedDataset}
         dataProfile={dataProfile}
         loading={loading}
+        onWorkspaceDeleted={handleWorkspaceDeleted}
+        onWorkspaceUpdated={handleWorkspaceUpdated}
+        onDatasetDeleted={handleDatasetDeleted}
       />
       
       {/* Main Content */}
