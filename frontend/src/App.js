@@ -27,6 +27,7 @@ function AppContent() {
   const [loading, setLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatSettings, setChatSettings] = useState({ context: "", response_style: "" });
+  const [dataViewTab, setDataViewTab] = useState("profile"); // "profile" or "grid"
 
   // Fetch workspaces
   const fetchWorkspaces = useCallback(async () => {
