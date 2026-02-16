@@ -145,6 +145,42 @@ export const ChatView = ({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Progress state for loading indicator
+  const [progress, setProgress] = useState(0);
+  const [progressStep, setProgressStep] = useState("");
+
+  const progressSteps = [
+    { progress: 15, text: "Understanding your question..." },
+    { progress: 35, text: "Analyzing dataset..." },
+    { progress: 55, text: "Running calculations..." },
+    { progress: 75, text: "Generating insights..." },
+    { progress: 90, text: "Preparing visualization..." },
+  ];
+
+  useEffect(() => {
+    if (sending) {
+      setProgress(0);
+      setProgressStep(progressSteps[0].text);
+      
+      let stepIndex = 0;
+      const interval = setInterval(() => {
+        stepIndex++;
+        if (stepIndex < progressSteps.length) {
+          setProgress(progressSteps[stepIndex].progress);
+          setProgressStep(progressSteps[stepIndex].text);
+        }
+      }, 800);
+
+      return () => clearInterval(interval);
+    } else {
+      setProgress(100);
+      setTimeout(() => {
+        setProgress(0);
+        setProgressStep("");
+      }, 300);
+    }
+  }, [sending]);
+
   const handleSend = async (customPrompt) => {
     const messageText = customPrompt || input.trim();
     if (!messageText || !workspace) return;
