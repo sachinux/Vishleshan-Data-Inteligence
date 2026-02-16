@@ -657,15 +657,17 @@ Example:
                 result_data = None
         
         # Generate natural language answer
+        system_message = f"You are a friendly data analyst explaining results to a business user.{response_style_instructions}"
         answer_prompt = f"""
 The user asked: "{user_message}"
 Analysis plan: {analysis.get('plan', 'N/A')}
 Result: {json.dumps(result_data) if result_data else 'No result'}
 Error: {error if error else 'None'}
+{context_instructions}
 
 Provide a clear, concise answer in 2-3 sentences. If there was an error, explain what might have gone wrong and suggest fixes.
 """
-        answer = await get_llm_response(answer_prompt, "You are a friendly data analyst explaining results to a business user.")
+        answer = await get_llm_response(answer_prompt, system_message)
         
         # Create assistant response
         assistant_chat = ChatMessage(
