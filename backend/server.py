@@ -107,6 +107,20 @@ class ChatRequest(BaseModel):
     workspace_id: str
     message: str
     dataset_id: Optional[str] = None
+    context: Optional[str] = None  # Custom AI instructions
+    response_style: Optional[str] = None  # Response style preference
+
+class ChatSettings(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    workspace_id: str
+    context: str = ""  # Up to 1000 chars
+    response_style: str = ""  # Up to 50 chars
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ChatSettingsUpdate(BaseModel):
+    context: Optional[str] = None
+    response_style: Optional[str] = None
 
 class StoryTile(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -681,6 +695,44 @@ async def get_chat_history(workspace_id: str):
         parse_datetime_fields(msg, ["created_at"])
     
     return messages
+
+# Chat Settings endpoints
+@api_router.get("/chat-settings/{workspace_id}")
+async def get_chat_settings(workspace_id: str):
+    settings = await db.chat_settings.find_one({"workspace_id": workspace_id}, {"_id": 0})
+    if not settings:
+        # Return default settings if none exist
+        return {"workspace_id": workspace_id, "context": "", "response_style": ""}
+    parse_datetime_fields(settings, ["updated_at"])
+    return settings
+
+@api_router.put("/chat-settings/{workspace_id}")
+async def update_chat_settings(workspace_id: str, update: ChatSettingsUpdate):
+    update_data = {}
+    
+    if update.context is not None:
+        # Limit to 1000 characters
+        update_data["context"] = update.context[:1000]
+    if update.response_style is not None:
+        # Limit to 50 characters
+        update_data["response_style"] = update.response_style[:50]
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No update data provided")
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    update_data["workspace_id"] = workspace_id
+    
+    # Upsert: create if doesn't exist, update if it does
+    result = await db.chat_settings.update_one(
+        {"workspace_id": workspace_id},
+        {"$set": update_data},
+        upsert=True
+    )
+    
+    settings = await db.chat_settings.find_one({"workspace_id": workspace_id}, {"_id": 0})
+    parse_datetime_fields(settings, ["updated_at"])
+    return settings
 
 # Story Tiles endpoints
 @api_router.post("/story-tiles", response_model=StoryTile)
