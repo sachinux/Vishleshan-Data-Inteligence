@@ -125,12 +125,41 @@ export const StoryboardView = ({
       const newStoryboard = await generateStoryboard(newTitle);
       setSelectedStoryboard(newStoryboard);
       setShowNewStoryboard(false);
-      setNewTitle("Data Story");
-      toast.success("Storyboard generated with action items!");
+      setNewTitle("Data Actions");
+      toast.success("Data Actions generated with action items!");
     } catch (error) {
-      toast.error("Failed to generate storyboard. Make sure you have story tiles.");
+      toast.error("Failed to generate. Make sure you have story tiles.");
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleDeleteStoryboard = async () => {
+    if (!deletingStoryboard) return;
+
+    try {
+      await deleteStoryboard(deletingStoryboard.id);
+      if (selectedStoryboard?.id === deletingStoryboard.id) {
+        setSelectedStoryboard(null);
+      }
+      toast.success("Data Actions deleted");
+    } catch (error) {
+      toast.error("Failed to delete");
+    } finally {
+      setDeletingStoryboard(null);
+    }
+  };
+
+  const handleDeleteTile = async () => {
+    if (!deletingTile) return;
+
+    try {
+      await deleteStoryTile(deletingTile.id);
+      toast.success("Insight removed");
+    } catch (error) {
+      toast.error("Failed to delete insight");
+    } finally {
+      setDeletingTile(null);
     }
   };
 
