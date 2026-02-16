@@ -355,16 +355,29 @@ function AppContent() {
       {/* Main Content */}
       <main className="main-content">
         {activeView === "workspace" && (
-          <WorkspaceView
-            workspace={currentWorkspace}
-            datasets={datasets}
-            selectedDataset={selectedDataset}
-            setSelectedDataset={setSelectedDataset}
-            dataProfile={dataProfile}
-            uploadFile={uploadFile}
-            importGoogleSheet={importGoogleSheet}
-            loading={loading}
-          />
+          dataViewTab === "grid" ? (
+            <DataGridView
+              dataset={selectedDataset}
+              workspace={currentWorkspace}
+              API={API}
+              onAnalysisComplete={(result) => {
+                // Switch to chat view to see the result
+                setActiveView("chat");
+                fetchChatMessages(currentWorkspace.id);
+              }}
+            />
+          ) : (
+            <WorkspaceView
+              workspace={currentWorkspace}
+              datasets={datasets}
+              selectedDataset={selectedDataset}
+              setSelectedDataset={setSelectedDataset}
+              dataProfile={dataProfile}
+              uploadFile={uploadFile}
+              importGoogleSheet={importGoogleSheet}
+              loading={loading}
+            />
+          )
         )}
         
         {activeView === "chat" && (
