@@ -155,6 +155,8 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 - `DELETE /api/workspaces/{id}` - Delete workspace
 - `POST /api/datasets/upload` - Upload data file
 - `DELETE /api/datasets/{id}` - Delete dataset
+- `GET /api/datasets/{id}/rows` - Get paginated rows for grid view
+- `POST /api/datasets/selected-rows/analyze` - Analyze selected rows (narrate/compare)
 - `POST /api/chat` - Process user query
 - `GET /api/chat-settings/{workspace_id}` - Get chat settings
 - `PUT /api/chat-settings/{workspace_id}` - Update chat settings
