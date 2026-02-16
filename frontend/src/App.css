@@ -40,9 +40,9 @@
 
 /* Right Sidebar - Bento Card */
 .right-sidebar {
-    width: 280px;
-    min-width: 280px;
-    max-width: 280px;
+    width: 320px;
+    min-width: 320px;
+    max-width: 320px;
     height: calc(100vh - 24px);
     background-color: hsl(var(--card));
     border: 1px solid hsl(var(--border));
@@ -439,8 +439,9 @@
     }
     
     .right-sidebar {
-        width: 240px;
-        min-width: 240px;
+        width: 280px;
+        min-width: 280px;
+        max-width: 280px;
     }
 }
 
