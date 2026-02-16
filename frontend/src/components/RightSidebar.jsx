@@ -486,20 +486,20 @@ export const RightSidebar = ({
                   </div>
 
                   {/* Quick Stats */}
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2" role="region" aria-label="Quick Statistics">
                     <div className="p-3 border border-border rounded-lg bg-card text-center">
-                      <p className="text-xl font-bold text-green-600">{completedCount}</p>
-                      <p className="text-[9px] text-muted-foreground mt-1">Done</p>
+                      <p className="text-xl font-bold text-green-600" aria-label="Completed actions">{completedCount}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Done</p>
                     </div>
                     <div className="p-3 border border-border rounded-lg bg-card text-center">
-                      <p className="text-xl font-bold text-yellow-600">
+                      <p className="text-xl font-bold text-yellow-600" aria-label="Pending actions">
                         {actionItems.filter(a => a.priority === "MEDIUM" && !a.completed).length}
                       </p>
-                      <p className="text-[9px] text-muted-foreground mt-1">Pending</p>
+                      <p className="text-xs text-muted-foreground mt-1">Pending</p>
                     </div>
                     <div className="p-3 border border-border rounded-lg bg-card text-center">
-                      <p className="text-xl font-bold text-red-600">{highPriorityItems.length}</p>
-                      <p className="text-[9px] text-muted-foreground mt-1">Urgent</p>
+                      <p className="text-xl font-bold text-red-600" aria-label="Urgent actions">{highPriorityItems.length}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Urgent</p>
                     </div>
                   </div>
                 </div>
