@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Dialog, 
   DialogContent, 
@@ -43,8 +42,6 @@ import {
   Pencil,
   Trash2,
   AlertTriangle,
-  LayoutGrid,
-  FileBarChart,
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -66,10 +63,6 @@ export const Sidebar = ({
   onWorkspaceDeleted,
   onWorkspaceUpdated,
   onDatasetDeleted,
-  dataViewTab,
-  setDataViewTab,
-  showGridSplit,
-  setShowGridSplit,
 }) => {
   const [showNewWorkspace, setShowNewWorkspace] = useState(false);
   const [showEditWorkspace, setShowEditWorkspace] = useState(false);
