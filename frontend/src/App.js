@@ -350,7 +350,7 @@ function AppContent() {
   const navItems = [
     { id: "workspace", label: "Workspace", icon: Database },
     { id: "chat", label: "Analysis", icon: MessageSquare },
-    { id: "storyboard", label: "Storyboard", icon: LayoutDashboard },
+    { id: "storyboard", label: "Data Actions", icon: LayoutDashboard },
   ];
 
   return (
