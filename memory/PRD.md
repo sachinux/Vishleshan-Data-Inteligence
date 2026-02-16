@@ -69,6 +69,13 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 
 ## What's Been Implemented
 
+### Session - February 16, 2026
+- **UI Fix**: Right sidebar width increased from 280px to 320px
+- **Layout Fix**: Fixed overlapping text in Key Metrics, To Do, and Quick Stats sections
+- **Improved Readability**: Better spacing for action items and KPI cards
+
+### Previous Sessions
+
 ### Feb 16, 2026
 - **Chat Settings Feature**: Added settings modal to customize AI behavior
   - Context: Custom instructions the AI remembers (up to 1000 chars)
