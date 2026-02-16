@@ -109,6 +109,9 @@ export const ChatView = ({
   API,
   chatMessages,
   setChatMessages,
+  chatSettings,
+  updateChatSettings,
+  loading: parentLoading,
 }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -118,6 +121,7 @@ export const ChatView = ({
   const [selectedQuery, setSelectedQuery] = useState(null);
   const [detailPanel, setDetailPanel] = useState(null);
   const [clarifying, setClarifying] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Sync messages with parent
