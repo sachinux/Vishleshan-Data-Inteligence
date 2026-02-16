@@ -50,9 +50,11 @@ import {
   Lightbulb,
   ChevronRight,
   X,
+  Settings,
 } from "lucide-react";
 import { ChartRenderer } from "@/components/ChartRenderer";
 import { DataTable } from "@/components/DataTable";
+import { ChatSettings } from "@/components/ChatSettings";
 
 // Workflow Templates - Pre-built analysis patterns
 const WORKFLOW_TEMPLATES = [
