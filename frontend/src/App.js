@@ -8,6 +8,7 @@ import { ChatView } from "@/components/ChatView";
 import { StoryboardView } from "@/components/StoryboardView";
 import { Sidebar } from "@/components/Sidebar";
 import { RightSidebar } from "@/components/RightSidebar";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { Database, MessageSquare, LayoutDashboard } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -255,7 +256,7 @@ function AppContent() {
 
   const navItems = [
     { id: "workspace", label: "Workspace", icon: Database },
-    { id: "chat", label: "Analysis Chat", icon: MessageSquare },
+    { id: "chat", label: "Analysis", icon: MessageSquare },
     { id: "storyboard", label: "Storyboard", icon: LayoutDashboard },
   ];
 
@@ -335,11 +336,13 @@ function AppContent() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/*" element={<AppContent />} />
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider defaultTheme="light" storageKey="data-storyteller-theme">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/*" element={<AppContent />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
