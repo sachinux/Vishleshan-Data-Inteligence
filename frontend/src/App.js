@@ -351,6 +351,8 @@ function AppContent() {
         onDatasetDeleted={handleDatasetDeleted}
         dataViewTab={dataViewTab}
         setDataViewTab={setDataViewTab}
+        showGridSplit={showGridSplit}
+        setShowGridSplit={setShowGridSplit}
       />
       
       {/* Main Content */}
