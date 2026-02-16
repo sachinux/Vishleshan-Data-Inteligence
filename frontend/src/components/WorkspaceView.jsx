@@ -12,7 +12,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import axios from "axios";
 import {
   Upload,
   Link,
@@ -30,7 +41,11 @@ import {
   CircleDot,
   AlertTriangle,
   Sparkles,
+  Trash2,
 } from "lucide-react";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 export const WorkspaceView = ({
   workspace,
@@ -41,11 +56,30 @@ export const WorkspaceView = ({
   uploadFile,
   importGoogleSheet,
   loading,
+  onDatasetDeleted,
 }) => {
   const [googleSheetUrl, setGoogleSheetUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [deletingDataset, setDeletingDataset] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef(null);
+
+  const handleDeleteDataset = async () => {
+    if (!deletingDataset) return;
+    
+    setDeleting(true);
+    try {
+      await axios.delete(`${API}/datasets/${deletingDataset.id}`);
+      onDatasetDeleted(deletingDataset.id);
+      toast.success(`Deleted ${deletingDataset.filename}`);
+    } catch (error) {
+      toast.error("Failed to delete dataset");
+    } finally {
+      setDeleting(false);
+      setDeletingDataset(null);
+    }
+  };
 
   const handleFileUpload = async (files) => {
     if (!workspace) {
