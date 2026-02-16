@@ -112,6 +112,8 @@ export const ChatView = ({
   chatSettings,
   updateChatSettings,
   loading: parentLoading,
+  showGridSplit,
+  setShowGridSplit,
 }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
