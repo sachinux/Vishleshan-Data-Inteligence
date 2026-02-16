@@ -83,9 +83,18 @@
 .chat-area {
     flex: 1;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     overflow: hidden;
     height: 100%;
+}
+
+/* Chat main content - beside query navigator */
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
 }
 
 /* Chat header - FIXED */
@@ -94,7 +103,6 @@
     border-bottom: 1px solid hsl(var(--border));
     background-color: hsl(var(--card));
     z-index: 10;
-    border-radius: var(--radius) var(--radius) 0 0;
 }
 
 /* Chat messages - SCROLLABLE */
