@@ -251,7 +251,7 @@ export const ChatView = ({
         {showQueryNav && (
           <div className="query-navigator animate-slide-in">
             <div className="query-navigator-header flex items-center justify-between">
-              <span className="font-heading text-xs uppercase tracking-wider text-primary">
+              <span className="text-xs uppercase tracking-wider font-medium">
                 Query Navigator
               </span>
               <Button
@@ -278,16 +278,16 @@ export const ChatView = ({
                         element?.scrollIntoView({ behavior: "smooth" });
                         setSelectedQuery(query.id);
                       }}
-                      className={`w-full text-left p-2 text-xs font-mono border transition-colors truncate ${
+                      className={`w-full text-left p-2 text-xs font-mono rounded-lg transition-colors ${
                         selectedQuery === query.id
-                          ? "border-primary bg-primary/10"
-                          : "border-transparent hover:border-border hover:bg-muted/50"
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-secondary"
                       }`}
                     >
-                      <span className="text-muted-foreground mr-2">
+                      <span className="opacity-50 mr-2">
                         {String(idx + 1).padStart(2, "0")}
                       </span>
-                      {query.content?.substring(0, 40)}...
+                      {query.content?.substring(0, 30)}...
                     </button>
                   ))
                 )}
@@ -296,16 +296,16 @@ export const ChatView = ({
           </div>
         )}
 
-        {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        {/* Main Chat Content */}
+        <div className="chat-main">
           {/* Header - FIXED */}
           <div className="chat-header p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
-                variant="ghost"
+                variant={showQueryNav ? "default" : "outline"}
                 size="sm"
                 onClick={() => setShowQueryNav(!showQueryNav)}
-                className={showQueryNav ? "text-primary" : ""}
+                className="h-8 rounded-lg"
                 data-testid="toggle-query-nav"
               >
                 <History className="h-4 w-4 mr-2" />
@@ -313,11 +313,25 @@ export const ChatView = ({
               </Button>
               <Separator orientation="vertical" className="h-6" />
               <div>
-                <h2 className="font-heading text-lg uppercase tracking-wider text-primary">
+                <h2 className="font-semibold text-sm">
                   Chat & Analysis
                 </h2>
                 {selectedDataset && (
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Analyzing: {selectedDataset.filename}
+                  </p>
+                )}
+              </div>
+            </div>
+            {!selectedDataset && (
+              <div className="flex items-center gap-2 text-amber-500">
+                <AlertCircle className="h-4 w-4" />
+                <span className="text-xs">
+                  No dataset selected
+                </span>
+              </div>
+            )}
+          </div>
                     Analyzing: {selectedDataset.filename}
                   </p>
                 )}
