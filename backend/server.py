@@ -1213,6 +1213,39 @@ async def delete_storyboard(storyboard_id: str):
         raise HTTPException(status_code=404, detail="Storyboard not found")
     return {"message": "Storyboard deleted"}
 
+# Action Item toggle endpoint
+class ActionItemToggle(BaseModel):
+    action_id: str
+    completed: bool
+
+@api_router.put("/storyboards/{storyboard_id}/action-items")
+async def toggle_action_item(storyboard_id: str, toggle: ActionItemToggle):
+    """Toggle the completion status of an action item"""
+    storyboard = await db.storyboards.find_one({"id": storyboard_id}, {"_id": 0})
+    if not storyboard:
+        raise HTTPException(status_code=404, detail="Storyboard not found")
+    
+    # Update action item in the master list
+    action_items = storyboard.get("action_items", [])
+    for item in action_items:
+        if item.get("id") == toggle.action_id:
+            item["completed"] = toggle.completed
+            break
+    
+    # Also update in frames if present
+    frames = storyboard.get("frames", [])
+    for frame in frames:
+        for item in frame.get("action_items", []):
+            if item.get("id") == toggle.action_id:
+                item["completed"] = toggle.completed
+    
+    await db.storyboards.update_one(
+        {"id": storyboard_id},
+        {"$set": {"action_items": action_items, "frames": frames, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Action item updated", "action_id": toggle.action_id, "completed": toggle.completed}
+
 # Export endpoints
 @api_router.post("/export/pdf/{storyboard_id}")
 async def export_storyboard_pdf(storyboard_id: str):
