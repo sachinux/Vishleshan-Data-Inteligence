@@ -1,24 +1,28 @@
-/* Main app layout - Three Column */
+/* Main app layout - Three Column Bento Style */
 .app-layout {
     display: flex;
     height: 100vh;
     width: 100vw;
     overflow: hidden;
     background-color: hsl(var(--background));
+    padding: 12px;
+    gap: 12px;
 }
 
-/* Left Sidebar - FIXED */
+/* Left Sidebar - Bento Card */
 .sidebar {
     width: 240px;
     min-width: 240px;
     max-width: 240px;
-    height: 100vh;
-    border-right: 1px solid hsl(var(--border));
+    height: calc(100vh - 24px);
     background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
     overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.02);
 }
 
 .sidebar-header {
@@ -34,18 +38,20 @@
     min-height: 0;
 }
 
-/* Right Sidebar - FIXED */
+/* Right Sidebar - Bento Card */
 .right-sidebar {
     width: 280px;
     min-width: 280px;
     max-width: 280px;
-    height: 100vh;
-    border-left: 1px solid hsl(var(--border));
+    height: calc(100vh - 24px);
     background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
     overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.02);
 }
 
 .right-sidebar-header {
@@ -59,14 +65,18 @@
     flex-shrink: 0;
 }
 
-/* Main content - Flexible */
+/* Main content - Bento Card */
 .main-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    height: 100vh;
+    height: calc(100vh - 24px);
     min-width: 0;
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.02);
 }
 
 /* Chat area - Main container */
@@ -84,6 +94,7 @@
     border-bottom: 1px solid hsl(var(--border));
     background-color: hsl(var(--card));
     z-index: 10;
+    border-radius: var(--radius) var(--radius) 0 0;
 }
 
 /* Chat messages - SCROLLABLE */
@@ -98,7 +109,7 @@
 .workflow-bar {
     flex-shrink: 0;
     border-top: 1px solid hsl(var(--border));
-    background-color: hsl(var(--card)/0.5);
+    background-color: hsl(var(--secondary) / 0.5);
 }
 
 /* Chat input area - FIXED at bottom */
@@ -108,14 +119,15 @@
     padding: 1rem 1.5rem;
     background-color: hsl(var(--card));
     z-index: 10;
+    border-radius: 0 0 var(--radius) var(--radius);
 }
 
-/* Query Navigator - FIXED sidebar in chat */
+/* Query Navigator - Bento sidebar in chat */
 .query-navigator {
-    width: 256px;
-    min-width: 256px;
+    width: 220px;
+    min-width: 220px;
     border-right: 1px solid hsl(var(--border));
-    background-color: hsl(var(--card)/0.5);
+    background-color: hsl(var(--secondary) / 0.3);
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -151,63 +163,49 @@
 }
 
 .message-content {
-    max-width: 80%;
+    max-width: 85%;
     padding: 1rem 1.25rem;
     border: 1px solid hsl(var(--border));
     background-color: hsl(var(--card));
+    border-radius: var(--radius);
 }
 
 .message-user .message-content {
-    background-color: hsl(var(--primary) / 0.1);
-    border-color: hsl(var(--primary) / 0.3);
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-color: hsl(var(--primary));
 }
 
-/* File list */
+/* File list - Bento items */
 .file-item {
     display: flex;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem;
     border: 1px solid hsl(var(--border));
     margin-bottom: 0.5rem;
     cursor: pointer;
-    background-color: hsl(var(--background));
-    transition: border-color 0.2s, background-color 0.2s;
+    background-color: hsl(var(--card));
+    border-radius: calc(var(--radius) - 4px);
+    transition: all 0.2s ease;
 }
 
 .file-item:hover {
-    border-color: hsl(var(--primary) / 0.5);
-    background-color: hsl(var(--card));
+    border-color: hsl(var(--primary) / 0.3);
+    background-color: hsl(var(--secondary));
 }
 
 .file-item.active {
     border-color: hsl(var(--primary));
-    background-color: hsl(var(--primary) / 0.1);
+    background-color: hsl(var(--primary) / 0.05);
 }
 
-/* Profile panel */
-.profile-panel {
-    padding: 1rem;
-    border: 1px solid hsl(var(--border));
-    background-color: hsl(var(--card));
-}
-
-.profile-stat {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid hsl(var(--border) / 0.5);
-}
-
-.profile-stat:last-child {
-    border-bottom: none;
-}
-
-/* Chart container */
+/* Chart container - Bento card */
 .chart-container {
     border: 1px solid hsl(var(--border));
     background-color: hsl(var(--card));
     padding: 1.5rem;
     margin-top: 1rem;
+    border-radius: var(--radius);
 }
 
 .chart-controls {
@@ -217,62 +215,50 @@
     flex-wrap: wrap;
 }
 
-/* Story tiles */
+/* Story tiles - Bento cards */
 .story-tile {
     border: 1px solid hsl(var(--border));
     background-color: hsl(var(--card));
-    padding: 1.25rem;
+    padding: 1rem;
     cursor: pointer;
-    transition: border-color 0.2s, transform 0.2s;
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
 }
 
 .story-tile:hover {
-    border-color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.3);
     transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
 }
 
-.story-tile-title {
-    font-family: 'Space Mono', monospace;
-    font-size: 1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.75rem;
-    color: hsl(var(--primary));
-}
-
-.story-tile-metric {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.875rem;
-    padding: 0.25rem 0;
-    color: hsl(var(--foreground));
-}
-
-/* Storyboard frame */
+/* Storyboard frame - Bento card */
 .storyboard-frame {
     border: 1px solid hsl(var(--border));
     background-color: hsl(var(--card));
     padding: 1.5rem;
     cursor: grab;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
 }
 
 .storyboard-frame:hover {
-    border-color: hsl(var(--primary) / 0.5);
+    border-color: hsl(var(--primary) / 0.3);
 }
 
 .storyboard-frame.dragging {
     cursor: grabbing;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1);
 }
 
-/* Upload zone */
+/* Upload zone - Bento style */
 .upload-zone {
     border: 2px dashed hsl(var(--border));
     padding: 2rem;
     text-align: center;
     cursor: pointer;
-    transition: border-color 0.2s, background-color 0.2s;
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+    background-color: hsl(var(--secondary) / 0.3);
 }
 
 .upload-zone:hover,
@@ -281,46 +267,53 @@
     background-color: hsl(var(--primary) / 0.05);
 }
 
-/* Code block */
+/* Code block - Bento style */
 .code-block {
-    background-color: hsl(var(--background));
+    background-color: hsl(var(--secondary));
     border: 1px solid hsl(var(--border));
     padding: 1rem;
     overflow-x: auto;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.8125rem;
     line-height: 1.6;
+    border-radius: calc(var(--radius) - 4px);
 }
 
-/* Table styling */
+/* Table styling - Bento style */
 .data-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 0.875rem;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
 }
 
 .data-table th {
-    background-color: hsl(var(--muted));
+    background-color: hsl(var(--secondary));
     padding: 0.75rem;
     text-align: left;
-    font-family: 'Space Mono', monospace;
+    font-weight: 600;
     font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    border: 1px solid hsl(var(--border));
-    position: sticky;
-    top: 0;
-    z-index: 1;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid hsl(var(--border));
 }
 
 .data-table td {
     padding: 0.75rem;
-    border: 1px solid hsl(var(--border));
+    border-bottom: 1px solid hsl(var(--border));
     font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8125rem;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
 }
 
 .data-table tr:hover td {
-    background-color: hsl(var(--muted) / 0.5);
+    background-color: hsl(var(--secondary) / 0.5);
 }
 
 /* Workspace view layout */
@@ -329,6 +322,7 @@
     flex: 1;
     overflow: hidden;
     height: 100%;
+    gap: 1px;
 }
 
 .workspace-left {
@@ -367,8 +361,8 @@
 }
 
 .storyboard-sidebar {
-    width: 320px;
-    min-width: 320px;
+    width: 300px;
+    min-width: 300px;
     border-right: 1px solid hsl(var(--border));
     display: flex;
     flex-direction: column;
@@ -405,56 +399,61 @@
     padding: 1.5rem;
 }
 
-/* Loading states */
-.loading-pulse {
-    animation: pulse 2s infinite;
+/* Theme toggle button */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid hsl(var(--border));
+    background-color: hsl(var(--secondary));
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+.theme-toggle:hover {
+    background-color: hsl(var(--primary) / 0.1);
+    border-color: hsl(var(--primary) / 0.3);
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
+    .app-layout {
+        padding: 8px;
+        gap: 8px;
+    }
+    
     .sidebar {
+        width: 200px;
+        min-width: 200px;
+    }
+    
+    .right-sidebar {
         width: 240px;
         min-width: 240px;
     }
-    
-    .workspace-left,
-    .workspace-right {
-        width: 50%;
-    }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .app-layout {
         flex-direction: column;
         height: auto;
         min-height: 100vh;
     }
     
-    .sidebar {
+    .sidebar,
+    .right-sidebar {
         width: 100%;
         min-width: 100%;
         max-width: 100%;
         height: auto;
-        max-height: 40vh;
-        position: relative;
+        max-height: 300px;
     }
     
     .main-content {
         height: auto;
-        min-height: 60vh;
-    }
-    
-    .workspace-layout {
-        flex-direction: column;
-    }
-    
-    .workspace-left,
-    .workspace-right {
-        width: 100%;
+        min-height: 50vh;
     }
 }
