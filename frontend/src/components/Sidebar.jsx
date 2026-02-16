@@ -371,7 +371,20 @@ export const Sidebar = ({
         <div className="flex-shrink-0 border-t border-border bg-secondary/30">
           {/* Profile/Grid Tabs */}
           <div className="p-2 border-b border-border">
-            <Tabs value={dataViewTab || "profile"} onValueChange={setDataViewTab} className="w-full">
+            <Tabs 
+              value={dataViewTab || "profile"} 
+              onValueChange={(value) => {
+                setDataViewTab(value);
+                if (value === "grid" && setShowGridSplit) {
+                  // Switch to Analysis view with grid split
+                  setActiveView("chat");
+                  setShowGridSplit(true);
+                } else if (value === "profile" && setShowGridSplit) {
+                  setShowGridSplit(false);
+                }
+              }} 
+              className="w-full"
+            >
               <TabsList className="w-full h-8">
                 <TabsTrigger 
                   value="profile" 
@@ -416,11 +429,11 @@ export const Sidebar = ({
             </div>
           )}
 
-          {/* Grid hint when Grid tab is active */}
+          {/* Grid active indicator */}
           {dataViewTab === "grid" && (
             <div className="p-3">
               <p className="text-[10px] text-muted-foreground text-center">
-                View full data grid in the main panel
+                Data grid shown above chat
               </p>
             </div>
           )}
