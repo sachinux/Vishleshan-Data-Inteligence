@@ -364,26 +364,64 @@ export const Sidebar = ({
         </div>
       </div>
 
-      {/* Quick Profile */}
+      {/* Quick Profile with Tabs */}
       {dataProfile && selectedDataset && (
-        <div className="flex-shrink-0 p-3 border-t border-border bg-secondary/30">
-          <p className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wider font-medium">
-            Quick Stats
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="text-center p-2 rounded-lg bg-card border border-border">
-              <p className="text-sm font-semibold">{dataProfile.row_count}</p>
-              <p className="text-[9px] text-muted-foreground">Rows</p>
-            </div>
-            <div className="text-center p-2 rounded-lg bg-card border border-border">
-              <p className="text-sm font-semibold">{dataProfile.column_count}</p>
-              <p className="text-[9px] text-muted-foreground">Cols</p>
-            </div>
-            <div className="text-center p-2 rounded-lg bg-card border border-border">
-              <p className="text-[10px] font-semibold">{dataProfile.memory_usage}</p>
-              <p className="text-[9px] text-muted-foreground">Size</p>
-            </div>
+        <div className="flex-shrink-0 border-t border-border bg-secondary/30">
+          {/* Profile/Grid Tabs */}
+          <div className="p-2 border-b border-border">
+            <Tabs value={dataViewTab || "profile"} onValueChange={setDataViewTab} className="w-full">
+              <TabsList className="w-full h-8">
+                <TabsTrigger 
+                  value="profile" 
+                  className="flex-1 text-[10px] h-7"
+                  data-testid="profile-tab"
+                >
+                  <FileBarChart className="h-3 w-3 mr-1" />
+                  Profile
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="grid" 
+                  className="flex-1 text-[10px] h-7"
+                  data-testid="grid-tab"
+                >
+                  <LayoutGrid className="h-3 w-3 mr-1" />
+                  Grid
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
+
+          {/* Quick Stats (only show when Profile tab is active) */}
+          {(!dataViewTab || dataViewTab === "profile") && (
+            <div className="p-3">
+              <p className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wider font-medium">
+                Quick Stats
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-center p-2 rounded-lg bg-card border border-border">
+                  <p className="text-sm font-semibold">{dataProfile.row_count}</p>
+                  <p className="text-[9px] text-muted-foreground">Rows</p>
+                </div>
+                <div className="text-center p-2 rounded-lg bg-card border border-border">
+                  <p className="text-sm font-semibold">{dataProfile.column_count}</p>
+                  <p className="text-[9px] text-muted-foreground">Cols</p>
+                </div>
+                <div className="text-center p-2 rounded-lg bg-card border border-border">
+                  <p className="text-[10px] font-semibold">{dataProfile.memory_usage}</p>
+                  <p className="text-[9px] text-muted-foreground">Size</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Grid hint when Grid tab is active */}
+          {dataViewTab === "grid" && (
+            <div className="p-3">
+              <p className="text-[10px] text-muted-foreground text-center">
+                View full data grid in the main panel
+              </p>
+            </div>
+          )}
         </div>
       )}
 
