@@ -96,6 +96,24 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
   - Backend: `/api/datasets/{id}/rows` and `/api/datasets/selected-rows/analyze` endpoints
   - Frontend: DataGridView.jsx component
 
+- **Interactive Actionable Storyboards**: Major enhancement to storyboard generation
+  - **Executive Summary**: AI-generated 2-3 sentence summary at the top
+  - **KPI Dashboard**: Color-coded KPIs (green/yellow/red) with trend indicators
+  - **Action Items Checklist**: 
+    - Prioritized actions (HIGH/MEDIUM/LOW)
+    - Category badges (Operations, Product, Marketing, Sales)
+    - Progress tracking with completion checkboxes
+    - Progress bar showing completed vs total
+  - **Stakeholder Views**: Different perspectives for:
+    - Executive: High-level summary, key points, recommended actions
+    - Manager: Tactical overview with operational focus
+    - Analyst: Detailed findings with technical recommendations
+  - **Frame-level enhancements**:
+    - Inline KPIs with status indicators
+    - Frame-specific action items
+  - Backend: Enhanced `/api/storyboards/generate` with rich LLM prompts
+  - Frontend: Tabbed interface (Story | Actions | KPIs | Views)
+
 ### Jan 9, 2026
 - 16 API endpoints (all tested and working)
 - Workspace CRUD operations
