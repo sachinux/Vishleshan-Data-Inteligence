@@ -77,6 +77,13 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
   - Frontend: ChatSettings.jsx modal component
   - Settings persist per workspace in MongoDB
 
+- **Storyboard UX Improvements**: Simplified the storyboard view
+  - Cleaner frame cards with rounded corners and subtle borders
+  - Simplified UX copy ("Included Tiles", "Speaker Notes")
+  - Removed confusing CTAs and redundant elements
+  - Better visual hierarchy with numbered frames (01, 02, 03)
+  - Cleaner right sidebar with simplified "Pinned Insights" section
+
 ### Jan 9, 2026
 - 16 API endpoints (all tested and working)
 - Workspace CRUD operations
