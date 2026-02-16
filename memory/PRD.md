@@ -84,6 +84,16 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
   - Better visual hierarchy with numbered frames (01, 02, 03)
   - Cleaner right sidebar with simplified "Pinned Insights" section
 
+- **Excel-like Data Grid with Row Selection**: Added Profile/Grid tabs
+  - New "Grid" tab in left sidebar for Excel-like data view
+  - Row selection with checkboxes (single and multi-select)
+  - Sortable columns, pagination (50 rows per page)
+  - **"Narrate Story"** - AI generates a narrative from selected rows
+  - **"Compare Data"** - AI compares and contrasts selected rows
+  - Both generate visual charts and can be pinned as insights
+  - Backend: `/api/datasets/{id}/rows` and `/api/datasets/selected-rows/analyze` endpoints
+  - Frontend: DataGridView.jsx component
+
 ### Jan 9, 2026
 - 16 API endpoints (all tested and working)
 - Workspace CRUD operations
