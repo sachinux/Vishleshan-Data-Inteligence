@@ -398,13 +398,13 @@ export const RightSidebar = ({
                   {/* Urgent Actions */}
                   {highPriorityItems.length > 0 && (
                     <div className="p-3 border border-red-200 rounded-lg bg-red-500/5">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-3">
                         <AlertTriangle className="h-3 w-3 text-red-500" />
                         <span className="text-[10px] text-red-600 uppercase tracking-wider font-medium">
                           Urgent ({highPriorityItems.length})
                         </span>
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {highPriorityItems.slice(0, 3).map((action) => (
                           <div
                             key={action.id}
@@ -414,9 +414,9 @@ export const RightSidebar = ({
                               checked={action.completed}
                               onCheckedChange={(checked) => handleToggleAction(action.id, checked)}
                               disabled={togglingAction === action.id}
-                              className="mt-0.5 border-red-300"
+                              className="mt-0.5 border-red-300 flex-shrink-0"
                             />
-                            <p className="text-[9px] leading-tight flex-1 line-clamp-2">
+                            <p className="text-[10px] leading-relaxed flex-1">
                               {action.text}
                             </p>
                           </div>
