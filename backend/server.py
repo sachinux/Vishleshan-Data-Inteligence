@@ -608,8 +608,8 @@ Dataset Schema:
     
     # Generate analysis plan using LLM
     analysis_prompt = f"""
-You are a data analysis assistant. The user asked: "{user_message}"
-
+You are a data analysis assistant.{response_style_instructions} The user asked: "{user_message}"
+{context_instructions}
 {schema_info}
 
 Generate a JSON response with:
