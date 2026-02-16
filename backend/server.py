@@ -1148,25 +1148,50 @@ Return ONLY valid JSON.
     
     frames = []
     for i, frame_data in enumerate(storyboard_data.get("frames", [])):
+        # Ensure action_items are proper dictionaries
+        frame_action_items = []
+        for item in frame_data.get("action_items", []):
+            if isinstance(item, dict):
+                frame_action_items.append(item)
+            elif isinstance(item, str):
+                # If it's a string (ID reference), skip it or find it in master list
+                pass
+        
+        # Ensure kpis are proper dictionaries
+        frame_kpis = []
+        for kpi in frame_data.get("kpis", []):
+            if isinstance(kpi, dict):
+                frame_kpis.append(kpi)
+        
         frame = StoryboardFrame(
             title=frame_data.get("title", f"Frame {i+1}"),
             summary=frame_data.get("summary", ""),
             tile_refs=frame_data.get("tile_refs", []),
             narrative_notes=frame_data.get("narrative_notes", ""),
             order=i,
-            action_items=frame_data.get("action_items", []),
-            kpis=frame_data.get("kpis", [])
+            action_items=frame_action_items,
+            kpis=frame_kpis
         )
         frames.append(frame)
+    
+    # Ensure master action_items have proper IDs
+    master_action_items = []
+    for i, item in enumerate(storyboard_data.get("action_items", [])):
+        if isinstance(item, dict):
+            if not item.get("id"):
+                item["id"] = f"action-{i+1}"
+            if not item.get("completed"):
+                item["completed"] = False
+            master_action_items.append(item)
     
     storyboard = Storyboard(
         workspace_id=workspace_id,
         title=title,
         frames=frames,
         executive_summary=storyboard_data.get("executive_summary", ""),
-        kpis=storyboard_data.get("kpis", []),
-        action_items=storyboard_data.get("action_items", []),
-        stakeholder_views=storyboard_data.get("stakeholder_views", {})
+        kpis=storyboard_data.get("kpis", []) if isinstance(storyboard_data.get("kpis"), list) else [],
+        action_items=master_action_items,
+        stakeholder_views=storyboard_data.get("stakeholder_views", {}) if isinstance(storyboard_data.get("stakeholder_views"), dict) else {}
     )
     
     doc = prepare_for_mongo(storyboard.model_dump())
