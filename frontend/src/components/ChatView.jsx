@@ -699,25 +699,324 @@ export const ChatView = ({
             </div>
           )}
 
-          {/* Input Area - FIXED at bottom */}
+          {/* Enhanced Input Area */}
           <div className="chat-input-area">
-            <div className="flex gap-3">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-                placeholder={
-                  selectedDataset
-                    ? "Ask a question about your data..."
-                    : "Select a dataset first..."
-                }
-                disabled={sending || !selectedDataset}
-                className="flex-1 font-mono"
-                data-testid="chat-input"
-              />
-              <Button
-                onClick={() => handleSend()}
-                disabled={sending || !input.trim() || !selectedDataset}
+            {/* File Upload Mini Panel */}
+            {showFileUpload && (
+              <div 
+                className={`mb-3 p-4 border-2 border-dashed rounded-lg transition-colors ${
+                  dragOver ? 'border-primary bg-primary/5' : 'border-border bg-muted/30'
+                }`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={(e) => handleFileUpload(Array.from(e.target.files))}
+                  accept=".csv,.xlsx,.xls,.pdf"
+                  multiple
+                  className="hidden"
+                />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Upload className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Quick Upload</p>
+                      <p className="text-xs text-muted-foreground">
+                        Drop files or click to browse • CSV, Excel, PDF
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingFile}
+                    >
+                      {uploadingFile ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <FileSpreadsheet className="h-4 w-4 mr-1" />
+                          Browse
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowFileUpload(false)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Input Row */}
+            <div className="flex flex-col gap-2">
+              {/* Action Buttons Row */}
+              <div className="flex items-center gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowFileUpload(!showFileUpload)}
+                      className="h-8 w-8 p-0"
+                      data-testid="chat-upload-btn"
+                    >
+                      <Paperclip className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Upload file</TooltipContent>
+                </Tooltip>
+
+                <Popover open={showPromptLibrary} onOpenChange={setShowPromptLibrary}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      data-testid="prompt-library-btn"
+                    >
+                      <Library className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-0" align="start">
+                    <div className="p-3 border-b border-border">
+                      <h4 className="font-semibold text-sm">Prompt Library</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Your saved prompts
+                      </p>
+                    </div>
+                    <ScrollArea className="h-[250px]">
+                      {savedPrompts.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                          <Library className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          No saved prompts yet
+                        </div>
+                      ) : (
+                        <div className="p-2 space-y-1">
+                          {/* Favorites first */}
+                          {savedPrompts
+                            .sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0))
+                            .map((prompt) => (
+                            <div
+                              key={prompt.id}
+                              className="group p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div 
+                                  className="flex-1 min-w-0"
+                                  onClick={() => handleUsePrompt(prompt)}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    {prompt.isFavorite && (
+                                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                    )}
+                                    <span className="text-sm font-medium truncate">
+                                      {prompt.name}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                    {prompt.prompt}
+                                  </p>
+                                  <Badge variant="secondary" className="text-[10px] mt-1">
+                                    {prompt.category}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleToggleFavorite(prompt.id);
+                                    }}
+                                    className="h-6 w-6 p-0"
+                                  >
+                                    {prompt.isFavorite ? (
+                                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                    ) : (
+                                      <StarOff className="h-3 w-3" />
+                                    )}
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeletePrompt(prompt.id);
+                                    }}
+                                    className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowSavePrompt(true)}
+                      disabled={!input.trim()}
+                      className="h-8 w-8 p-0"
+                      data-testid="save-prompt-btn"
+                    >
+                      <BookmarkPlus className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Save prompt</TooltipContent>
+                </Tooltip>
+
+                <Separator orientation="vertical" className="h-5 mx-1" />
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowGridSplit(!showGridSplit)}
+                      className={`h-8 w-8 p-0 ${showGridSplit ? 'text-primary bg-primary/10' : ''}`}
+                      data-testid="toggle-grid-split"
+                    >
+                      <Table2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{showGridSplit ? 'Hide' : 'Show'} data grid</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowSettings(true)}
+                      className="h-8 w-8 p-0"
+                      data-testid="chat-settings-btn"
+                    >
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Chat settings</TooltipContent>
+                </Tooltip>
+
+                <div className="flex-1" />
+
+                <span className="text-xs text-muted-foreground">
+                  {input.length}/500
+                </span>
+              </div>
+
+              {/* Textarea Input */}
+              <div className="flex gap-2">
+                <Textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value.slice(0, 500))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                  placeholder={
+                    selectedDataset
+                      ? "Ask about your data... (Shift+Enter for new line)"
+                      : "Select a dataset first..."
+                  }
+                  disabled={sending || !selectedDataset}
+                  className="flex-1 font-mono min-h-[44px] max-h-[120px] resize-none"
+                  rows={1}
+                  data-testid="chat-input"
+                />
+                <Button
+                  onClick={() => handleSend()}
+                  disabled={sending || !input.trim() || !selectedDataset}
+                  className="font-mono uppercase self-end h-[44px]"
+                  data-testid="chat-send-btn"
+                >
+                  {sending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Save Prompt Dialog */}
+        <Dialog open={showSavePrompt} onOpenChange={setShowSavePrompt}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Save Prompt to Library</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Prompt Name</label>
+                <Input
+                  value={newPromptName}
+                  onChange={(e) => setNewPromptName(e.target.value)}
+                  placeholder="e.g., Sales Analysis Query"
+                  data-testid="prompt-name-input"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Category</label>
+                <div className="flex flex-wrap gap-2">
+                  {["Custom", "Analysis", "Visualization", "Summary", "Comparison"].map((cat) => (
+                    <Badge
+                      key={cat}
+                      variant={newPromptCategory === cat ? "default" : "outline"}
+                      className="cursor-pointer"
+                      onClick={() => setNewPromptCategory(cat)}
+                    >
+                      {cat}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Prompt Preview</label>
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {input || "No prompt entered"}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSavePrompt(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSavePrompt}
+                disabled={!newPromptName.trim() || !input.trim()}
+              >
+                <BookmarkPlus className="h-4 w-4 mr-2" />
+                Save Prompt
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
                 className="font-mono uppercase"
                 data-testid="chat-send-btn"
               >
