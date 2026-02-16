@@ -113,7 +113,6 @@ export const ChatSettings = ({
           <Button 
             onClick={handleSave}
             disabled={loading}
-            className="bg-purple-600 hover:bg-purple-700"
             data-testid="save-settings-btn"
           >
             {loading ? "Saving..." : "Save changes"}
