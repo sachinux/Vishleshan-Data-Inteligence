@@ -272,26 +272,45 @@ export const WorkspaceView = ({
               {datasets.map((dataset) => {
                 const Icon = getFileIcon(dataset.file_type);
                 return (
-                  <button
+                  <div
                     key={dataset.id}
-                    onClick={() => setSelectedDataset(dataset)}
-                    data-testid={`workspace-dataset-${dataset.id}`}
-                    className={`file-item w-full ${
+                    className={`file-item w-full group ${
                       selectedDataset?.id === dataset.id ? "active" : ""
                     }`}
                   >
-                    <Icon className="h-5 w-5 mr-3 text-primary" />
-                    <div className="flex-1 text-left">
-                      <p className="font-mono text-sm truncate">{dataset.filename}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {dataset.row_count} rows × {dataset.column_count} cols •{" "}
-                        {dataset.file_type.toUpperCase()}
-                      </p>
+                    <button
+                      onClick={() => setSelectedDataset(dataset)}
+                      data-testid={`workspace-dataset-${dataset.id}`}
+                      className="flex-1 flex items-center min-w-0"
+                    >
+                      <Icon className="h-5 w-5 mr-3 text-primary flex-shrink-0" />
+                      <div className="flex-1 text-left min-w-0">
+                        <p className="font-mono text-sm truncate">{dataset.filename}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {dataset.row_count} rows × {dataset.column_count} cols •{" "}
+                          {dataset.file_type.toUpperCase()}
+                        </p>
+                      </div>
+                    </button>
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                      {selectedDataset?.id === dataset.id && (
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeletingDataset(dataset);
+                        }}
+                        className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                        data-testid={`delete-dataset-${dataset.id}`}
+                        aria-label={`Delete ${dataset.filename}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                    {selectedDataset?.id === dataset.id && (
-                      <CheckCircle className="h-4 w-4 text-primary" />
-                    )}
-                  </button>
+                  </div>
                 );
               })}
             </div>
