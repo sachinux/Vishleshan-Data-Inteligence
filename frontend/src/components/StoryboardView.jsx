@@ -889,6 +889,48 @@ export const StoryboardView = ({
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Storyboard Confirmation */}
+      <AlertDialog open={!!deletingStoryboard} onOpenChange={() => setDeletingStoryboard(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Data Actions</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{deletingStoryboard?.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteStoryboard}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Tile Confirmation */}
+      <AlertDialog open={!!deletingTile} onOpenChange={() => setDeletingTile(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Pinned Insight</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove "{deletingTile?.title}"? This will remove it from all data actions.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteTile}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
