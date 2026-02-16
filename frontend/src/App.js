@@ -28,6 +28,7 @@ function AppContent() {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatSettings, setChatSettings] = useState({ context: "", response_style: "" });
   const [showGridSplit, setShowGridSplit] = useState(false); // Show grid in split view with chat
+  const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false); // Collapsible right sidebar
 
   // Fetch workspaces
   const fetchWorkspaces = useCallback(async () => {
