@@ -185,11 +185,11 @@ export const Sidebar = ({
       <div className="flex-shrink-0 p-4 border-b border-border">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-semibold text-sm tracking-tight">
-              Data Storyteller
+            <h1 className="font-semibold text-base tracking-tight">
+              Vishleshan
             </h1>
-            <p className="text-[10px] text-muted-foreground">
-              Studio
+            <p className="text-xs text-muted-foreground">
+              Data Intelligence
             </p>
           </div>
           <button
