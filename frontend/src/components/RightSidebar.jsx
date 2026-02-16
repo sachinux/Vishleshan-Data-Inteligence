@@ -7,6 +7,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import axios from "axios";
 import {
@@ -18,6 +28,8 @@ import {
   Presentation,
   Plus,
   FileDown,
+  Trash2,
+  X,
 } from "lucide-react";
 
 export const RightSidebar = ({
@@ -27,6 +39,7 @@ export const RightSidebar = ({
   chatMessages,
   generateStoryboard,
   exportStoryboard,
+  deleteStoryTile,
   API,
   loading,
 }) => {
@@ -34,6 +47,7 @@ export const RightSidebar = ({
   const [narrativeLoading, setNarrativeLoading] = useState(false);
   const [narrativeResponse, setNarrativeResponse] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [deletingTile, setDeletingTile] = useState(null);
 
   const latestStoryboard = storyboards?.[storyboards.length - 1];
 
@@ -63,10 +77,10 @@ export const RightSidebar = ({
 
     setGenerating(true);
     try {
-      await generateStoryboard("Data Story");
-      toast.success("Storyboard generated!");
+      await generateStoryboard("Data Actions");
+      toast.success("Data Actions generated!");
     } catch (error) {
-      toast.error("Failed to generate storyboard");
+      toast.error("Failed to generate");
     } finally {
       setGenerating(false);
     }
@@ -74,7 +88,7 @@ export const RightSidebar = ({
 
   const handleExport = async () => {
     if (!latestStoryboard) {
-      toast.error("Generate a storyboard first");
+      toast.error("Generate Data Actions first");
       return;
     }
 
@@ -86,6 +100,19 @@ export const RightSidebar = ({
     }
   };
 
+  const handleDeleteTile = async () => {
+    if (!deletingTile) return;
+
+    try {
+      await deleteStoryTile(deletingTile.id);
+      toast.success("Insight removed");
+    } catch (error) {
+      toast.error("Failed to delete insight");
+    } finally {
+      setDeletingTile(null);
+    }
+  };
+
   return (
     <TooltipProvider>
       <aside className="right-sidebar" data-testid="right-sidebar">
@@ -94,7 +121,7 @@ export const RightSidebar = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Presentation className="h-4 w-4" />
-              <span className="font-medium text-sm">Storyboard</span>
+              <span className="font-medium text-sm">Data Actions</span>
             </div>
             <Button
               variant="outline"
@@ -135,7 +162,7 @@ export const RightSidebar = ({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="text-xs">Create storyboard</p>
+                  <p className="text-xs">Create Data Actions</p>
                 </TooltipContent>
               </Tooltip>
             )}
@@ -146,7 +173,7 @@ export const RightSidebar = ({
               <div className="text-center py-6 px-4 border border-dashed border-border rounded-lg bg-muted/30">
                 <Pin className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
                 <p className="text-xs text-muted-foreground">
-                  Pin insights from chat to build your story
+                  Pin insights from chat to build your actions
                 </p>
               </div>
             ) : (
@@ -154,7 +181,7 @@ export const RightSidebar = ({
                 {storyTiles.map((tile) => (
                   <div
                     key={tile.id}
-                    className="p-3 border border-border rounded-lg bg-card hover:border-primary/30 transition-colors"
+                    className="group p-3 border border-border rounded-lg bg-card hover:border-primary/30 transition-colors relative"
                     data-testid={`insight-tile-${tile.id}`}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -164,9 +191,20 @@ export const RightSidebar = ({
                           {tile.explanation}
                         </p>
                       </div>
-                      {tile.chart_config && (
-                        <BarChart3 className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                      )}
+                      <div className="flex items-center gap-1">
+                        {tile.chart_config && (
+                          <BarChart3 className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeletingTile(tile)}
+                          className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                          data-testid={`delete-tile-${tile.id}`}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -219,6 +257,27 @@ export const RightSidebar = ({
             </Button>
           </div>
         </div>
+
+        {/* Delete Insight Confirmation Dialog */}
+        <AlertDialog open={!!deletingTile} onOpenChange={() => setDeletingTile(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Pinned Insight</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to remove "{deletingTile?.title}"? This will remove it from all storyboards.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteTile}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </aside>
     </TooltipProvider>
   );
