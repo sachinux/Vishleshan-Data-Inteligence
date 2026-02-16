@@ -133,6 +133,9 @@ class StoryTile(BaseModel):
     table_data: Optional[Dict[str, Any]] = None
     tags: List[str] = []
     source_message_id: Optional[str] = None
+    # Enhanced fields for actionable insights
+    action_items: List[Dict[str, Any]] = []  # {text, priority: HIGH/MEDIUM/LOW, category}
+    impact_score: str = "MEDIUM"  # HIGH, MEDIUM, LOW
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class StoryTileCreate(BaseModel):
@@ -144,6 +147,8 @@ class StoryTileCreate(BaseModel):
     table_data: Optional[Dict[str, Any]] = None
     tags: List[str] = []
     source_message_id: Optional[str] = None
+    action_items: List[Dict[str, Any]] = []
+    impact_score: str = "MEDIUM"
 
 class StoryboardFrame(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -152,6 +157,30 @@ class StoryboardFrame(BaseModel):
     tile_refs: List[str] = []
     narrative_notes: str = ""
     order: int = 0
+    # Enhanced fields
+    action_items: List[Dict[str, Any]] = []  # {text, priority, completed, category}
+    kpis: List[Dict[str, Any]] = []  # {label, value, status: green/yellow/red, trend}
+
+class KPI(BaseModel):
+    label: str
+    value: str
+    status: str = "green"  # green, yellow, red
+    trend: str = ""  # up, down, stable
+    description: str = ""
+
+class ActionItem(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    text: str
+    priority: str = "MEDIUM"  # HIGH, MEDIUM, LOW
+    category: str = ""  # e.g., "Marketing", "Operations", "Finance"
+    completed: bool = False
+    due_date: Optional[str] = None
+
+class StakeholderView(BaseModel):
+    type: str  # executive, manager, analyst
+    summary: str
+    key_points: List[str] = []
+    recommended_actions: List[str] = []
 
 class Storyboard(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -159,6 +188,11 @@ class Storyboard(BaseModel):
     workspace_id: str
     title: str
     frames: List[StoryboardFrame] = []
+    # Enhanced fields for actionable storyboards
+    executive_summary: str = ""
+    kpis: List[Dict[str, Any]] = []  # Dashboard KPIs
+    action_items: List[Dict[str, Any]] = []  # Master action item list
+    stakeholder_views: Dict[str, Dict[str, Any]] = {}  # {executive: {...}, manager: {...}, analyst: {...}}
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
