@@ -403,26 +403,28 @@ export const RightSidebar = ({
 
                   {/* Urgent Actions */}
                   {highPriorityItems.length > 0 && (
-                    <div className="p-3 border border-red-200 rounded-lg bg-red-500/5">
+                    <div className="p-3 border border-red-200 rounded-lg bg-red-500/5" role="region" aria-label="Urgent Actions">
                       <div className="flex items-center gap-2 mb-3">
-                        <AlertTriangle className="h-3 w-3 text-red-500" />
-                        <span className="text-[10px] text-red-600 uppercase tracking-wider font-medium">
+                        <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
+                        <span className="text-xs text-red-600 uppercase tracking-wider font-semibold">
                           Urgent ({highPriorityItems.length})
                         </span>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2" role="list">
                         {highPriorityItems.slice(0, 3).map((action) => (
                           <div
                             key={action.id}
-                            className="flex items-start gap-2 p-2 bg-white/50 border border-red-100 rounded-lg"
+                            className="flex items-start gap-2.5 p-2.5 bg-white dark:bg-card border border-red-100 dark:border-red-900/30 rounded-lg"
+                            role="listitem"
                           >
                             <Checkbox
                               checked={action.completed}
                               onCheckedChange={(checked) => handleToggleAction(action.id, checked)}
                               disabled={togglingAction === action.id}
                               className="mt-0.5 border-red-300 flex-shrink-0"
+                              aria-label={`Mark "${action.text}" as complete`}
                             />
-                            <p className="text-[10px] leading-relaxed flex-1">
+                            <p className="text-xs leading-relaxed flex-1 break-words">
                               {action.text}
                             </p>
                           </div>
