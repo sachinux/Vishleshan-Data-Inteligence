@@ -433,7 +433,7 @@ export const ChatView = ({
                         <button
                           key={suggestion}
                           onClick={() => setInput(suggestion)}
-                          className="px-3 py-2 text-xs font-mono border border-border hover:border-primary hover:text-primary transition-colors"
+                          className="px-3 py-2 text-xs font-mono border border-border rounded-lg hover:border-primary hover:bg-secondary transition-colors"
                         >
                           {suggestion}
                         </button>
@@ -442,19 +442,40 @@ export const ChatView = ({
                   </div>
                 </div>
               ) : (
-                messages.map((message, idx) => (
-                  <div key={message.id || idx} id={`msg-${message.id}`}>
-                    <MessageBubble
-                      message={message}
-                      onSaveAsTile={handleSaveAsTile}
-                      savingTile={savingTile}
-                      onSuggestionClick={handleSuggestionClick}
-                      onClarify={handleClarify}
-                      clarifying={clarifying}
-                      onExpandDetail={handleExpandDetail}
-                    />
-                  </div>
-                ))
+                <>
+                  {messages.map((message, idx) => (
+                    <div key={message.id || idx} id={`msg-${message.id}`}>
+                      <MessageBubble
+                        message={message}
+                        onSaveAsTile={handleSaveAsTile}
+                        savingTile={savingTile}
+                        onSuggestionClick={handleSuggestionClick}
+                        onClarify={handleClarify}
+                        clarifying={clarifying}
+                        onExpandDetail={handleExpandDetail}
+                      />
+                    </div>
+                  ))}
+                  
+                  {/* Progress Indicator */}
+                  {sending && (
+                    <div className="message message-assistant animate-fade-in">
+                      <div className="message-content max-w-md">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                            <span className="text-sm font-medium">{progressStep}</span>
+                          </div>
+                          <Progress value={progress} className="h-2" />
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Processing</span>
+                            <span>{progress}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
               <div ref={messagesEndRef} />
             </div>
