@@ -343,111 +343,111 @@ export const RightSidebar = ({
           </TabsContent>
 
           {/* Actions Tab */}
-          <TabsContent value="actions" className="flex-1 flex flex-col overflow-hidden m-0 mt-2">
+          <TabsContent value="actions" className="flex-1 flex flex-col overflow-hidden m-0 p-0 data-[state=inactive]:hidden">
             {activeStoryboard ? (
-              <>
-                {/* Progress Overview */}
-                <div className="flex-shrink-0 p-3 border-b border-border">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                      Progress
-                    </span>
-                    <span className="text-xs font-medium">
-                      {completedCount}/{totalCount}
-                    </span>
-                  </div>
-                  <Progress value={progressPercent} className="h-2" />
-                  <p className="text-[10px] text-muted-foreground mt-2 truncate">
-                    {activeStoryboard.title}
-                  </p>
-                </div>
-
-                {/* KPI Summary */}
-                {kpis.length > 0 && (
-                  <div className="flex-shrink-0 p-3 border-b border-border">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Target className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                        Key Metrics
+              <ScrollArea className="flex-1">
+                <div className="p-3 space-y-3">
+                  {/* Progress Overview */}
+                  <div className="p-3 border border-border rounded-lg bg-card">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                        Progress
+                      </span>
+                      <span className="text-xs font-medium">
+                        {completedCount}/{totalCount}
                       </span>
                     </div>
-                    <div className="space-y-1">
-                      {kpis.slice(0, 3).map((kpi, i) => (
-                        <div
-                          key={i}
-                          className={`flex items-center justify-between p-2 rounded-lg ${statusColors[kpi.status] || 'bg-muted/50'}`}
-                        >
-                          <span className="text-[9px] font-medium truncate flex-1 mr-2">
-                            {kpi.label}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] font-bold">{kpi.value}</span>
-                            <TrendIcon trend={kpi.trend} />
+                    <Progress value={progressPercent} className="h-2" />
+                    <p className="text-[10px] text-muted-foreground mt-2 truncate">
+                      {activeStoryboard.title}
+                    </p>
+                  </div>
+
+                  {/* KPI Summary */}
+                  {kpis.length > 0 && (
+                    <div className="p-3 border border-border rounded-lg bg-card">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Target className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                          Key Metrics
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        {kpis.slice(0, 4).map((kpi, i) => (
+                          <div
+                            key={i}
+                            className={`flex items-center justify-between p-2 rounded-lg ${statusColors[kpi.status] || 'bg-muted/50'}`}
+                          >
+                            <span className="text-[9px] font-medium truncate flex-1 mr-2">
+                              {kpi.label}
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[10px] font-bold">{kpi.value}</span>
+                              <TrendIcon trend={kpi.trend} />
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Urgent Actions */}
-                {highPriorityItems.length > 0 && (
-                  <div className="flex-shrink-0 p-3 border-b border-border">
-                    <div className="flex items-center gap-2 mb-2">
-                      <AlertTriangle className="h-3 w-3 text-red-500" />
-                      <span className="text-[10px] text-red-600 uppercase tracking-wider font-medium">
-                        Urgent ({highPriorityItems.length})
-                      </span>
-                    </div>
-                    <div className="space-y-1">
-                      {highPriorityItems.slice(0, 2).map((action) => (
-                        <div
-                          key={action.id}
-                          className="flex items-start gap-2 p-2 bg-red-500/5 border border-red-200 rounded-lg"
-                        >
-                          <Checkbox
-                            checked={action.completed}
-                            onCheckedChange={(checked) => handleToggleAction(action.id, checked)}
-                            disabled={togglingAction === action.id}
-                            className="mt-0.5 border-red-300"
-                          />
-                          <p className="text-[9px] leading-tight flex-1 line-clamp-2">
-                            {action.text}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* To Do List */}
-                <div className="flex-1 overflow-hidden flex flex-col">
-                  <div className="flex-shrink-0 px-3 py-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CheckSquare className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                        To Do
-                      </span>
-                    </div>
-                    <Badge variant="outline" className="text-[8px]">
-                      {actionItems.filter(a => !a.completed).length} left
-                    </Badge>
-                  </div>
-
-                  <ScrollArea className="flex-1">
-                    <div className="px-3 pb-3 space-y-1">
-                      {pendingItems.length === 0 ? (
-                        <div className="text-center py-4 px-3 border border-dashed border-border rounded-lg bg-muted/30">
-                          <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto mb-1" />
-                          <p className="text-[10px] text-muted-foreground">
-                            All done!
-                          </p>
-                        </div>
-                      ) : (
-                        pendingItems.map((action) => (
+                  {/* Urgent Actions */}
+                  {highPriorityItems.length > 0 && (
+                    <div className="p-3 border border-red-200 rounded-lg bg-red-500/5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle className="h-3 w-3 text-red-500" />
+                        <span className="text-[10px] text-red-600 uppercase tracking-wider font-medium">
+                          Urgent ({highPriorityItems.length})
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        {highPriorityItems.slice(0, 3).map((action) => (
                           <div
                             key={action.id}
-                            className="flex items-start gap-2 p-2 border border-border rounded-lg bg-card hover:border-primary/30 transition-colors"
+                            className="flex items-start gap-2 p-2 bg-white/50 border border-red-100 rounded-lg"
+                          >
+                            <Checkbox
+                              checked={action.completed}
+                              onCheckedChange={(checked) => handleToggleAction(action.id, checked)}
+                              disabled={togglingAction === action.id}
+                              className="mt-0.5 border-red-300"
+                            />
+                            <p className="text-[9px] leading-tight flex-1 line-clamp-2">
+                              {action.text}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* To Do List */}
+                  <div className="p-3 border border-border rounded-lg bg-card">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <CheckSquare className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                          To Do
+                        </span>
+                      </div>
+                      <Badge variant="outline" className="text-[8px]">
+                        {actionItems.filter(a => !a.completed).length} left
+                      </Badge>
+                    </div>
+                    
+                    {pendingItems.length === 0 ? (
+                      <div className="text-center py-4 px-3 border border-dashed border-border rounded-lg bg-muted/30">
+                        <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto mb-1" />
+                        <p className="text-[10px] text-muted-foreground">
+                          All done!
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        {pendingItems.map((action) => (
+                          <div
+                            key={action.id}
+                            className="flex items-start gap-2 p-2 border border-border rounded-lg bg-background hover:border-primary/30 transition-colors"
                           >
                             <Checkbox
                               checked={action.completed}
@@ -466,32 +466,30 @@ export const RightSidebar = ({
                               )}
                             </div>
                           </div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
-                </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                {/* Quick Stats Footer */}
-                <div className="flex-shrink-0 p-2 border-t border-border bg-muted/30">
-                  <div className="grid grid-cols-3 gap-1 text-center">
-                    <div className="p-1">
-                      <p className="text-sm font-bold text-green-600">{completedCount}</p>
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="p-2 border border-border rounded-lg bg-card text-center">
+                      <p className="text-lg font-bold text-green-600">{completedCount}</p>
                       <p className="text-[8px] text-muted-foreground">Done</p>
                     </div>
-                    <div className="p-1">
-                      <p className="text-sm font-bold text-yellow-600">
+                    <div className="p-2 border border-border rounded-lg bg-card text-center">
+                      <p className="text-lg font-bold text-yellow-600">
                         {actionItems.filter(a => a.priority === "MEDIUM" && !a.completed).length}
                       </p>
                       <p className="text-[8px] text-muted-foreground">Pending</p>
                     </div>
-                    <div className="p-1">
-                      <p className="text-sm font-bold text-red-600">{highPriorityItems.length}</p>
+                    <div className="p-2 border border-border rounded-lg bg-card text-center">
+                      <p className="text-lg font-bold text-red-600">{highPriorityItems.length}</p>
                       <p className="text-[8px] text-muted-foreground">Urgent</p>
                     </div>
                   </div>
                 </div>
-              </>
+              </ScrollArea>
             ) : (
               <div className="flex-1 flex items-center justify-center p-4">
                 <div className="text-center">
