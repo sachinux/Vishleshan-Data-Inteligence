@@ -386,6 +386,7 @@ function AppContent() {
             uploadFile={uploadFile}
             importGoogleSheet={importGoogleSheet}
             loading={loading}
+            onDatasetDeleted={handleDatasetDeleted}
           />
         )}
         
