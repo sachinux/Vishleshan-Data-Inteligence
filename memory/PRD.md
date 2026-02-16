@@ -128,7 +128,7 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 - [x] Chat Settings (Context & Response Style)
 
 ### P1 (High Priority)
-- [ ] Profile/Grid tabs in left sidebar
+- [x] Profile/Grid tabs in left sidebar
 - [ ] Quick Start Templates (Data Audit, Deep Dive)
 - [ ] Excel multi-sheet support
 - [ ] Heatmap chart type
