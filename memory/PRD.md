@@ -86,6 +86,8 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 
 - **Excel-like Data Grid with Row Selection**: Added Profile/Grid tabs
   - New "Grid" tab in left sidebar for Excel-like data view
+  - **50-50 Split View**: Grid appears at top of Analysis section when activated
+  - **"Show Table" / "Hide Table"** toggle button in chat header
   - Row selection with checkboxes (single and multi-select)
   - Sortable columns, pagination (50 rows per page)
   - **"Narrate Story"** - AI generates a narrative from selected rows
