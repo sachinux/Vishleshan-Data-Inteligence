@@ -1017,18 +1017,6 @@ export const ChatView = ({
             </DialogFooter>
           </DialogContent>
         </Dialog>
-                className="font-mono uppercase"
-                data-testid="chat-send-btn"
-              >
-                {sending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
 
         {/* Detail Side Panel */}
         <Sheet open={!!detailPanel} onOpenChange={() => setDetailPanel(null)}>
