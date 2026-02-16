@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -19,6 +18,7 @@ import {
   BarChart3,
   Presentation,
   Plus,
+  FileDown,
 } from "lucide-react";
 
 export const RightSidebar = ({
@@ -90,43 +90,42 @@ export const RightSidebar = ({
   return (
     <TooltipProvider>
       <aside className="right-sidebar" data-testid="right-sidebar">
-        {/* Header - Fixed */}
-        <div className="flex-shrink-0 p-3 border-b border-border">
+        {/* Header */}
+        <div className="flex-shrink-0 p-4 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Presentation className="h-3 w-3 text-primary" />
-              <span className="font-heading text-xs uppercase tracking-wider">
-                Storyboard
-              </span>
+              <Presentation className="h-4 w-4" />
+              <span className="font-semibold text-sm">Storyboard</span>
             </div>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleExportPDF}
               disabled={!latestStoryboard}
-              className="text-[10px] font-mono text-primary hover:text-primary h-6 px-2"
+              className="h-7 text-xs rounded-lg"
               data-testid="export-pdf-sidebar"
             >
-              Export PDF
+              <FileDown className="h-3 w-3 mr-1" />
+              Export
             </Button>
           </div>
         </div>
 
-        {/* Insights Section - Scrollable */}
+        {/* Insights Section */}
         <div className="flex-1 min-h-0 flex flex-col overflow-hidden border-b border-border">
-          <div className="flex-shrink-0 p-3 flex items-center justify-between">
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              Insights ({storyTiles.length})
+          <div className="flex-shrink-0 px-4 py-3 flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+              Pinned Insights ({storyTiles.length})
             </span>
             {storyTiles.length > 0 && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={handleGenerateStoryboard}
                     disabled={generating}
-                    className="h-5 w-5 p-0"
+                    className="h-6 w-6 p-0 rounded-lg"
                     data-testid="generate-from-insights"
                   >
                     {generating ? (
@@ -137,7 +136,7 @@ export const RightSidebar = ({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="text-xs">Generate storyboard from insights</p>
+                  <p className="text-xs">Generate storyboard</p>
                 </TooltipContent>
               </Tooltip>
             )}
@@ -145,10 +144,10 @@ export const RightSidebar = ({
 
           <div className="flex-1 overflow-y-auto px-3 pb-3">
             {storyTiles.length === 0 ? (
-              <div className="text-center py-6 border border-dashed border-border rounded">
-                <Pin className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
-                <p className="text-[10px] text-muted-foreground">
-                  Pin insights from your chat here
+              <div className="text-center py-8 px-4 border border-dashed border-border rounded-xl bg-secondary/30">
+                <Pin className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground">
+                  Pin insights from chat to build your story
                 </p>
               </div>
             ) : (
@@ -156,12 +155,12 @@ export const RightSidebar = ({
                 {storyTiles.map((tile) => (
                   <div
                     key={tile.id}
-                    className="p-2 border border-border hover:border-primary/50 transition-colors bg-card/50"
+                    className="p-3 border border-border rounded-xl bg-card hover:border-primary/30 transition-all"
                     data-testid={`insight-tile-${tile.id}`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-mono text-primary truncate">
+                        <p className="text-xs font-medium truncate">
                           {tile.title}
                         </p>
                         <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">
@@ -169,18 +168,18 @@ export const RightSidebar = ({
                         </p>
                       </div>
                       {tile.chart_config && (
-                        <BarChart3 className="h-3 w-3 text-primary flex-shrink-0" />
+                        <BarChart3 className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                       )}
                     </div>
                     {tile.key_metrics?.length > 0 && (
-                      <div className="mt-1.5 flex flex-wrap gap-1">
+                      <div className="mt-2 flex flex-wrap gap-1">
                         {tile.key_metrics.slice(0, 2).map((metric, i) => (
                           <Badge
                             key={i}
                             variant="secondary"
-                            className="text-[8px] px-1 py-0 h-4"
+                            className="text-[9px] px-1.5 py-0 h-4 rounded-md"
                           >
-                            {metric.length > 15 ? `${metric.slice(0, 15)}...` : metric}
+                            {metric.length > 18 ? `${metric.slice(0, 18)}...` : metric}
                           </Badge>
                         ))}
                       </div>
@@ -192,24 +191,22 @@ export const RightSidebar = ({
           </div>
         </div>
 
-        {/* Narrative Coach Section - Fixed at bottom */}
-        <div className="flex-shrink-0 p-3 flex flex-col">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-3 w-3 text-primary" />
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              Narrative Coach
-            </span>
+        {/* Narrative Coach Section */}
+        <div className="flex-shrink-0 p-4 flex flex-col">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="h-4 w-4" />
+            <span className="font-medium text-xs">Narrative Coach</span>
           </div>
 
           {/* Response Area */}
           {narrativeResponse ? (
-            <div className="mb-2 p-2 bg-primary/5 border-l-2 border-primary text-[10px] max-h-20 overflow-y-auto">
+            <div className="mb-3 p-3 bg-secondary/50 rounded-xl text-xs max-h-24 overflow-y-auto">
               {narrativeResponse}
             </div>
           ) : (
-            <div className="mb-2 text-center py-3">
+            <div className="mb-3 p-4 text-center border border-dashed border-border rounded-xl bg-secondary/30">
               <p className="text-[10px] text-muted-foreground">
-                Ask for help organizing your presentation flow
+                Get AI help to structure your presentation
               </p>
             </div>
           )}
@@ -220,16 +217,16 @@ export const RightSidebar = ({
               value={narrativeInput}
               onChange={(e) => setNarrativeInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleNarrativeCoach()}
-              placeholder="Ask about your story..."
+              placeholder="Ask for story advice..."
               disabled={narrativeLoading || !workspace}
-              className="text-[10px] h-7"
+              className="text-xs h-8 rounded-lg"
               data-testid="narrative-coach-input"
             />
             <Button
               size="sm"
               onClick={handleNarrativeCoach}
               disabled={narrativeLoading || !narrativeInput.trim() || !workspace}
-              className="h-7 w-7 p-0"
+              className="h-8 w-8 p-0 rounded-lg"
               data-testid="narrative-coach-send"
             >
               {narrativeLoading ? (
