@@ -270,6 +270,7 @@ export const StoryboardView = ({
   const [stakeholderView, setStakeholderView] = useState("executive");
   const [deletingStoryboard, setDeletingStoryboard] = useState(null);
   const [draggedReport, setDraggedReport] = useState(null);
+  const [isKanbanCollapsed, setIsKanbanCollapsed] = useState(false);
 
   // Get the currently active report
   const activeReport = storyboards.find(sb => sb.id === activeTabId);
