@@ -1061,26 +1061,59 @@ async def create_storyboard(input: StoryboardCreate):
 
 @api_router.post("/storyboards/generate")
 async def generate_storyboard(workspace_id: str = Form(...), title: str = Form("Data Story")):
-    """Auto-generate a storyboard from existing story tiles"""
+    """Auto-generate an actionable storyboard from existing story tiles"""
     tiles = await db.story_tiles.find({"workspace_id": workspace_id}, {"_id": 0}).to_list(100)
     
     if not tiles:
         raise HTTPException(status_code=400, detail="No story tiles found. Create some tiles first.")
     
-    # Use LLM to organize tiles into frames
-    tiles_summary = json.dumps([{"id": t["id"], "title": t["title"], "explanation": t.get("explanation", "")} for t in tiles])
+    # Prepare tiles data with action items
+    tiles_summary = json.dumps([{
+        "id": t["id"], 
+        "title": t["title"], 
+        "explanation": t.get("explanation", ""),
+        "key_metrics": t.get("key_metrics", []),
+        "action_items": t.get("action_items", []),
+        "impact_score": t.get("impact_score", "MEDIUM")
+    } for t in tiles])
     
+    # Use LLM to generate comprehensive storyboard
     storyboard_prompt = f"""
-Create a storyboard from these story tiles: {tiles_summary}
+Create a comprehensive, actionable storyboard from these story tiles: {tiles_summary}
 
-Generate a JSON response with "frames" array. Each frame should have:
-- "title": Frame title
-- "summary": 1-2 sentence summary
-- "tile_refs": List of tile IDs to include (from the tiles provided)
-- "narrative_notes": Speaker notes (what to say when presenting this frame)
+Generate a JSON response with:
 
-Organize the tiles into a logical narrative flow (intro, body, conclusion).
-Return ONLY valid JSON with a "frames" array.
+1. "executive_summary": A 2-3 sentence executive summary highlighting the most critical findings and recommended actions.
+
+2. "kpis": Array of 3-5 key performance indicators, each with:
+   - "label": KPI name
+   - "value": The metric value
+   - "status": "green" (good), "yellow" (warning), or "red" (critical)
+   - "trend": "up", "down", or "stable"
+   - "description": Brief explanation
+
+3. "action_items": Master list of prioritized action items (consolidate from tiles), each with:
+   - "id": Unique ID
+   - "text": Action description
+   - "priority": "HIGH", "MEDIUM", or "LOW"
+   - "category": Business area (Marketing, Operations, Finance, Product, Sales)
+   - "completed": false
+
+4. "frames": Array of story frames. Each frame should have:
+   - "title": Frame title
+   - "summary": 1-2 sentence summary
+   - "tile_refs": List of tile IDs to include
+   - "narrative_notes": Speaker notes for presenting
+   - "action_items": Frame-specific actions
+   - "kpis": Frame-specific KPIs if applicable
+
+5. "stakeholder_views": Object with different perspectives:
+   - "executive": {{"summary": "1-2 sentences for C-suite", "key_points": ["point1", "point2"], "recommended_actions": ["action1"]}}
+   - "manager": {{"summary": "Tactical summary", "key_points": [...], "recommended_actions": [...]}}
+   - "analyst": {{"summary": "Detailed findings", "key_points": [...], "recommended_actions": [...]}}
+
+Organize frames into a logical narrative: Problem Statement -> Key Findings -> Recommendations -> Next Steps.
+Return ONLY valid JSON.
 """
     
     llm_response = await get_llm_response(storyboard_prompt)
@@ -1095,12 +1128,22 @@ Return ONLY valid JSON with a "frames" array.
     except json.JSONDecodeError:
         # Default structure
         storyboard_data = {
+            "executive_summary": "Analysis of key business metrics reveals opportunities for improvement.",
+            "kpis": [],
+            "action_items": [],
             "frames": [{
                 "title": "Overview",
                 "summary": "Key findings from the analysis",
                 "tile_refs": [t["id"] for t in tiles[:3]],
-                "narrative_notes": "Let's walk through the main insights."
-            }]
+                "narrative_notes": "Let's walk through the main insights.",
+                "action_items": [],
+                "kpis": []
+            }],
+            "stakeholder_views": {
+                "executive": {"summary": "High-level overview", "key_points": [], "recommended_actions": []},
+                "manager": {"summary": "Tactical overview", "key_points": [], "recommended_actions": []},
+                "analyst": {"summary": "Detailed findings", "key_points": [], "recommended_actions": []}
+            }
         }
     
     frames = []
@@ -1110,14 +1153,20 @@ Return ONLY valid JSON with a "frames" array.
             summary=frame_data.get("summary", ""),
             tile_refs=frame_data.get("tile_refs", []),
             narrative_notes=frame_data.get("narrative_notes", ""),
-            order=i
+            order=i,
+            action_items=frame_data.get("action_items", []),
+            kpis=frame_data.get("kpis", [])
         )
         frames.append(frame)
     
     storyboard = Storyboard(
         workspace_id=workspace_id,
         title=title,
-        frames=frames
+        frames=frames,
+        executive_summary=storyboard_data.get("executive_summary", ""),
+        kpis=storyboard_data.get("kpis", []),
+        action_items=storyboard_data.get("action_items", []),
+        stakeholder_views=storyboard_data.get("stakeholder_views", {})
     )
     
     doc = prepare_for_mongo(storyboard.model_dump())
