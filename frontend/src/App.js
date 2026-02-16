@@ -432,6 +432,8 @@ function AppContent() {
             generateStoryboard={generateStoryboard}
             updateStoryboard={updateStoryboard}
             exportStoryboard={exportStoryboard}
+            deleteStoryboard={deleteStoryboard}
+            deleteStoryTile={deleteStoryTile}
             loading={loading}
           />
         )}
@@ -445,6 +447,7 @@ function AppContent() {
         chatMessages={chatMessages}
         generateStoryboard={generateStoryboard}
         exportStoryboard={exportStoryboard}
+        deleteStoryTile={deleteStoryTile}
         API={API}
         loading={loading}
       />
