@@ -981,13 +981,18 @@ async def create_tile_from_message(workspace_id: str = Form(...), message_id: st
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
     
-    # Use LLM to generate tile content
+    # Use LLM to generate tile content with action items
     tile_prompt = f"""
-Based on this analysis result, create a story tile with:
+Based on this analysis result, create an actionable story tile with:
 1. "title": A catchy, brief title (5-8 words)
 2. "key_metrics": List of 2-3 key numbers/insights from the result
 3. "explanation": A 1-2 sentence explanation for business users
 4. "tags": List of 2-3 relevant tags
+5. "impact_score": Rate the business impact as "HIGH", "MEDIUM", or "LOW"
+6. "action_items": List of 1-3 actionable recommendations, each with:
+   - "text": The action to take
+   - "priority": "HIGH", "MEDIUM", or "LOW"
+   - "category": Category like "Marketing", "Operations", "Finance", "Product", "Sales"
 
 Analysis content: {message.get('content')}
 Result data: {json.dumps(message.get('table_data')) if message.get('table_data') else 'N/A'}
@@ -1009,7 +1014,9 @@ Return ONLY valid JSON.
             "title": "Analysis Result",
             "key_metrics": [],
             "explanation": message.get("content", "")[:200],
-            "tags": []
+            "tags": [],
+            "impact_score": "MEDIUM",
+            "action_items": []
         }
     
     tile = StoryTile(
@@ -1020,7 +1027,9 @@ Return ONLY valid JSON.
         chart_config=message.get("chart_config"),
         table_data=message.get("table_data"),
         tags=tile_data.get("tags", []),
-        source_message_id=message_id
+        source_message_id=message_id,
+        action_items=tile_data.get("action_items", []),
+        impact_score=tile_data.get("impact_score", "MEDIUM")
     )
     
     doc = prepare_for_mongo(tile.model_dump())
