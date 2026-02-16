@@ -234,6 +234,43 @@ function AppContent() {
     }
   };
 
+  // Handle workspace deleted
+  const handleWorkspaceDeleted = (workspaceId) => {
+    const newWorkspaces = workspaces.filter(ws => ws.id !== workspaceId);
+    setWorkspaces(newWorkspaces);
+    if (currentWorkspace?.id === workspaceId) {
+      setCurrentWorkspace(newWorkspaces[0] || null);
+      setDatasets([]);
+      setSelectedDataset(null);
+      setDataProfile(null);
+      setStoryTiles([]);
+      setStoryboards([]);
+      setChatMessages([]);
+    }
+  };
+
+  // Handle workspace updated
+  const handleWorkspaceUpdated = (updatedWorkspace) => {
+    setWorkspaces(workspaces.map(ws => 
+      ws.id === updatedWorkspace.id ? updatedWorkspace : ws
+    ));
+    if (currentWorkspace?.id === updatedWorkspace.id) {
+      setCurrentWorkspace(updatedWorkspace);
+    }
+  };
+
+  // Handle dataset deleted
+  const handleDatasetDeleted = (datasetId) => {
+    const newDatasets = datasets.filter(ds => ds.id !== datasetId);
+    setDatasets(newDatasets);
+    if (selectedDataset?.id === datasetId) {
+      setSelectedDataset(newDatasets[0] || null);
+      if (newDatasets.length === 0) {
+        setDataProfile(null);
+      }
+    }
+  };
+
   // Effects
   useEffect(() => {
     fetchWorkspaces();
