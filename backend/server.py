@@ -555,6 +555,185 @@ async def preview_dataset(dataset_id: str, rows: int = 10):
         "total_rows": len(df)
     }
 
+@api_router.get("/datasets/{dataset_id}/rows")
+async def get_dataset_rows(dataset_id: str, page: int = 1, page_size: int = 100):
+    """Get paginated rows from a dataset for the data grid view"""
+    if dataset_id not in datasets_store:
+        raise HTTPException(status_code=404, detail="Dataset not found in memory")
+    
+    df = datasets_store[dataset_id]
+    total_rows = len(df)
+    start_idx = (page - 1) * page_size
+    end_idx = start_idx + page_size
+    
+    # Get the slice of data with row indices
+    data_slice = df.iloc[start_idx:end_idx].copy()
+    data_slice.insert(0, '_row_index', range(start_idx, min(end_idx, total_rows)))
+    
+    return {
+        "columns": list(df.columns),
+        "data": data_slice.to_dict(orient="records"),
+        "total_rows": total_rows,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": (total_rows + page_size - 1) // page_size
+    }
+
+class SelectedRowsRequest(BaseModel):
+    workspace_id: str
+    dataset_id: str
+    row_indices: List[int]
+    action: str  # "narrate" or "compare"
+
+@api_router.post("/datasets/selected-rows/analyze")
+async def analyze_selected_rows(request: SelectedRowsRequest):
+    """Analyze selected rows - narrate story or compare data"""
+    if request.dataset_id not in datasets_store:
+        raise HTTPException(status_code=404, detail="Dataset not found in memory")
+    
+    df = datasets_store[request.dataset_id]
+    
+    # Get selected rows
+    selected_df = df.iloc[request.row_indices]
+    
+    if len(selected_df) == 0:
+        raise HTTPException(status_code=400, detail="No rows selected")
+    
+    # Convert to string representation for LLM
+    selected_data = selected_df.to_dict(orient="records")
+    columns = list(df.columns)
+    
+    # Get chat settings for this workspace
+    chat_settings = await db.chat_settings.find_one({"workspace_id": request.workspace_id}, {"_id": 0})
+    context_instructions = ""
+    response_style_instructions = ""
+    
+    if chat_settings:
+        if chat_settings.get("context"):
+            context_instructions = f"\n\nUser's custom instructions: {chat_settings['context']}"
+        if chat_settings.get("response_style"):
+            response_style_instructions = f" Respond in a {chat_settings['response_style']} manner."
+    
+    if request.action == "narrate":
+        # Generate narrative story from selected rows
+        prompt = f"""
+You are a data storytelling expert.{response_style_instructions} Analyze these {len(selected_df)} selected rows and create a compelling narrative story.
+{context_instructions}
+
+Columns: {columns}
+Selected Data: {json.dumps(selected_data[:20])}  # Limit to first 20 for context
+
+Generate a JSON response with:
+1. "title": A catchy title for this story (5-8 words)
+2. "narrative": A compelling 2-3 paragraph story explaining the key insights, patterns, and significance of this data
+3. "key_points": List of 3-5 bullet point insights
+4. "chart_suggestion": Recommended chart type to visualize this data ("bar", "line", "pie", "scatter", or null)
+5. "chart_config": If chart suggested, provide config with "x_column", "y_column", "title"
+
+Return ONLY valid JSON.
+"""
+    else:  # compare
+        if len(selected_df) < 2:
+            raise HTTPException(status_code=400, detail="Need at least 2 rows to compare")
+        
+        # Generate comparison of selected rows
+        prompt = f"""
+You are a data analysis expert.{response_style_instructions} Compare these {len(selected_df)} selected rows and highlight differences and similarities.
+{context_instructions}
+
+Columns: {columns}
+Selected Data: {json.dumps(selected_data[:20])}  # Limit to first 20 for context
+
+Generate a JSON response with:
+1. "title": A title for this comparison (5-8 words)
+2. "summary": A brief summary of the comparison (1-2 sentences)
+3. "similarities": List of key similarities between the rows
+4. "differences": List of key differences between the rows, with specific values mentioned
+5. "insights": Additional insights or patterns noticed
+6. "recommendation": What action or conclusion can be drawn from this comparison
+7. "chart_suggestion": Best chart type to visualize the comparison ("bar", "scatter", or null)
+8. "chart_config": If chart suggested, provide config with columns to use
+
+Return ONLY valid JSON.
+"""
+    
+    try:
+        llm_response = await get_llm_response(prompt)
+        
+        # Parse LLM response
+        try:
+            clean_response = llm_response.strip()
+            if clean_response.startswith("```"):
+                clean_response = clean_response.split("```")[1]
+                if clean_response.startswith("json"):
+                    clean_response = clean_response[4:]
+            analysis = json.loads(clean_response.strip())
+        except json.JSONDecodeError:
+            analysis = {
+                "title": "Data Analysis",
+                "narrative" if request.action == "narrate" else "summary": "Analysis of selected data rows",
+                "key_points" if request.action == "narrate" else "insights": ["Data analysis completed"],
+            }
+        
+        # Create a chat message for this analysis
+        content = ""
+        if request.action == "narrate":
+            content = analysis.get("narrative", "")
+            if analysis.get("key_points"):
+                content += "\n\n**Key Points:**\n" + "\n".join(f"• {p}" for p in analysis["key_points"])
+        else:
+            content = analysis.get("summary", "")
+            if analysis.get("similarities"):
+                content += "\n\n**Similarities:**\n" + "\n".join(f"• {s}" for s in analysis["similarities"])
+            if analysis.get("differences"):
+                content += "\n\n**Differences:**\n" + "\n".join(f"• {d}" for d in analysis["differences"])
+            if analysis.get("recommendation"):
+                content += f"\n\n**Recommendation:** {analysis['recommendation']}"
+        
+        # Build chart config if suggested
+        chart_config = None
+        if analysis.get("chart_suggestion") and analysis.get("chart_config"):
+            chart_config = {
+                "type": analysis["chart_suggestion"],
+                **analysis["chart_config"]
+            }
+        
+        # Prepare table data from selected rows
+        table_data = {
+            "type": "dataframe",
+            "data": selected_data,
+            "columns": columns,
+            "row_count": len(selected_df)
+        }
+        
+        # Save as chat message
+        assistant_chat = ChatMessage(
+            workspace_id=request.workspace_id,
+            role="assistant",
+            content=content,
+            plan=f"{'Narrated story' if request.action == 'narrate' else 'Compared'} {len(selected_df)} selected rows",
+            table_data=table_data,
+            chart_config=chart_config,
+            suggestions=[
+                "Pin this insight",
+                "Explore related patterns",
+                "Generate more details"
+            ]
+        )
+        
+        doc = prepare_for_mongo(assistant_chat.model_dump())
+        await db.chat_messages.insert_one(doc)
+        
+        return {
+            "analysis": analysis,
+            "message": assistant_chat.model_dump(),
+            "selected_rows_count": len(selected_df)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error analyzing selected rows: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Chat endpoints
 @api_router.post("/chat")
 async def chat(request: ChatRequest):
