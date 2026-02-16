@@ -94,6 +94,34 @@ function AppContent() {
     }
   }, []);
 
+  // Fetch chat settings
+  const fetchChatSettings = useCallback(async (workspaceId) => {
+    try {
+      const response = await axios.get(`${API}/chat-settings/${workspaceId}`);
+      setChatSettings(response.data);
+    } catch (error) {
+      console.error("Error fetching chat settings:", error);
+      setChatSettings({ context: "", response_style: "" });
+    }
+  }, []);
+
+  // Update chat settings
+  const updateChatSettings = async (settings) => {
+    if (!currentWorkspace) return;
+    
+    try {
+      setLoading(true);
+      const response = await axios.put(`${API}/chat-settings/${currentWorkspace.id}`, settings);
+      setChatSettings(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating chat settings:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Create workspace
   const createWorkspace = async (name, description = "") => {
     try {
