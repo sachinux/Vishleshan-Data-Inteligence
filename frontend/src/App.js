@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { WorkspaceView } from "@/components/WorkspaceView";
 import { ChatView } from "@/components/ChatView";
 import { StoryboardView } from "@/components/StoryboardView";
+import { DataGridView } from "@/components/DataGridView";
 import { Sidebar } from "@/components/Sidebar";
 import { RightSidebar } from "@/components/RightSidebar";
 import { ThemeProvider } from "@/components/ThemeProvider";
