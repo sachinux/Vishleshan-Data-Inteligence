@@ -356,43 +356,51 @@ function AppContent() {
       {/* Main Content */}
       <main className="main-content">
         {activeView === "workspace" && (
-          dataViewTab === "grid" ? (
-            <DataGridView
-              dataset={selectedDataset}
-              workspace={currentWorkspace}
-              API={API}
-              onAnalysisComplete={(result) => {
-                // Switch to chat view to see the result
-                setActiveView("chat");
-                fetchChatMessages(currentWorkspace.id);
-              }}
-            />
-          ) : (
-            <WorkspaceView
-              workspace={currentWorkspace}
-              datasets={datasets}
-              selectedDataset={selectedDataset}
-              setSelectedDataset={setSelectedDataset}
-              dataProfile={dataProfile}
-              uploadFile={uploadFile}
-              importGoogleSheet={importGoogleSheet}
-              loading={loading}
-            />
-          )
+          <WorkspaceView
+            workspace={currentWorkspace}
+            datasets={datasets}
+            selectedDataset={selectedDataset}
+            setSelectedDataset={setSelectedDataset}
+            dataProfile={dataProfile}
+            uploadFile={uploadFile}
+            importGoogleSheet={importGoogleSheet}
+            loading={loading}
+          />
         )}
         
         {activeView === "chat" && (
-          <ChatView
-            workspace={currentWorkspace}
-            selectedDataset={selectedDataset}
-            createStoryTile={createStoryTile}
-            API={API}
-            chatMessages={chatMessages}
-            setChatMessages={setChatMessages}
-            chatSettings={chatSettings}
-            updateChatSettings={updateChatSettings}
-            loading={loading}
-          />
+          <div className="flex flex-col h-full">
+            {/* Grid Panel - Top Half (when split view is active) */}
+            {showGridSplit && selectedDataset && (
+              <div className="h-1/2 border-b border-border">
+                <DataGridView
+                  dataset={selectedDataset}
+                  workspace={currentWorkspace}
+                  API={API}
+                  onAnalysisComplete={(result) => {
+                    fetchChatMessages(currentWorkspace.id);
+                  }}
+                />
+              </div>
+            )}
+            
+            {/* Chat Panel - Full or Bottom Half */}
+            <div className={showGridSplit && selectedDataset ? "h-1/2" : "h-full"}>
+              <ChatView
+                workspace={currentWorkspace}
+                selectedDataset={selectedDataset}
+                createStoryTile={createStoryTile}
+                API={API}
+                chatMessages={chatMessages}
+                setChatMessages={setChatMessages}
+                chatSettings={chatSettings}
+                updateChatSettings={updateChatSettings}
+                loading={loading}
+                showGridSplit={showGridSplit}
+                setShowGridSplit={setShowGridSplit}
+              />
+            </div>
+          </div>
         )}
         
         {activeView === "storyboard" && (
