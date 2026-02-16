@@ -8,23 +8,25 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 - **Google Sheets**: Simple URL parsing (public sheets only)
 - **PDF Extraction**: Advanced table detection with pdfplumber
 - **Export Formats**: Both PDF and PPTX
-- **Design**: Black minimalism Retro look
+- **Design**: Bento style minimal white with light/dark theme toggle
 
 ## Architecture
 
 ### Backend (FastAPI)
 - `/app/backend/server.py` - Main API with all endpoints
-- MongoDB for persistence (workspaces, datasets, chat messages, story tiles, storyboards)
+- MongoDB for persistence (workspaces, datasets, chat messages, story tiles, storyboards, chat_settings)
 - In-memory DataFrame storage for dataset analysis
 - OpenAI GPT-5.2 integration via emergentintegrations library
 
 ### Frontend (React + Tailwind)
-- **Sidebar.jsx** - Workspace selector, navigation, dataset list
+- **Sidebar.jsx** - Workspace selector, navigation, dataset list, theme toggle
 - **WorkspaceView.jsx** - File upload, Google Sheets import, data profiling
-- **ChatView.jsx** - Natural language chat with chart rendering
+- **ChatView.jsx** - Natural language chat with chart rendering, settings
+- **ChatSettings.jsx** - AI customization modal (context & response style)
 - **ChartRenderer.jsx** - Recharts-based visualization (bar, line, pie, scatter)
 - **DataTable.jsx** - Paginated data display
 - **StoryboardView.jsx** - Story tiles, storyboard editor with drag-drop
+- **RightSidebar.jsx** - Storyboard, Pinned Insights, Narrative Coach
 
 ## Core Requirements (Static)
 
@@ -45,6 +47,7 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 - [x] Main chat with plan, result, table, chart
 - [x] Toggleable code view (hidden by default)
 - [x] Error explanations with suggestions
+- [x] Chat Settings with Context and Response Style customization
 
 ### Visualization
 - [x] Auto-generated chart specs (bar, line, pie, scatter)
@@ -64,9 +67,17 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 - [x] PPTX export with python-pptx
 - [x] JSON export endpoint
 
-## What's Been Implemented (Jan 9, 2026)
+## What's Been Implemented
 
-### Backend
+### Feb 16, 2026
+- **Chat Settings Feature**: Added settings modal to customize AI behavior
+  - Context: Custom instructions the AI remembers (up to 1000 chars)
+  - Response Style: How the AI responds (up to 50 chars, e.g., "professional, concise")
+  - Backend: `/api/chat-settings/{workspace_id}` GET/PUT endpoints
+  - Frontend: ChatSettings.jsx modal component
+  - Settings persist per workspace in MongoDB
+
+### Jan 9, 2026
 - 16 API endpoints (all tested and working)
 - Workspace CRUD operations
 - File upload for CSV, Excel, PDF
@@ -76,16 +87,10 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 - Story tile creation from messages
 - Storyboard generation and editing
 - PDF/PPTX/JSON export
-
-### Frontend
-- Black minimalist retro theme (amber accents, Space Mono font)
-- Three-view navigation (Workspace, Chat, Storyboard)
-- Drag-drop file upload zone
-- Data profile panel with column details
-- Chat interface with suggestions
-- Chart rendering (4 chart types)
-- Storyboard editor with drag reorder
-- Export buttons for PDF/PPTX
+- Three-column layout with fixed sidebars
+- Bento UI theme with light/dark toggle
+- Workspace/dataset deletion with confirmation dialogs
+- Progress indicator for chat queries
 
 ## User Personas
 
@@ -103,28 +108,49 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 
 ### P0 (MVP Complete)
 - [x] All core features implemented
+- [x] Chat Settings (Context & Response Style)
 
 ### P1 (High Priority)
+- [ ] Profile/Grid tabs in left sidebar
+- [ ] Quick Start Templates (Data Audit, Deep Dive)
 - [ ] Excel multi-sheet support
 - [ ] Heatmap chart type
-- [ ] Correlation analysis
-- [ ] Date range filters on charts
 
 ### P2 (Medium Priority)
-- [ ] User authentication
-- [ ] Workspace sharing
+- [ ] Search and filter for Query Navigator
+- [ ] Timestamps for queries
+- [ ] Bulk deletion for datasets
+- [ ] Rename/description editing for datasets
+- [ ] Narrative Coach functionality
 - [ ] Custom chart color themes
-- [ ] Template storyboards
 
 ### P3 (Nice to Have)
+- [ ] User authentication
+- [ ] Workspace sharing
 - [ ] Real-time collaboration
 - [ ] Scheduled report generation
 - [ ] Email export delivery
 - [ ] Dashboard embedding
 
-## Next Tasks
-1. Add user authentication (JWT or social login)
-2. Implement Excel multi-sheet selection
-3. Add more chart types (heatmap, area, funnel)
-4. Improve error handling for LLM failures
-5. Add chart image export (PNG)
+## Key API Endpoints
+- `POST /api/workspaces` - Create workspace
+- `PUT /api/workspaces/{id}` - Update workspace
+- `DELETE /api/workspaces/{id}` - Delete workspace
+- `POST /api/datasets/upload` - Upload data file
+- `DELETE /api/datasets/{id}` - Delete dataset
+- `POST /api/chat` - Process user query
+- `GET /api/chat-settings/{workspace_id}` - Get chat settings
+- `PUT /api/chat-settings/{workspace_id}` - Update chat settings
+- `POST /api/story-tiles/from-message` - Create story tile
+- `POST /api/storyboards/generate` - Generate storyboard
+- `POST /api/export/pdf/{id}` - Export to PDF
+- `POST /api/export/pptx/{id}` - Export to PPTX
+
+## Files of Reference
+- `/app/backend/server.py` - All API logic
+- `/app/frontend/src/App.js` - Root React component
+- `/app/frontend/src/components/ChatView.jsx` - Chat interface
+- `/app/frontend/src/components/ChatSettings.jsx` - Settings modal
+- `/app/frontend/src/components/Sidebar.jsx` - Left sidebar
+- `/app/frontend/src/components/RightSidebar.jsx` - Right sidebar
+
