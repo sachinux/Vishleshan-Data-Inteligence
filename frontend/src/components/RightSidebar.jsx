@@ -187,10 +187,10 @@ export const RightSidebar = ({
           </TabsList>
 
           {/* Insights Tab */}
-          <TabsContent value="insights" className="flex-1 flex flex-col overflow-hidden m-0 mt-2">
+          <TabsContent value="insights" className="flex-1 flex flex-col overflow-hidden m-0 p-0 data-[state=inactive]:hidden">
             {/* Selection Toolbar */}
             {storyTiles.length > 0 && (
-              <div className="flex-shrink-0 px-3 py-2 border-b border-border flex items-center justify-between">
+              <div className="flex-shrink-0 px-3 py-2 border-b border-border flex items-center justify-between bg-muted/30">
                 <div className="flex items-center gap-2">
                   <Checkbox
                     checked={selectedTiles.size === storyTiles.length && storyTiles.length > 0}
@@ -224,8 +224,8 @@ export const RightSidebar = ({
             <ScrollArea className="flex-1">
               <div className="p-3 space-y-2">
                 {storyTiles.length === 0 ? (
-                  <div className="text-center py-8 px-4 border border-dashed border-border rounded-lg bg-muted/30">
-                    <Pin className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <div className="text-center py-12 px-4 border border-dashed border-border rounded-lg bg-muted/30">
+                    <Pin className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                     <p className="text-sm font-medium mb-1">No Pinned Insights</p>
                     <p className="text-xs text-muted-foreground">
                       Pin insights from your analysis to build data actions
@@ -282,21 +282,21 @@ export const RightSidebar = ({
                             </div>
                           )}
 
-                          {/* Action Items Preview */}
-                          {tile.action_items?.length > 0 && (
-                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                              <ListChecks className="h-3 w-3" />
-                              <span>{tile.action_items.length} action{tile.action_items.length > 1 ? 's' : ''}</span>
-                            </div>
-                          )}
-
-                          {/* Chart indicator */}
-                          {tile.chart_config && (
-                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-1">
-                              <BarChart3 className="h-3 w-3" />
-                              <span>Has visualization</span>
-                            </div>
-                          )}
+                          {/* Indicators */}
+                          <div className="flex items-center gap-3">
+                            {tile.action_items?.length > 0 && (
+                              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <ListChecks className="h-3 w-3" />
+                                <span>{tile.action_items.length} action{tile.action_items.length > 1 ? 's' : ''}</span>
+                              </div>
+                            )}
+                            {tile.chart_config && (
+                              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <BarChart3 className="h-3 w-3" />
+                                <span>Chart</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         {/* Delete Button */}
