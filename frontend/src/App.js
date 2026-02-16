@@ -348,10 +348,6 @@ function AppContent() {
         onWorkspaceDeleted={handleWorkspaceDeleted}
         onWorkspaceUpdated={handleWorkspaceUpdated}
         onDatasetDeleted={handleDatasetDeleted}
-        dataViewTab={dataViewTab}
-        setDataViewTab={setDataViewTab}
-        showGridSplit={showGridSplit}
-        setShowGridSplit={setShowGridSplit}
       />
       
       {/* Main Content */}
