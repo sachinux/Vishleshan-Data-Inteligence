@@ -207,7 +207,7 @@ function AppContent() {
   };
 
   // Generate storyboard
-  const generateStoryboard = async (title = "Data Story") => {
+  const generateStoryboard = async (title = "Data Actions") => {
     if (!currentWorkspace) return null;
     
     try {
@@ -224,6 +224,30 @@ function AppContent() {
       throw error;
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Delete story tile (pinned insight)
+  const deleteStoryTile = async (tileId) => {
+    try {
+      await axios.delete(`${API}/story-tiles/${tileId}`);
+      setStoryTiles(storyTiles.filter(tile => tile.id !== tileId));
+      return true;
+    } catch (error) {
+      console.error("Error deleting story tile:", error);
+      throw error;
+    }
+  };
+
+  // Delete storyboard
+  const deleteStoryboard = async (storyboardId) => {
+    try {
+      await axios.delete(`${API}/storyboards/${storyboardId}`);
+      setStoryboards(storyboards.filter(sb => sb.id !== storyboardId));
+      return true;
+    } catch (error) {
+      console.error("Error deleting storyboard:", error);
+      throw error;
     }
   };
 
