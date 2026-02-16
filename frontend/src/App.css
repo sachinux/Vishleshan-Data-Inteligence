@@ -2,28 +2,27 @@
 .app-layout {
     display: flex;
     height: 100vh;
+    width: 100vw;
     overflow: hidden;
     background-color: hsl(var(--background));
 }
 
 /* Left Sidebar - FIXED */
 .sidebar {
-    width: 260px;
-    min-width: 260px;
-    max-width: 260px;
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
     height: 100vh;
     border-right: 1px solid hsl(var(--border));
     background-color: hsl(var(--card));
     display: flex;
     flex-direction: column;
-    position: sticky;
-    top: 0;
-    left: 0;
+    flex-shrink: 0;
     overflow: hidden;
 }
 
 .sidebar-header {
-    padding: 1.25rem;
+    padding: 1rem;
     border-bottom: 1px solid hsl(var(--border));
     flex-shrink: 0;
 }
@@ -31,33 +30,32 @@
 .sidebar-content {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem;
+    padding: 0.75rem;
+    min-height: 0;
 }
 
 /* Right Sidebar - FIXED */
 .right-sidebar {
-    width: 300px;
-    min-width: 300px;
-    max-width: 300px;
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
     height: 100vh;
     border-left: 1px solid hsl(var(--border));
     background-color: hsl(var(--card));
     display: flex;
     flex-direction: column;
-    position: sticky;
-    top: 0;
-    right: 0;
+    flex-shrink: 0;
     overflow: hidden;
 }
 
 .right-sidebar-header {
-    padding: 1rem;
+    padding: 0.75rem;
     border-bottom: 1px solid hsl(var(--border));
     flex-shrink: 0;
 }
 
 .right-sidebar-section {
-    padding: 1rem;
+    padding: 0.75rem;
     flex-shrink: 0;
 }
 
