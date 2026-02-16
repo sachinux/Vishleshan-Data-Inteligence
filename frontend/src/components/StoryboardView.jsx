@@ -950,16 +950,9 @@ export const StoryboardView = ({
             <div className="text-center max-w-sm">
               <Presentation className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="font-semibold text-lg mb-2">Select a Report</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Click on a report card above to view its details, or create a new one
+              <p className="text-sm text-muted-foreground">
+                Click on a report card above to view its details
               </p>
-              <Button
-                onClick={() => setShowNewStoryboard(true)}
-                disabled={storyTiles.length === 0}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create New Report
-              </Button>
             </div>
           </div>
         )}
