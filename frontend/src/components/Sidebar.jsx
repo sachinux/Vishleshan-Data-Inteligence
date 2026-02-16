@@ -73,53 +73,53 @@ export const Sidebar = ({
 
   return (
     <aside className="sidebar" data-testid="sidebar">
-      {/* Header */}
-      <div className="sidebar-header">
-        <h1 className="font-heading text-lg font-bold tracking-wider text-primary uppercase">
+      {/* Header - Fixed */}
+      <div className="flex-shrink-0 p-4 border-b border-border">
+        <h1 className="font-heading text-base font-bold tracking-wider text-primary uppercase">
           Data Storyteller
         </h1>
-        <p className="text-xs text-muted-foreground mt-1 tracking-widest uppercase">
+        <p className="text-[10px] text-muted-foreground mt-0.5 tracking-widest uppercase">
           Studio
         </p>
       </div>
 
-      {/* Workspace Selector */}
-      <div className="p-4 border-b border-border">
+      {/* Workspace Selector - Fixed */}
+      <div className="flex-shrink-0 p-3 border-b border-border">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
               variant="outline" 
-              className="w-full justify-between font-mono text-xs uppercase tracking-wider"
+              className="w-full justify-between font-mono text-[10px] uppercase tracking-wider h-8"
               data-testid="workspace-selector"
             >
-              {currentWorkspace?.name || "Select Workspace"}
-              <ChevronDown className="h-4 w-4 ml-2" />
+              <span className="truncate">{currentWorkspace?.name || "Select Workspace"}</span>
+              <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-[240px]">
+          <DropdownMenuContent className="w-[200px]">
             {workspaces.map((ws) => (
               <DropdownMenuItem 
                 key={ws.id} 
                 onClick={() => setCurrentWorkspace(ws)}
-                className="font-mono text-xs uppercase"
+                className="font-mono text-xs"
               >
-                {ws.name}
+                <span className="truncate">{ws.name}</span>
               </DropdownMenuItem>
             ))}
             <DropdownMenuItem 
               onClick={() => setShowNewWorkspace(true)}
-              className="font-mono text-xs uppercase text-primary"
+              className="font-mono text-xs text-primary"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-3 w-3 mr-2 flex-shrink-0" />
               New Workspace
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      {/* Navigation */}
-      <div className="p-4 border-b border-border">
-        <p className="text-xs text-muted-foreground mb-3 tracking-widest uppercase">Navigation</p>
+      {/* Navigation - Fixed */}
+      <div className="flex-shrink-0 p-3 border-b border-border">
+        <p className="text-[10px] text-muted-foreground mb-2 tracking-widest uppercase">Navigation</p>
         <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -128,69 +128,71 @@ export const Sidebar = ({
                 key={item.id}
                 onClick={() => setActiveView(item.id)}
                 data-testid={`nav-${item.id}`}
-                className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-mono uppercase tracking-wider transition-colors ${
+                className={`w-full flex items-center gap-2 px-2 py-1.5 text-xs font-mono uppercase tracking-wider transition-colors ${
                   activeView === item.id
                     ? "bg-primary/10 text-primary border border-primary"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted border border-transparent"
                 }`}
               >
-                <Icon className="h-4 w-4" />
-                {item.label}
+                <Icon className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
               </button>
             );
           })}
         </nav>
       </div>
 
-      {/* Datasets List */}
-      <div className="flex-1 overflow-hidden">
-        <div className="p-4 border-b border-border">
-          <p className="text-xs text-muted-foreground tracking-widest uppercase">
+      {/* Datasets List - Scrollable */}
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        <div className="flex-shrink-0 p-3 border-b border-border">
+          <p className="text-[10px] text-muted-foreground tracking-widest uppercase">
             Datasets ({datasets.length})
           </p>
         </div>
-        <ScrollArea className="h-[calc(100%-200px)]">
-          <div className="p-2">
-            {datasets.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-4">
-                No datasets yet
-              </p>
-            ) : (
-              datasets.map((dataset) => {
+        <div className="flex-1 overflow-y-auto p-2">
+          {datasets.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-4">
+              No datasets yet
+            </p>
+          ) : (
+            <div className="space-y-1">
+              {datasets.map((dataset) => {
                 const Icon = getFileIcon(dataset.file_type);
                 return (
                   <button
                     key={dataset.id}
                     onClick={() => setSelectedDataset(dataset)}
                     data-testid={`dataset-${dataset.id}`}
-                    className={`file-item w-full ${
-                      selectedDataset?.id === dataset.id ? "active" : ""
+                    className={`w-full flex items-center gap-2 p-2 text-left border transition-colors ${
+                      selectedDataset?.id === dataset.id 
+                        ? "border-primary bg-primary/10" 
+                        : "border-border hover:border-primary/50 bg-background"
                     }`}
                   >
-                    <Icon className="h-4 w-4 mr-3 text-primary" />
-                    <div className="flex-1 text-left">
-                      <p className="text-sm font-mono truncate">
+                    <Icon className="h-3 w-3 text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-mono truncate">
                         {dataset.filename}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[10px] text-muted-foreground">
                         {dataset.row_count} rows × {dataset.column_count} cols
                       </p>
                     </div>
                   </button>
                 );
-              })
-            )}
-          </div>
-        </ScrollArea>
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Quick Profile */}
+      {/* Quick Profile - Fixed at bottom */}
       {dataProfile && selectedDataset && (
-        <div className="p-4 border-t border-border">
-          <p className="text-xs text-muted-foreground mb-2 tracking-widest uppercase">
+        <div className="flex-shrink-0 p-3 border-t border-border">
+          <p className="text-[10px] text-muted-foreground mb-2 tracking-widest uppercase">
             Quick Stats
           </p>
-          <div className="space-y-1 text-xs font-mono">
+          <div className="space-y-1 text-[10px] font-mono">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Rows</span>
               <span className="text-primary">{dataProfile.row_count}</span>
@@ -209,9 +211,9 @@ export const Sidebar = ({
 
       {/* Loading indicator */}
       {loading && (
-        <div className="p-4 border-t border-border flex items-center justify-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-          <span className="text-xs text-muted-foreground uppercase tracking-wider">
+        <div className="flex-shrink-0 p-3 border-t border-border flex items-center justify-center gap-2">
+          <Loader2 className="h-3 w-3 animate-spin text-primary" />
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
             Processing...
           </span>
         </div>
