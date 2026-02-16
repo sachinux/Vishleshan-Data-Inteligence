@@ -77,6 +77,8 @@ export const RightSidebar = ({
   deleteStoryTile,
   API: apiProp,
   loading,
+  isCollapsed,
+  onToggleCollapse,
 }) => {
   const [activeTab, setActiveTab] = useState("insights");
   const [selectedTiles, setSelectedTiles] = useState(new Set());
