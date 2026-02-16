@@ -174,17 +174,19 @@ export const RightSidebar = ({
     <TooltipProvider>
       <aside className="right-sidebar flex flex-col" data-testid="right-sidebar">
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="mx-3 mt-3 grid grid-cols-2">
-            <TabsTrigger value="insights" className="text-xs">
-              <Pin className="h-3 w-3 mr-1" />
-              Insights ({storyTiles.length})
-            </TabsTrigger>
-            <TabsTrigger value="actions" className="text-xs">
-              <Zap className="h-3 w-3 mr-1" />
-              Actions
-            </TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+          <div className="flex-shrink-0 px-3 pt-3">
+            <TabsList className="grid grid-cols-2 w-full">
+              <TabsTrigger value="insights" className="text-xs">
+                <Pin className="h-3 w-3 mr-1" />
+                Insights ({storyTiles.length})
+              </TabsTrigger>
+              <TabsTrigger value="actions" className="text-xs">
+                <Zap className="h-3 w-3 mr-1" />
+                Actions
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Insights Tab */}
           <TabsContent value="insights" className="flex-1 flex flex-col overflow-hidden m-0 p-0 data-[state=inactive]:hidden">
