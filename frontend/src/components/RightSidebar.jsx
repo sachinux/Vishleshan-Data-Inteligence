@@ -178,21 +178,124 @@ export const RightSidebar = ({
 
   return (
     <TooltipProvider>
-      <aside className="right-sidebar flex flex-col" data-testid="right-sidebar" role="complementary" aria-label="Insights and Actions Panel">
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-          <div className="flex-shrink-0 px-3 pt-3">
-            <TabsList className="grid grid-cols-2 w-full" aria-label="Switch between Insights and Actions">
-              <TabsTrigger value="insights" className="text-sm" aria-label={`Insights tab, ${storyTiles.length} items`}>
-                <Pin className="h-4 w-4 mr-1.5" aria-hidden="true" />
-                Insights ({storyTiles.length})
-              </TabsTrigger>
-              <TabsTrigger value="actions" className="text-sm" aria-label="Actions tab">
-                <Zap className="h-4 w-4 mr-1.5" aria-hidden="true" />
-                Actions
-              </TabsTrigger>
-            </TabsList>
+      <aside 
+        className={`right-sidebar flex flex-col ${isCollapsed ? 'collapsed' : ''}`} 
+        data-testid="right-sidebar" 
+        role="complementary" 
+        aria-label="Insights and Actions Panel"
+      >
+        {/* Collapsed View */}
+        {isCollapsed ? (
+          <div className="flex flex-col items-center py-3 gap-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleCollapse}
+                  className="h-9 w-9 p-0"
+                  aria-label="Expand sidebar"
+                >
+                  <PanelRightOpen className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">Expand panel</TooltipContent>
+            </Tooltip>
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={activeTab === "insights" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => { setActiveTab("insights"); onToggleCollapse(); }}
+                  className="h-9 w-9 p-0"
+                  aria-label={`Insights (${storyTiles.length})`}
+                >
+                  <Pin className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">Insights ({storyTiles.length})</TooltipContent>
+            </Tooltip>
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={activeTab === "actions" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => { setActiveTab("actions"); onToggleCollapse(); }}
+                  className="h-9 w-9 p-0"
+                  aria-label="Actions"
+                >
+                  <Zap className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">Actions</TooltipContent>
+            </Tooltip>
+            
+            {highPriorityItems.length > 0 && (
+              <Badge variant="destructive" className="text-[9px] px-1.5">
+                {highPriorityItems.length}
+              </Badge>
+            )}
           </div>
+        ) : (
+          <>
+            {/* Collapse Button */}
+            <div className="flex items-center justify-between px-3 pt-2 pb-1">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+                Quick Panel
+              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onToggleCollapse}
+                    className="h-7 w-7 p-0"
+                    aria-label="Collapse sidebar"
+                  >
+                    <PanelRightClose className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Collapse panel</TooltipContent>
+              </Tooltip>
+            </div>
+
+            {/* AI Warning Banner */}
+            <div className="ai-warning-banner" role="alert">
+              <Bot className="h-4 w-4 ai-icon" aria-hidden="true" />
+              <div className="ai-text">
+                <p className="ai-title">AI-Generated Content</p>
+                <p className="ai-description">
+                  Insights and actions are AI-generated. Review for accuracy before making decisions.
+                </p>
+              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-5 w-5 p-0 flex-shrink-0">
+                    <Info className="h-3 w-3 text-muted-foreground" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-[200px]">
+                  <p className="text-xs">AI may occasionally produce inaccurate information. Always verify important data with primary sources.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+
+            {/* Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+              <div className="flex-shrink-0 px-3 pt-2">
+                <TabsList className="grid grid-cols-2 w-full" aria-label="Switch between Insights and Actions">
+                  <TabsTrigger value="insights" className="text-xs" aria-label={`Insights tab, ${storyTiles.length} items`}>
+                    <Pin className="h-3 w-3 mr-1.5" aria-hidden="true" />
+                    Insights ({storyTiles.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="actions" className="text-xs" aria-label="Actions tab">
+                    <Zap className="h-3 w-3 mr-1.5" aria-hidden="true" />
+                    Actions
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
           {/* Insights Tab */}
           <TabsContent value="insights" className="flex-1 flex flex-col overflow-hidden m-0 p-0 data-[state=inactive]:hidden">
