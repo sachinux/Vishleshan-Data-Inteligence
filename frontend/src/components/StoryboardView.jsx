@@ -85,17 +85,21 @@ export const StoryboardView = ({
   generateStoryboard,
   updateStoryboard,
   exportStoryboard,
+  deleteStoryboard,
+  deleteStoryTile,
   loading,
 }) => {
   const [selectedStoryboard, setSelectedStoryboard] = useState(null);
   const [editingFrame, setEditingFrame] = useState(null);
   const [showNewStoryboard, setShowNewStoryboard] = useState(false);
-  const [newTitle, setNewTitle] = useState("Data Story");
+  const [newTitle, setNewTitle] = useState("Data Actions");
   const [generating, setGenerating] = useState(false);
   const [exporting, setExporting] = useState(null);
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [activeTab, setActiveTab] = useState("story");
   const [stakeholderView, setStakeholderView] = useState("executive");
+  const [deletingStoryboard, setDeletingStoryboard] = useState(null);
+  const [deletingTile, setDeletingTile] = useState(null);
 
   useEffect(() => {
     if (storyboards.length > 0 && !selectedStoryboard) {
