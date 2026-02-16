@@ -142,6 +142,8 @@ export const ChatView = ({
   loading: parentLoading,
   showGridSplit,
   setShowGridSplit,
+  uploadFile,
+  onDatasetUploaded,
 }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -152,7 +154,121 @@ export const ChatView = ({
   const [detailPanel, setDetailPanel] = useState(null);
   const [clarifying, setClarifying] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  
+  // File upload states
+  const [showFileUpload, setShowFileUpload] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
+  
+  // Prompt library states
+  const [showPromptLibrary, setShowPromptLibrary] = useState(false);
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
+  const [savedPrompts, setSavedPrompts] = useState([]);
+  const [newPromptName, setNewPromptName] = useState("");
+  const [newPromptCategory, setNewPromptCategory] = useState("Custom");
+  
   const messagesEndRef = useRef(null);
+
+  // Load saved prompts from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(`vishleshan-prompts-${workspace?.id}`);
+    if (stored) {
+      setSavedPrompts(JSON.parse(stored));
+    }
+  }, [workspace?.id]);
+
+  // Save prompts to localStorage
+  const savePromptsToStorage = (prompts) => {
+    localStorage.setItem(`vishleshan-prompts-${workspace?.id}`, JSON.stringify(prompts));
+    setSavedPrompts(prompts);
+  };
+
+  // Handle file upload in chat
+  const handleFileUpload = async (files) => {
+    if (!files || files.length === 0 || !workspace) return;
+    
+    setUploadingFile(true);
+    try {
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        const response = await axios.post(
+          `${API_BASE}/workspaces/${workspace.id}/upload`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        
+        if (onDatasetUploaded) {
+          onDatasetUploaded(response.data);
+        }
+        toast.success(`Uploaded: ${file.name}`);
+      }
+      setShowFileUpload(false);
+    } catch (error) {
+      toast.error("Failed to upload file");
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const files = Array.from(e.dataTransfer.files);
+    handleFileUpload(files);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
+
+  // Save current prompt
+  const handleSavePrompt = () => {
+    if (!input.trim() || !newPromptName.trim()) return;
+    
+    const newPrompt = {
+      id: Date.now().toString(),
+      name: newPromptName,
+      prompt: input,
+      category: newPromptCategory,
+      isFavorite: false,
+      createdAt: new Date().toISOString(),
+    };
+    
+    savePromptsToStorage([...savedPrompts, newPrompt]);
+    setNewPromptName("");
+    setNewPromptCategory("Custom");
+    setShowSavePrompt(false);
+    toast.success("Prompt saved to library!");
+  };
+
+  // Delete saved prompt
+  const handleDeletePrompt = (promptId) => {
+    const updated = savedPrompts.filter(p => p.id !== promptId);
+    savePromptsToStorage(updated);
+    toast.success("Prompt deleted");
+  };
+
+  // Toggle favorite
+  const handleToggleFavorite = (promptId) => {
+    const updated = savedPrompts.map(p => 
+      p.id === promptId ? { ...p, isFavorite: !p.isFavorite } : p
+    );
+    savePromptsToStorage(updated);
+  };
+
+  // Use saved prompt
+  const handleUsePrompt = (prompt) => {
+    setInput(prompt.prompt);
+    setShowPromptLibrary(false);
+  };
 
   // Sync messages with parent
   useEffect(() => {
