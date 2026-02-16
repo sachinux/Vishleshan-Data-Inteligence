@@ -420,6 +420,11 @@ function AppContent() {
                 loading={loading}
                 showGridSplit={showGridSplit}
                 setShowGridSplit={setShowGridSplit}
+                uploadFile={uploadFile}
+                onDatasetUploaded={(newDataset) => {
+                  setDatasets(prev => [...prev, newDataset]);
+                  setSelectedDataset(newDataset);
+                }}
               />
             </div>
           </div>
