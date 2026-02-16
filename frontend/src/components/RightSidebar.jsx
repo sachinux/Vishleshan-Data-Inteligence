@@ -368,24 +368,26 @@ export const RightSidebar = ({
                   {/* KPI Summary */}
                   {kpis.length > 0 && (
                     <div className="p-3 border border-border rounded-lg bg-card">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-3">
                         <Target className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                           Key Metrics
                         </span>
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {kpis.slice(0, 4).map((kpi, i) => (
                           <div
                             key={i}
-                            className={`flex items-center justify-between p-2 rounded-lg ${statusColors[kpi.status] || 'bg-muted/50'}`}
+                            className={`p-2 rounded-lg ${statusColors[kpi.status] || 'bg-muted/50'}`}
                           >
-                            <span className="text-[9px] font-medium truncate flex-1 mr-2">
-                              {kpi.label}
-                            </span>
-                            <div className="flex items-center gap-1">
-                              <span className="text-[10px] font-bold">{kpi.value}</span>
-                              <TrendIcon trend={kpi.trend} />
+                            <div className="flex items-start justify-between gap-2">
+                              <span className="text-[10px] font-medium leading-tight flex-1">
+                                {kpi.label}
+                              </span>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <span className="text-xs font-bold whitespace-nowrap">{kpi.value}</span>
+                                <TrendIcon trend={kpi.trend} />
+                              </div>
                             </div>
                           </div>
                         ))}
