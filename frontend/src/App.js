@@ -455,6 +455,8 @@ function AppContent() {
         deleteStoryTile={deleteStoryTile}
         API={API}
         loading={loading}
+        isCollapsed={rightSidebarCollapsed}
+        onToggleCollapse={() => setRightSidebarCollapsed(!rightSidebarCollapsed)}
       />
       
       <Toaster position="bottom-right" />
