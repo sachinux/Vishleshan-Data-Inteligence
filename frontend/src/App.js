@@ -439,15 +439,11 @@ function AppContent() {
         )}
       </main>
       
-      {/* Right Sidebar - Always Visible */}
+      {/* Right Sidebar - Quick Actions */}
       <RightSidebar
         workspace={currentWorkspace}
         storyTiles={storyTiles}
         storyboards={storyboards}
-        chatMessages={chatMessages}
-        generateStoryboard={generateStoryboard}
-        exportStoryboard={exportStoryboard}
-        deleteStoryTile={deleteStoryTile}
         API={API}
         loading={loading}
       />
