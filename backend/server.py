@@ -378,7 +378,49 @@ async def delete_workspace(workspace_id: str):
     await db.chat_messages.delete_many({"workspace_id": workspace_id})
     await db.story_tiles.delete_many({"workspace_id": workspace_id})
     await db.storyboards.delete_many({"workspace_id": workspace_id})
+    # Remove datasets from memory
+    dataset_ids = [d["id"] for d in await db.datasets.find({"workspace_id": workspace_id}, {"id": 1, "_id": 0}).to_list(100)]
+    for did in dataset_ids:
+        if did in datasets_store:
+            del datasets_store[did]
     return {"message": "Workspace deleted"}
+
+class WorkspaceUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+@api_router.put("/workspaces/{workspace_id}", response_model=Workspace)
+async def update_workspace(workspace_id: str, update: WorkspaceUpdate):
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No update data provided")
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    result = await db.workspaces.update_one(
+        {"id": workspace_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+    
+    workspace = await db.workspaces.find_one({"id": workspace_id}, {"_id": 0})
+    parse_datetime_fields(workspace, ["created_at", "updated_at"])
+    return workspace
+
+@api_router.delete("/datasets/{dataset_id}")
+async def delete_dataset(dataset_id: str):
+    # Remove from MongoDB
+    result = await db.datasets.delete_one({"id": dataset_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    
+    # Remove from memory
+    if dataset_id in datasets_store:
+        del datasets_store[dataset_id]
+    
+    return {"message": "Dataset deleted"}
 
 # File upload endpoints
 @api_router.post("/datasets/upload")
