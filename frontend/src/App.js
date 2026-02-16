@@ -311,8 +311,9 @@ function AppContent() {
       fetchStoryTiles(currentWorkspace.id);
       fetchStoryboards(currentWorkspace.id);
       fetchChatMessages(currentWorkspace.id);
+      fetchChatSettings(currentWorkspace.id);
     }
-  }, [currentWorkspace, fetchDatasets, fetchStoryTiles, fetchStoryboards, fetchChatMessages]);
+  }, [currentWorkspace, fetchDatasets, fetchStoryTiles, fetchStoryboards, fetchChatMessages, fetchChatSettings]);
 
   useEffect(() => {
     if (selectedDataset) {
