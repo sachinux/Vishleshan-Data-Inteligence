@@ -172,17 +172,17 @@ export const RightSidebar = ({
 
   return (
     <TooltipProvider>
-      <aside className="right-sidebar flex flex-col" data-testid="right-sidebar">
+      <aside className="right-sidebar flex flex-col" data-testid="right-sidebar" role="complementary" aria-label="Insights and Actions Panel">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
           <div className="flex-shrink-0 px-3 pt-3">
-            <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="insights" className="text-xs">
-                <Pin className="h-3 w-3 mr-1" />
+            <TabsList className="grid grid-cols-2 w-full" aria-label="Switch between Insights and Actions">
+              <TabsTrigger value="insights" className="text-sm" aria-label={`Insights tab, ${storyTiles.length} items`}>
+                <Pin className="h-4 w-4 mr-1.5" aria-hidden="true" />
                 Insights ({storyTiles.length})
               </TabsTrigger>
-              <TabsTrigger value="actions" className="text-xs">
-                <Zap className="h-3 w-3 mr-1" />
+              <TabsTrigger value="actions" className="text-sm" aria-label="Actions tab">
+                <Zap className="h-4 w-4 mr-1.5" aria-hidden="true" />
                 Actions
               </TabsTrigger>
             </TabsList>
