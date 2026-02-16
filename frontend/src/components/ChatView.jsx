@@ -365,14 +365,26 @@ export const ChatView = ({
                 )}
               </div>
             </div>
-            {!selectedDataset && (
-              <div className="flex items-center gap-2 text-amber-500">
-                <AlertCircle className="h-4 w-4" />
-                <span className="text-xs">
-                  No dataset selected
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {!selectedDataset && (
+                <div className="flex items-center gap-2 text-amber-500">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-xs">
+                    No dataset selected
+                  </span>
+                </div>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSettings(true)}
+                className="h-8 rounded-lg"
+                data-testid="open-chat-settings"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+            </div>
           </div>
 
           {/* Messages - SCROLLABLE */}
