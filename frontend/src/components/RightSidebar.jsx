@@ -449,30 +449,32 @@ export const RightSidebar = ({
                     
                     {pendingItems.length === 0 ? (
                       <div className="text-center py-4 px-3 border border-dashed border-border rounded-lg bg-muted/30">
-                        <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto mb-1" />
-                        <p className="text-[10px] text-muted-foreground">
+                        <CheckCircle2 className="h-6 w-6 text-green-500 mx-auto mb-2" aria-hidden="true" />
+                        <p className="text-xs text-muted-foreground">
                           All done!
                         </p>
                       </div>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-2" role="list">
                         {pendingItems.map((action) => (
                           <div
                             key={action.id}
-                            className="flex items-start gap-2 p-2 border border-border rounded-lg bg-background hover:border-primary/30 transition-colors"
+                            className="flex items-start gap-2.5 p-2.5 border border-border rounded-lg bg-background hover:border-primary/30 transition-colors"
+                            role="listitem"
                           >
                             <Checkbox
                               checked={action.completed}
                               onCheckedChange={(checked) => handleToggleAction(action.id, checked)}
                               disabled={togglingAction === action.id}
                               className="mt-0.5 flex-shrink-0"
+                              aria-label={`Mark "${action.text}" as complete`}
                             />
                             <div className="flex-1 min-w-0">
-                              <p className="text-[10px] leading-relaxed">
+                              <p className="text-xs leading-relaxed break-words">
                                 {action.text}
                               </p>
                               {action.category && (
-                                <Badge variant="secondary" className="text-[8px] mt-1.5">
+                                <Badge variant="secondary" className="text-[10px] mt-1.5">
                                   {action.category}
                                 </Badge>
                               )}
