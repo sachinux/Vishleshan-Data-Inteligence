@@ -562,6 +562,23 @@ async def chat(request: ChatRequest):
     user_message = request.message
     dataset_id = request.dataset_id
     
+    # Get chat settings for this workspace
+    chat_settings = await db.chat_settings.find_one({"workspace_id": workspace_id}, {"_id": 0})
+    context_instructions = ""
+    response_style_instructions = ""
+    
+    if chat_settings:
+        if chat_settings.get("context"):
+            context_instructions = f"\n\nUser's custom instructions: {chat_settings['context']}"
+        if chat_settings.get("response_style"):
+            response_style_instructions = f" Respond in a {chat_settings['response_style']} manner."
+    
+    # Also check request-level overrides
+    if request.context:
+        context_instructions = f"\n\nUser's custom instructions: {request.context}"
+    if request.response_style:
+        response_style_instructions = f" Respond in a {request.response_style} manner."
+    
     # Save user message
     user_chat = ChatMessage(
         workspace_id=workspace_id,
