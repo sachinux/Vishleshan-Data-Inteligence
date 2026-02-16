@@ -97,6 +97,7 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
   - Frontend: DataGridView.jsx component
 
 - **Interactive Actionable Storyboards**: Major enhancement to storyboard generation
+  - **Renamed to "Data Actions"** throughout the UI
   - **Executive Summary**: AI-generated 2-3 sentence summary at the top
   - **KPI Dashboard**: Color-coded KPIs (green/yellow/red) with trend indicators
   - **Action Items Checklist**: 
@@ -108,6 +109,10 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
     - Executive: High-level summary, key points, recommended actions
     - Manager: Tactical overview with operational focus
     - Analyst: Detailed findings with technical recommendations
+  - **Delete functionality**:
+    - Delete Data Actions (storyboards) with confirmation dialog
+    - Delete Pinned Insights with confirmation dialog
+    - Hover to reveal delete button on items
   - **Frame-level enhancements**:
     - Inline KPIs with status indicators
     - Frame-specific action items
