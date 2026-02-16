@@ -600,6 +600,23 @@ export const ChatView = ({
             </div>
           </SheetContent>
         </Sheet>
+
+        {/* Chat Settings Modal */}
+        <ChatSettings
+          open={showSettings}
+          onOpenChange={setShowSettings}
+          settings={chatSettings}
+          onSave={async (settings) => {
+            try {
+              await updateChatSettings(settings);
+              toast.success("Settings saved!");
+              setShowSettings(false);
+            } catch (error) {
+              toast.error("Failed to save settings");
+            }
+          }}
+          loading={parentLoading}
+        />
       </div>
     </TooltipProvider>
   );
