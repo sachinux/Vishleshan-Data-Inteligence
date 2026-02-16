@@ -348,6 +348,8 @@ function AppContent() {
         onWorkspaceDeleted={handleWorkspaceDeleted}
         onWorkspaceUpdated={handleWorkspaceUpdated}
         onDatasetDeleted={handleDatasetDeleted}
+        dataViewTab={dataViewTab}
+        setDataViewTab={setDataViewTab}
       />
       
       {/* Main Content */}
