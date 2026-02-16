@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -13,17 +12,13 @@ import {
 import { toast } from "sonner";
 import axios from "axios";
 import {
-  FileDown,
   Sparkles,
   Pin,
   Send,
   Loader2,
-  ChevronRight,
   BarChart3,
-  MessageSquare,
   Presentation,
   Plus,
-  Trash2,
 } from "lucide-react";
 
 export const RightSidebar = ({
@@ -41,12 +36,6 @@ export const RightSidebar = ({
   const [narrativeResponse, setNarrativeResponse] = useState("");
   const [generating, setGenerating] = useState(false);
 
-  // Get insights (assistant messages with charts or tables)
-  const insights = chatMessages?.filter(
-    (msg) => msg.role === "assistant" && (msg.chart_config || msg.table_data)
-  ) || [];
-
-  // Get latest storyboard
   const latestStoryboard = storyboards?.[storyboards.length - 1];
 
   const handleNarrativeCoach = async () => {
@@ -101,12 +90,12 @@ export const RightSidebar = ({
   return (
     <TooltipProvider>
       <aside className="right-sidebar" data-testid="right-sidebar">
-        {/* Header */}
-        <div className="right-sidebar-header">
+        {/* Header - Fixed */}
+        <div className="flex-shrink-0 p-3 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Presentation className="h-4 w-4 text-primary" />
-              <span className="font-heading text-sm uppercase tracking-wider">
+              <Presentation className="h-3 w-3 text-primary" />
+              <span className="font-heading text-xs uppercase tracking-wider">
                 Storyboard
               </span>
             </div>
@@ -115,7 +104,7 @@ export const RightSidebar = ({
               size="sm"
               onClick={handleExportPDF}
               disabled={!latestStoryboard}
-              className="text-xs font-mono text-primary hover:text-primary"
+              className="text-[10px] font-mono text-primary hover:text-primary h-6 px-2"
               data-testid="export-pdf-sidebar"
             >
               Export PDF
@@ -123,10 +112,10 @@ export const RightSidebar = ({
           </div>
         </div>
 
-        {/* Insights Section */}
-        <div className="right-sidebar-section">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">
+        {/* Insights Section - Scrollable */}
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden border-b border-border">
+          <div className="flex-shrink-0 p-3 flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
               Insights ({storyTiles.length})
             </span>
             {storyTiles.length > 0 && (
@@ -137,7 +126,7 @@ export const RightSidebar = ({
                     size="sm"
                     onClick={handleGenerateStoryboard}
                     disabled={generating}
-                    className="h-6 w-6 p-0"
+                    className="h-5 w-5 p-0"
                     data-testid="generate-from-insights"
                   >
                     {generating ? (
@@ -154,44 +143,44 @@ export const RightSidebar = ({
             )}
           </div>
 
-          {storyTiles.length === 0 ? (
-            <div className="text-center py-6 border border-dashed border-border rounded">
-              <Pin className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">
-                Pin insights from your chat here
-              </p>
-            </div>
-          ) : (
-            <ScrollArea className="h-[180px]">
-              <div className="space-y-2 pr-2">
-                {storyTiles.map((tile, idx) => (
+          <div className="flex-1 overflow-y-auto px-3 pb-3">
+            {storyTiles.length === 0 ? (
+              <div className="text-center py-6 border border-dashed border-border rounded">
+                <Pin className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
+                <p className="text-[10px] text-muted-foreground">
+                  Pin insights from your chat here
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {storyTiles.map((tile) => (
                   <div
                     key={tile.id}
-                    className="p-3 border border-border hover:border-primary/50 transition-colors bg-card/50"
+                    className="p-2 border border-border hover:border-primary/50 transition-colors bg-card/50"
                     data-testid={`insight-tile-${tile.id}`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-mono text-primary truncate">
+                        <p className="text-[10px] font-mono text-primary truncate">
                           {tile.title}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">
                           {tile.explanation}
                         </p>
                       </div>
                       {tile.chart_config && (
-                        <BarChart3 className="h-3 w-3 text-primary shrink-0" />
+                        <BarChart3 className="h-3 w-3 text-primary flex-shrink-0" />
                       )}
                     </div>
                     {tile.key_metrics?.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
+                      <div className="mt-1.5 flex flex-wrap gap-1">
                         {tile.key_metrics.slice(0, 2).map((metric, i) => (
                           <Badge
                             key={i}
                             variant="secondary"
-                            className="text-[10px] px-1.5 py-0"
+                            className="text-[8px] px-1 py-0 h-4"
                           >
-                            {metric.length > 20 ? `${metric.slice(0, 20)}...` : metric}
+                            {metric.length > 15 ? `${metric.slice(0, 15)}...` : metric}
                           </Badge>
                         ))}
                       </div>
@@ -199,37 +188,31 @@ export const RightSidebar = ({
                   </div>
                 ))}
               </div>
-            </ScrollArea>
-          )}
+            )}
+          </div>
         </div>
 
-        <Separator />
-
-        {/* Narrative Coach Section */}
-        <div className="right-sidebar-section flex-1 flex flex-col">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">
+        {/* Narrative Coach Section - Fixed at bottom */}
+        <div className="flex-shrink-0 p-3 flex flex-col">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-3 w-3 text-primary" />
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
               Narrative Coach
             </span>
           </div>
 
           {/* Response Area */}
-          <div className="flex-1 min-h-0 mb-3">
-            {narrativeResponse ? (
-              <ScrollArea className="h-full max-h-[120px]">
-                <div className="p-3 bg-primary/5 border-l-2 border-primary text-xs">
-                  {narrativeResponse}
-                </div>
-              </ScrollArea>
-            ) : (
-              <div className="h-full flex items-center justify-center text-center p-4">
-                <p className="text-xs text-muted-foreground">
-                  Ask for help organizing your presentation flow
-                </p>
-              </div>
-            )}
-          </div>
+          {narrativeResponse ? (
+            <div className="mb-2 p-2 bg-primary/5 border-l-2 border-primary text-[10px] max-h-20 overflow-y-auto">
+              {narrativeResponse}
+            </div>
+          ) : (
+            <div className="mb-2 text-center py-3">
+              <p className="text-[10px] text-muted-foreground">
+                Ask for help organizing your presentation flow
+              </p>
+            </div>
+          )}
 
           {/* Input Area */}
           <div className="flex gap-2">
@@ -239,14 +222,14 @@ export const RightSidebar = ({
               onKeyDown={(e) => e.key === "Enter" && handleNarrativeCoach()}
               placeholder="Ask about your story..."
               disabled={narrativeLoading || !workspace}
-              className="text-xs h-8"
+              className="text-[10px] h-7"
               data-testid="narrative-coach-input"
             />
             <Button
               size="sm"
               onClick={handleNarrativeCoach}
               disabled={narrativeLoading || !narrativeInput.trim() || !workspace}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 p-0"
               data-testid="narrative-coach-send"
             >
               {narrativeLoading ? (
