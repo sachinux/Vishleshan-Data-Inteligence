@@ -69,6 +69,13 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 
 ## What's Been Implemented
 
+### Session - February 16, 2026 (continued)
+- **Kanban Board**: Implemented 3-column layout (Draft, In Progress, Completed) for report management
+- **Tabbed Reports**: Multiple reports can be opened in tabs for quick switching
+- **Report Cards**: Show title, progress bar, action count, frame count, last updated
+- **Drag & Drop**: Move reports between columns to change status
+- **Removed**: Pinned Insights section from Data Actions view
+
 ### Session - February 16, 2026
 - **UI Fix**: Right sidebar width increased from 280px to 320px
 - **Layout Fix**: Fixed overlapping text in Key Metrics, To Do, and Quick Stats sections
