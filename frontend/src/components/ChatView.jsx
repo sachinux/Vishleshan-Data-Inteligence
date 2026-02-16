@@ -378,6 +378,27 @@ export const ChatView = ({
                   </span>
                 </div>
               )}
+              {selectedDataset && setShowGridSplit && (
+                <Button
+                  variant={showGridSplit ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowGridSplit(!showGridSplit)}
+                  className="h-8 rounded-lg"
+                  data-testid="toggle-grid-split"
+                >
+                  {showGridSplit ? (
+                    <>
+                      <PanelTopClose className="h-4 w-4 mr-2" />
+                      Hide Table
+                    </>
+                  ) : (
+                    <>
+                      <Table2 className="h-4 w-4 mr-2" />
+                      Show Table
+                    </>
+                  )}
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
