@@ -815,16 +815,16 @@ export const StoryboardView = ({
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-sm">
               <Presentation className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold text-lg mb-2">Create Your Story</h3>
+              <h3 className="font-semibold text-lg mb-2">Create Data Actions</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Generate a storyboard from your pinned insights to create an actionable presentation
+                Generate actionable insights from your pinned data to drive decisions
               </p>
               <Button
                 onClick={() => setShowNewStoryboard(true)}
                 disabled={storyTiles.length === 0}
               >
                 <Sparkles className="h-4 w-4 mr-2" />
-                Generate Storyboard
+                Generate Data Actions
               </Button>
             </div>
           </div>
@@ -835,17 +835,17 @@ export const StoryboardView = ({
       <Dialog open={showNewStoryboard} onOpenChange={setShowNewStoryboard}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Generate Actionable Storyboard</DialogTitle>
+            <DialogTitle>Generate Data Actions</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <Input
-              placeholder="Enter storyboard title..."
+              placeholder="Enter title..."
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               data-testid="storyboard-title-input"
             />
             <p className="text-xs text-muted-foreground">
-              AI will organize your {storyTiles.length} pinned insights into a narrative with:
+              AI will organize your {storyTiles.length} pinned insights into actionable items:
             </p>
             <ul className="text-xs text-muted-foreground space-y-1 ml-4">
               <li>• Executive summary</li>
