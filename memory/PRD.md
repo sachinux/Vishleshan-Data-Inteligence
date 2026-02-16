@@ -69,6 +69,12 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 
 ## What's Been Implemented
 
+### Session - February 16, 2026 (Bug Fix)
+- **P0 Bug Fixed**: Chat code execution `__import__ not found` error
+- **Root Cause**: Backend Python sandbox blocked all builtins in `execute_data_query()`
+- **Fix**: Added whitelist of safe built-in functions (len, sum, range, etc.)
+- **File**: `/app/backend/server.py`
+
 ### Session - February 16, 2026 (continued)
 - **Kanban Board**: Implemented 3-column layout (Draft, In Progress, Completed) for report management
 - **Tabbed Reports**: Multiple reports can be opened in tabs for quick switching
