@@ -477,19 +477,19 @@ export const RightSidebar = ({
 
                   {/* Quick Stats */}
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="p-2 border border-border rounded-lg bg-card text-center">
-                      <p className="text-lg font-bold text-green-600">{completedCount}</p>
-                      <p className="text-[8px] text-muted-foreground">Done</p>
+                    <div className="p-3 border border-border rounded-lg bg-card text-center">
+                      <p className="text-xl font-bold text-green-600">{completedCount}</p>
+                      <p className="text-[9px] text-muted-foreground mt-1">Done</p>
                     </div>
-                    <div className="p-2 border border-border rounded-lg bg-card text-center">
-                      <p className="text-lg font-bold text-yellow-600">
+                    <div className="p-3 border border-border rounded-lg bg-card text-center">
+                      <p className="text-xl font-bold text-yellow-600">
                         {actionItems.filter(a => a.priority === "MEDIUM" && !a.completed).length}
                       </p>
-                      <p className="text-[8px] text-muted-foreground">Pending</p>
+                      <p className="text-[9px] text-muted-foreground mt-1">Pending</p>
                     </div>
-                    <div className="p-2 border border-border rounded-lg bg-card text-center">
-                      <p className="text-lg font-bold text-red-600">{highPriorityItems.length}</p>
-                      <p className="text-[8px] text-muted-foreground">Urgent</p>
+                    <div className="p-3 border border-border rounded-lg bg-card text-center">
+                      <p className="text-xl font-bold text-red-600">{highPriorityItems.length}</p>
+                      <p className="text-[9px] text-muted-foreground mt-1">Urgent</p>
                     </div>
                   </div>
                 </div>
