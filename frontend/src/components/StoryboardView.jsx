@@ -297,7 +297,7 @@ export const StoryboardView = ({
       <div className="storyboard-sidebar">
         <div className="storyboard-sidebar-header">
           <h2 className="font-semibold text-sm uppercase tracking-wider mb-4">
-            Storyboards
+            Data Actions
           </h2>
           <Button
             onClick={() => setShowNewStoryboard(true)}
@@ -306,7 +306,7 @@ export const StoryboardView = ({
             data-testid="generate-storyboard-btn"
           >
             <Sparkles className="h-4 w-4 mr-2" />
-            Generate Storyboard
+            Generate Data Actions
           </Button>
           {storyTiles.length === 0 && (
             <p className="text-xs text-muted-foreground mt-2 text-center">
@@ -319,25 +319,40 @@ export const StoryboardView = ({
           <div className="p-4 space-y-2">
             {storyboards.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-4">
-                No storyboards yet
+                No data actions yet
               </p>
             ) : (
               storyboards.map((sb) => (
-                <button
+                <div
                   key={sb.id}
-                  onClick={() => setSelectedStoryboard(sb)}
-                  data-testid={`storyboard-item-${sb.id}`}
-                  className={`w-full p-3 text-left border rounded-lg transition-colors ${
+                  className={`group relative p-3 text-left border rounded-lg transition-colors cursor-pointer ${
                     selectedStoryboard?.id === sb.id
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
                   }`}
                 >
-                  <p className="text-sm font-medium truncate">{sb.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {sb.frames?.length || 0} frames • {sb.action_items?.length || 0} actions
-                  </p>
-                </button>
+                  <div 
+                    onClick={() => setSelectedStoryboard(sb)}
+                    data-testid={`storyboard-item-${sb.id}`}
+                  >
+                    <p className="text-sm font-medium truncate pr-6">{sb.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {sb.frames?.length || 0} frames • {sb.action_items?.length || 0} actions
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeletingStoryboard(sb);
+                    }}
+                    className="absolute top-2 right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                    data-testid={`delete-storyboard-${sb.id}`}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
               ))
             )}
           </div>
@@ -346,21 +361,32 @@ export const StoryboardView = ({
           {storyTiles.length > 0 && (
             <div className="p-4 border-t border-border">
               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-                Story Tiles: {storyTiles.length}
+                Pinned Insights: {storyTiles.length}
               </p>
               <div className="space-y-1 max-h-32 overflow-y-auto">
                 {storyTiles.map((tile) => (
                   <div
                     key={tile.id}
-                    className="p-2 border border-border rounded-lg hover:border-primary/30 transition-colors"
+                    className="group p-2 border border-border rounded-lg hover:border-primary/30 transition-colors relative"
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-xs truncate flex-1">{tile.title}</p>
-                      {tile.impact_score && (
-                        <Badge variant="outline" className={`text-[9px] ml-1 ${priorityColors[tile.impact_score]}`}>
-                          {tile.impact_score}
-                        </Badge>
-                      )}
+                      <p className="text-xs truncate flex-1 pr-4">{tile.title}</p>
+                      <div className="flex items-center gap-1">
+                        {tile.impact_score && (
+                          <Badge variant="outline" className={`text-[9px] ${priorityColors[tile.impact_score]}`}>
+                            {tile.impact_score}
+                          </Badge>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeletingTile(tile)}
+                          className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                          data-testid={`delete-tile-sidebar-${tile.id}`}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
