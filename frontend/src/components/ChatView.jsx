@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -20,6 +21,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -53,10 +66,23 @@ import {
   Settings,
   Table2,
   PanelTopClose,
+  Upload,
+  Paperclip,
+  FileSpreadsheet,
+  FileText,
+  BookmarkPlus,
+  Library,
+  Trash2,
+  Plus,
+  Star,
+  StarOff,
 } from "lucide-react";
 import { ChartRenderer } from "@/components/ChartRenderer";
 import { DataTable } from "@/components/DataTable";
 import { ChatSettings } from "@/components/ChatSettings";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API_BASE = `${BACKEND_URL}/api`;
 
 // Workflow Templates - Pre-built analysis patterns
 const WORKFLOW_TEMPLATES = [
