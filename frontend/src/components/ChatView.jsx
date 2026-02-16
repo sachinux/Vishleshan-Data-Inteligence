@@ -149,25 +149,25 @@ export const ChatView = ({
   const [progress, setProgress] = useState(0);
   const [progressStep, setProgressStep] = useState("");
 
-  const progressSteps = [
-    { progress: 15, text: "Understanding your question..." },
-    { progress: 35, text: "Analyzing dataset..." },
-    { progress: 55, text: "Running calculations..." },
-    { progress: 75, text: "Generating insights..." },
-    { progress: 90, text: "Preparing visualization..." },
-  ];
-
   useEffect(() => {
+    const steps = [
+      { progress: 15, text: "Understanding your question..." },
+      { progress: 35, text: "Analyzing dataset..." },
+      { progress: 55, text: "Running calculations..." },
+      { progress: 75, text: "Generating insights..." },
+      { progress: 90, text: "Preparing visualization..." },
+    ];
+
     if (sending) {
       setProgress(0);
-      setProgressStep(progressSteps[0].text);
+      setProgressStep(steps[0].text);
       
       let stepIndex = 0;
       const interval = setInterval(() => {
         stepIndex++;
-        if (stepIndex < progressSteps.length) {
-          setProgress(progressSteps[stepIndex].progress);
-          setProgressStep(progressSteps[stepIndex].text);
+        if (stepIndex < steps.length) {
+          setProgress(steps[stepIndex].progress);
+          setProgressStep(steps[stepIndex].text);
         }
       }, 800);
 
