@@ -434,15 +434,15 @@ export const RightSidebar = ({
                   )}
 
                   {/* To Do List */}
-                  <div className="p-3 border border-border rounded-lg bg-card">
+                  <div className="p-3 border border-border rounded-lg bg-card" role="region" aria-label="To Do List">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <CheckSquare className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                        <CheckSquare className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                           To Do
                         </span>
                       </div>
-                      <Badge variant="outline" className="text-[9px] px-2">
+                      <Badge variant="outline" className="text-xs px-2">
                         {actionItems.filter(a => !a.completed).length} left
                       </Badge>
                     </div>
