@@ -1,9 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -15,15 +13,12 @@ import { toast } from "sonner";
 import {
   Plus,
   Loader2,
-  FileDown,
   GripVertical,
   Edit2,
-  Trash2,
   FileText,
   Presentation,
   AlertCircle,
   Sparkles,
-  ChevronRight,
 } from "lucide-react";
 
 export const StoryboardView = ({
@@ -43,7 +38,6 @@ export const StoryboardView = ({
   const [exporting, setExporting] = useState(null);
   const [draggedIndex, setDraggedIndex] = useState(null);
 
-  // Select first storyboard when available
   useEffect(() => {
     if (storyboards.length > 0 && !selectedStoryboard) {
       setSelectedStoryboard(storyboards[0]);
@@ -112,7 +106,6 @@ export const StoryboardView = ({
     const [removed] = frames.splice(draggedIndex, 1);
     frames.splice(index, 0, removed);
 
-    // Update order
     const reorderedFrames = frames.map((frame, idx) => ({
       ...frame,
       order: idx,
@@ -147,9 +140,7 @@ export const StoryboardView = ({
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="font-heading text-xl uppercase tracking-wider mb-2">
-            No Workspace Selected
-          </h2>
+          <h2 className="font-semibold text-lg mb-2">No Workspace Selected</h2>
           <p className="text-muted-foreground text-sm">
             Select a workspace to view storyboards
           </p>
@@ -160,17 +151,16 @@ export const StoryboardView = ({
 
   return (
     <div className="storyboard-layout" data-testid="storyboard-view">
-      {/* Left Panel - Storyboard List & Tiles - FIXED sidebar with scrollable content */}
+      {/* Left Panel - Storyboard List */}
       <div className="storyboard-sidebar">
-        {/* Header - FIXED */}
         <div className="storyboard-sidebar-header">
-          <h2 className="font-heading text-lg uppercase tracking-wider text-primary mb-4">
+          <h2 className="font-semibold text-sm uppercase tracking-wider mb-4">
             Storyboards
           </h2>
           <Button
             onClick={() => setShowNewStoryboard(true)}
             disabled={storyTiles.length === 0}
-            className="w-full font-mono uppercase text-xs"
+            className="w-full text-xs"
             data-testid="generate-storyboard-btn"
           >
             <Sparkles className="h-4 w-4 mr-2" />
@@ -178,12 +168,11 @@ export const StoryboardView = ({
           </Button>
           {storyTiles.length === 0 && (
             <p className="text-xs text-muted-foreground mt-2 text-center">
-              Save chat answers as Story Tiles first
+              Pin insights from chat first
             </p>
           )}
         </div>
 
-        {/* Storyboard List - SCROLLABLE */}
         <div className="storyboard-sidebar-content">
           <div className="p-4 space-y-2">
             {storyboards.length === 0 ? (
@@ -196,13 +185,13 @@ export const StoryboardView = ({
                   key={sb.id}
                   onClick={() => setSelectedStoryboard(sb)}
                   data-testid={`storyboard-item-${sb.id}`}
-                  className={`w-full p-3 text-left border transition-colors ${
+                  className={`w-full p-3 text-left border rounded-lg transition-colors ${
                     selectedStoryboard?.id === sb.id
-                      ? "border-primary bg-primary/10"
+                      ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
                   }`}
                 >
-                  <p className="font-mono text-sm truncate">{sb.title}</p>
+                  <p className="text-sm font-medium truncate">{sb.title}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {sb.frames?.length || 0} frames
                   </p>
@@ -211,24 +200,24 @@ export const StoryboardView = ({
             )}
           </div>
 
-          {/* Story Tiles Count */}
-          <div className="p-4 border-t border-border">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-              Story Tiles: {storyTiles.length}
-            </p>
-            <div className="space-y-1 max-h-32 overflow-y-auto">
-              {storyTiles.map((tile) => (
-                <div
-                  key={tile.id}
-                  className="p-2 border border-border hover:border-primary/50 transition-colors"
-                >
-                  <p className="text-xs font-mono truncate text-primary">
-                    {tile.title}
-                  </p>
-                </div>
-              ))}
+          {/* Story Tiles */}
+          {storyTiles.length > 0 && (
+            <div className="p-4 border-t border-border">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                Story Tiles: {storyTiles.length}
+              </p>
+              <div className="space-y-1 max-h-32 overflow-y-auto">
+                {storyTiles.map((tile) => (
+                  <div
+                    key={tile.id}
+                    className="p-2 border border-border rounded-lg hover:border-primary/30 transition-colors"
+                  >
+                    <p className="text-xs truncate">{tile.title}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -236,15 +225,14 @@ export const StoryboardView = ({
       <div className="storyboard-main">
         {selectedStoryboard ? (
           <>
-            {/* Storyboard Header - FIXED */}
+            {/* Header */}
             <div className="storyboard-main-header flex items-center justify-between">
               <div>
-                <h3 className="font-heading text-xl uppercase tracking-wider">
+                <h3 className="font-semibold text-lg uppercase tracking-wider">
                   {selectedStoryboard.title}
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {selectedStoryboard.frames?.length || 0} frames • Drag to
-                  reorder
+                  {selectedStoryboard.frames?.length || 0} frames • Drag to reorder
                 </p>
               </div>
               <div className="flex gap-2">
@@ -253,7 +241,7 @@ export const StoryboardView = ({
                   size="sm"
                   onClick={() => handleExport("pdf")}
                   disabled={exporting === "pdf"}
-                  className="font-mono text-xs"
+                  className="text-xs"
                   data-testid="export-pdf-btn"
                 >
                   {exporting === "pdf" ? (
@@ -268,7 +256,7 @@ export const StoryboardView = ({
                   size="sm"
                   onClick={() => handleExport("pptx")}
                   disabled={exporting === "pptx"}
-                  className="font-mono text-xs"
+                  className="text-xs"
                   data-testid="export-pptx-btn"
                 >
                   {exporting === "pptx" ? (
@@ -281,7 +269,7 @@ export const StoryboardView = ({
               </div>
             </div>
 
-            {/* Frames List - SCROLLABLE */}
+            {/* Frames */}
             <div className="storyboard-main-content">
               <div className="space-y-4">
                 {selectedStoryboard.frames?.map((frame, index) => (
@@ -292,29 +280,29 @@ export const StoryboardView = ({
                     onDragOver={(e) => handleDragOver(e, index)}
                     onDragEnd={handleDragEnd}
                     data-testid={`frame-${frame.id}`}
-                    className={`storyboard-frame ${
-                      draggedIndex === index ? "dragging" : ""
+                    className={`storyboard-frame p-5 border border-border rounded-xl bg-card hover:border-primary/30 transition-all ${
+                      draggedIndex === index ? "opacity-50 scale-[0.98]" : ""
                     }`}
                   >
                     <div className="flex items-start gap-4">
-                      {/* Drag Handle */}
-                      <div className="flex items-center gap-2 text-muted-foreground cursor-grab">
-                        <GripVertical className="h-5 w-5" />
-                        <span className="font-mono text-sm">
+                      {/* Drag Handle & Number */}
+                      <div className="flex items-center gap-2 text-muted-foreground cursor-grab pt-1">
+                        <GripVertical className="h-4 w-4" />
+                        <span className="text-sm font-medium">
                           {String(index + 1).padStart(2, "0")}
                         </span>
                       </div>
 
-                      {/* Frame Content */}
-                      <div className="flex-1">
-                        <h4 className="font-heading text-lg uppercase tracking-wider text-primary mb-2">
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-base uppercase tracking-wide mb-2">
                           {frame.title}
                         </h4>
                         <p className="text-sm text-muted-foreground mb-4">
                           {frame.summary}
                         </p>
 
-                        {/* Referenced Tiles */}
+                        {/* Included Tiles */}
                         {frame.tile_refs?.length > 0 && (
                           <div className="mb-4">
                             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
@@ -324,37 +312,37 @@ export const StoryboardView = ({
                               {frame.tile_refs.map((tileId) => {
                                 const tile = getTileById(tileId);
                                 return tile ? (
-                                  <div
+                                  <span
                                     key={tileId}
-                                    className="px-2 py-1 border border-primary/30 bg-primary/5 text-xs font-mono"
+                                    className="px-2 py-1 text-xs bg-secondary rounded-md"
                                   >
                                     {tile.title}
-                                  </div>
+                                  </span>
                                 ) : null;
                               })}
                             </div>
                           </div>
                         )}
 
-                        {/* Narrative Notes */}
+                        {/* Speaker Notes */}
                         {frame.narrative_notes && (
-                          <div className="p-3 bg-muted/30 border-l-2 border-primary">
+                          <div className="p-3 bg-muted/50 rounded-lg">
                             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
                               Speaker Notes
                             </p>
-                            <p className="text-sm italic">
+                            <p className="text-sm italic text-muted-foreground">
                               {frame.narrative_notes}
                             </p>
                           </div>
                         )}
                       </div>
 
-                      {/* Actions */}
+                      {/* Edit Button */}
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setEditingFrame(frame)}
-                        className="shrink-0"
+                        className="shrink-0 h-8 w-8 p-0"
                         data-testid={`edit-frame-${frame.id}`}
                       >
                         <Edit2 className="h-4 w-4" />
@@ -367,20 +355,17 @@ export const StoryboardView = ({
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
+            <div className="text-center max-w-sm">
               <Presentation className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-heading text-lg uppercase tracking-wider mb-2">
-                No Storyboard Selected
-              </h3>
+              <h3 className="font-semibold text-lg mb-2">Create Your Story</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Generate a storyboard from your story tiles
+                Generate a storyboard from your pinned insights to create a presentation
               </p>
               <Button
                 onClick={() => setShowNewStoryboard(true)}
                 disabled={storyTiles.length === 0}
-                className="font-mono uppercase"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Sparkles className="h-4 w-4 mr-2" />
                 Generate Storyboard
               </Button>
             </div>
@@ -392,35 +377,26 @@ export const StoryboardView = ({
       <Dialog open={showNewStoryboard} onOpenChange={setShowNewStoryboard}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-heading uppercase tracking-wider">
-              Generate Storyboard
-            </DialogTitle>
+            <DialogTitle>Generate Storyboard</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <Input
-              placeholder="Storyboard title..."
+              placeholder="Enter storyboard title..."
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              className="font-mono"
               data-testid="storyboard-title-input"
             />
             <p className="text-xs text-muted-foreground">
-              AI will organize your {storyTiles.length} story tiles into a
-              logical narrative flow.
+              AI will organize your {storyTiles.length} pinned insights into a narrative flow.
             </p>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowNewStoryboard(false)}
-              className="font-mono uppercase"
-            >
+            <Button variant="outline" onClick={() => setShowNewStoryboard(false)}>
               Cancel
             </Button>
             <Button
               onClick={handleGenerateStoryboard}
               disabled={generating || !newTitle.trim()}
-              className="font-mono uppercase"
               data-testid="confirm-generate-btn"
             >
               {generating ? (
@@ -435,15 +411,10 @@ export const StoryboardView = ({
       </Dialog>
 
       {/* Edit Frame Dialog */}
-      <Dialog
-        open={!!editingFrame}
-        onOpenChange={() => setEditingFrame(null)}
-      >
+      <Dialog open={!!editingFrame} onOpenChange={() => setEditingFrame(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-heading uppercase tracking-wider">
-              Edit Frame
-            </DialogTitle>
+            <DialogTitle>Edit Frame</DialogTitle>
           </DialogHeader>
           {editingFrame && (
             <EditFrameForm
@@ -477,57 +448,39 @@ const EditFrameForm = ({ frame, onSave, onCancel }) => {
   return (
     <div className="space-y-4 py-4">
       <div>
-        <label className="text-xs text-muted-foreground uppercase tracking-wider mb-2 block">
-          Title
-        </label>
+        <label className="text-sm font-medium mb-2 block">Title</label>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="font-mono"
           data-testid="edit-frame-title"
         />
       </div>
       <div>
-        <label className="text-xs text-muted-foreground uppercase tracking-wider mb-2 block">
-          Summary
-        </label>
+        <label className="text-sm font-medium mb-2 block">Summary</label>
         <Textarea
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           rows={3}
-          className="font-mono"
           data-testid="edit-frame-summary"
         />
       </div>
       <div>
-        <label className="text-xs text-muted-foreground uppercase tracking-wider mb-2 block">
-          Speaker Notes
-        </label>
+        <label className="text-sm font-medium mb-2 block">Speaker Notes</label>
         <Textarea
           value={narrativeNotes}
           onChange={(e) => setNarrativeNotes(e.target.value)}
           rows={4}
-          placeholder="What to say when presenting this frame..."
-          className="font-mono"
+          placeholder="Notes for presenting this frame..."
           data-testid="edit-frame-notes"
         />
       </div>
       <DialogFooter>
-        <Button
-          variant="outline"
-          onClick={onCancel}
-          className="font-mono uppercase"
-        >
+        <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-          className="font-mono uppercase"
-          data-testid="save-frame-btn"
-        >
-          {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-          Save
+        <Button onClick={handleSave} disabled={saving} data-testid="save-frame-btn">
+          {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          Save Changes
         </Button>
       </DialogFooter>
     </div>
