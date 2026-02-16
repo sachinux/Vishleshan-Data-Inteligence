@@ -51,6 +51,8 @@ import {
   ChevronRight,
   X,
   Settings,
+  Table2,
+  PanelTopClose,
 } from "lucide-react";
 import { ChartRenderer } from "@/components/ChartRenderer";
 import { DataTable } from "@/components/DataTable";
