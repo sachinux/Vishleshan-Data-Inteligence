@@ -457,7 +457,7 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="data-storyteller-theme">
+    <ThemeProvider defaultTheme="light" storageKey="vishleshan-theme">
       <BrowserRouter>
         <Routes>
           <Route path="/*" element={<AppContent />} />
