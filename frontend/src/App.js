@@ -439,11 +439,13 @@ function AppContent() {
         )}
       </main>
       
-      {/* Right Sidebar - Quick Actions */}
+      {/* Right Sidebar - Insights & Actions */}
       <RightSidebar
         workspace={currentWorkspace}
         storyTiles={storyTiles}
         storyboards={storyboards}
+        generateStoryboard={generateStoryboard}
+        deleteStoryTile={deleteStoryTile}
         API={API}
         loading={loading}
       />
