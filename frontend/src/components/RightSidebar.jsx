@@ -656,6 +656,8 @@ export const RightSidebar = ({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+          </>
+        )}
       </aside>
     </TooltipProvider>
   );
