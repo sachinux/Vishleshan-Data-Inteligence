@@ -1,115 +1,94 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import axios from "axios";
 import {
-  Sparkles,
-  Pin,
-  Send,
+  CheckSquare,
+  Target,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  AlertTriangle,
+  AlertCircle,
+  CheckCircle2,
   Loader2,
-  BarChart3,
-  Presentation,
-  Plus,
-  FileDown,
-  Trash2,
-  X,
+  ChevronRight,
+  Zap,
 } from "lucide-react";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+// Priority badge colors
+const priorityColors = {
+  HIGH: "bg-red-500/10 text-red-600 border-red-200",
+  MEDIUM: "bg-yellow-500/10 text-yellow-600 border-yellow-200",
+  LOW: "bg-green-500/10 text-green-600 border-green-200",
+};
+
+// KPI status colors
+const statusColors = {
+  green: "text-green-600 bg-green-500/10",
+  yellow: "text-yellow-600 bg-yellow-500/10",
+  red: "text-red-600 bg-red-500/10",
+};
+
+// Trend icons
+const TrendIcon = ({ trend }) => {
+  if (trend === "up") return <TrendingUp className="h-3 w-3 text-green-500" />;
+  if (trend === "down") return <TrendingDown className="h-3 w-3 text-red-500" />;
+  return <Minus className="h-3 w-3 text-muted-foreground" />;
+};
 
 export const RightSidebar = ({
   workspace,
   storyTiles,
   storyboards,
-  chatMessages,
-  generateStoryboard,
-  exportStoryboard,
-  deleteStoryTile,
-  API,
+  API: apiProp,
   loading,
 }) => {
-  const [narrativeInput, setNarrativeInput] = useState("");
-  const [narrativeLoading, setNarrativeLoading] = useState(false);
-  const [narrativeResponse, setNarrativeResponse] = useState("");
-  const [generating, setGenerating] = useState(false);
-  const [deletingTile, setDeletingTile] = useState(null);
+  const [togglingAction, setTogglingAction] = useState(null);
 
-  const latestStoryboard = storyboards?.[storyboards.length - 1];
+  // Get the latest/active storyboard
+  const activeStoryboard = storyboards?.[storyboards.length - 1];
+  
+  // Get action items from active storyboard
+  const actionItems = activeStoryboard?.action_items || [];
+  const completedCount = actionItems.filter(a => a.completed).length;
+  const totalCount = actionItems.length;
+  const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
-  const handleNarrativeCoach = async () => {
-    if (!narrativeInput.trim() || !workspace) return;
+  // Get KPIs from active storyboard
+  const kpis = activeStoryboard?.kpis || [];
 
-    setNarrativeLoading(true);
+  // Get high priority items
+  const highPriorityItems = actionItems.filter(a => a.priority === "HIGH" && !a.completed);
+  const pendingItems = actionItems.filter(a => !a.completed).slice(0, 5);
+
+  const handleToggleAction = async (actionId, completed) => {
+    if (!activeStoryboard) return;
+
+    setTogglingAction(actionId);
     try {
-      const response = await axios.post(`${API}/chat`, {
-        workspace_id: workspace.id,
-        message: `As a narrative coach, help me with: ${narrativeInput}. Focus on storytelling structure and key points.`,
+      await axios.put(`${API}/storyboards/${activeStoryboard.id}/action-items`, {
+        action_id: actionId,
+        completed: completed,
       });
-      setNarrativeResponse(response.data.content);
-      setNarrativeInput("");
+      toast.success(completed ? "Action completed!" : "Action reopened");
+      // Parent will refresh via state update
     } catch (error) {
-      toast.error("Failed to get advice");
+      toast.error("Failed to update");
     } finally {
-      setNarrativeLoading(false);
-    }
-  };
-
-  const handleGenerateStoryboard = async () => {
-    if (storyTiles.length === 0) {
-      toast.error("Pin some insights first");
-      return;
-    }
-
-    setGenerating(true);
-    try {
-      await generateStoryboard("Data Actions");
-      toast.success("Data Actions generated!");
-    } catch (error) {
-      toast.error("Failed to generate");
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  const handleExport = async () => {
-    if (!latestStoryboard) {
-      toast.error("Generate Data Actions first");
-      return;
-    }
-
-    try {
-      await exportStoryboard(latestStoryboard.id, "pdf");
-      toast.success("PDF exported!");
-    } catch (error) {
-      toast.error("Failed to export");
-    }
-  };
-
-  const handleDeleteTile = async () => {
-    if (!deletingTile) return;
-
-    try {
-      await deleteStoryTile(deletingTile.id);
-      toast.success("Insight removed");
-    } catch (error) {
-      toast.error("Failed to delete insight");
-    } finally {
-      setDeletingTile(null);
+      setTogglingAction(null);
     }
   };
 
@@ -118,166 +97,175 @@ export const RightSidebar = ({
       <aside className="right-sidebar" data-testid="right-sidebar">
         {/* Header */}
         <div className="flex-shrink-0 p-4 border-b border-border">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Presentation className="h-4 w-4" />
-              <span className="font-medium text-sm">Data Actions</span>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExport}
-              disabled={!latestStoryboard}
-              className="h-7 text-xs"
-              data-testid="export-pdf-sidebar"
-            >
-              <FileDown className="h-3 w-3 mr-1" />
-              Export
-            </Button>
+          <div className="flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary" />
+            <span className="font-medium text-sm">Quick Actions</span>
           </div>
         </div>
 
-        {/* Pinned Insights */}
-        <div className="flex-1 min-h-0 flex flex-col overflow-hidden border-b border-border">
-          <div className="flex-shrink-0 px-4 py-3 flex items-center justify-between">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">
-              Pinned Insights ({storyTiles.length})
-            </span>
-            {storyTiles.length > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleGenerateStoryboard}
-                    disabled={generating}
-                    className="h-6 w-6 p-0"
-                    data-testid="generate-from-insights"
-                  >
-                    {generating ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <Plus className="h-3 w-3" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Create Data Actions</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-
-          <div className="flex-1 overflow-y-auto px-3 pb-3">
-            {storyTiles.length === 0 ? (
-              <div className="text-center py-6 px-4 border border-dashed border-border rounded-lg bg-muted/30">
-                <Pin className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground">
-                  Pin insights from chat to build your actions
-                </p>
+        {activeStoryboard ? (
+          <>
+            {/* Progress Overview */}
+            <div className="p-4 border-b border-border">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Progress
+                </span>
+                <span className="text-xs font-medium">
+                  {completedCount}/{totalCount}
+                </span>
               </div>
-            ) : (
-              <div className="space-y-2">
-                {storyTiles.map((tile) => (
-                  <div
-                    key={tile.id}
-                    className="group p-3 border border-border rounded-lg bg-card hover:border-primary/30 transition-colors relative"
-                    data-testid={`insight-tile-${tile.id}`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{tile.title}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">
-                          {tile.explanation}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {tile.chart_config && (
-                          <BarChart3 className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeletingTile(tile)}
-                          className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                          data-testid={`delete-tile-${tile.id}`}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Narrative Coach */}
-        <div className="flex-shrink-0 p-4 flex flex-col">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="h-4 w-4" />
-            <span className="font-medium text-xs">Narrative Coach</span>
-          </div>
-
-          {narrativeResponse ? (
-            <div className="mb-3 p-3 bg-muted/50 rounded-lg text-xs max-h-24 overflow-y-auto">
-              {narrativeResponse}
-            </div>
-          ) : (
-            <div className="mb-3 p-3 text-center border border-dashed border-border rounded-lg bg-muted/30">
-              <p className="text-[10px] text-muted-foreground">
-                Get AI help to structure your presentation
+              <Progress value={progressPercent} className="h-2" />
+              <p className="text-[10px] text-muted-foreground mt-2">
+                {activeStoryboard.title}
               </p>
             </div>
-          )}
 
-          <div className="flex gap-2">
-            <Input
-              value={narrativeInput}
-              onChange={(e) => setNarrativeInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleNarrativeCoach()}
-              placeholder="Ask for story advice..."
-              disabled={narrativeLoading || !workspace}
-              className="text-xs h-8"
-              data-testid="narrative-coach-input"
-            />
-            <Button
-              size="sm"
-              onClick={handleNarrativeCoach}
-              disabled={narrativeLoading || !narrativeInput.trim() || !workspace}
-              className="h-8 w-8 p-0"
-              data-testid="narrative-coach-send"
-            >
-              {narrativeLoading ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <Send className="h-3 w-3" />
-              )}
-            </Button>
+            {/* KPI Summary */}
+            {kpis.length > 0 && (
+              <div className="p-4 border-b border-border">
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                    Key Metrics
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {kpis.slice(0, 4).map((kpi, i) => (
+                    <div
+                      key={i}
+                      className={`flex items-center justify-between p-2 rounded-lg ${statusColors[kpi.status] || 'bg-muted/50'}`}
+                    >
+                      <span className="text-[10px] font-medium truncate flex-1 mr-2">
+                        {kpi.label}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-bold">{kpi.value}</span>
+                        <TrendIcon trend={kpi.trend} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* High Priority Actions */}
+            {highPriorityItems.length > 0 && (
+              <div className="p-4 border-b border-border">
+                <div className="flex items-center gap-2 mb-3">
+                  <AlertTriangle className="h-3 w-3 text-red-500" />
+                  <span className="text-xs text-red-600 uppercase tracking-wider font-medium">
+                    Urgent ({highPriorityItems.length})
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {highPriorityItems.slice(0, 3).map((action) => (
+                    <div
+                      key={action.id}
+                      className="flex items-start gap-2 p-2 bg-red-500/5 border border-red-200 rounded-lg"
+                    >
+                      <Checkbox
+                        checked={action.completed}
+                        onCheckedChange={(checked) => handleToggleAction(action.id, checked)}
+                        disabled={togglingAction === action.id}
+                        className="mt-0.5 border-red-300"
+                      />
+                      <p className="text-[10px] leading-tight flex-1">
+                        {action.text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pending Actions */}
+            <div className="flex-1 overflow-hidden flex flex-col">
+              <div className="flex-shrink-0 px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckSquare className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                    To Do
+                  </span>
+                </div>
+                <Badge variant="outline" className="text-[9px]">
+                  {actionItems.filter(a => !a.completed).length} left
+                </Badge>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-3 pb-3">
+                {pendingItems.length === 0 ? (
+                  <div className="text-center py-6 px-4 border border-dashed border-border rounded-lg bg-muted/30">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">
+                      All actions completed!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {pendingItems.map((action) => (
+                      <div
+                        key={action.id}
+                        className="flex items-start gap-2 p-2 border border-border rounded-lg bg-card hover:border-primary/30 transition-colors"
+                      >
+                        <Checkbox
+                          checked={action.completed}
+                          onCheckedChange={(checked) => handleToggleAction(action.id, checked)}
+                          disabled={togglingAction === action.id}
+                          className="mt-0.5"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] leading-tight">
+                            {action.text}
+                          </p>
+                          {action.category && (
+                            <Badge variant="secondary" className="text-[8px] mt-1">
+                              {action.category}
+                            </Badge>
+                          )}
+                        </div>
+                        {togglingAction === action.id && (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Stats Footer */}
+            <div className="flex-shrink-0 p-3 border-t border-border bg-muted/30">
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <p className="text-lg font-bold text-green-600">{completedCount}</p>
+                  <p className="text-[9px] text-muted-foreground">Done</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-yellow-600">
+                    {actionItems.filter(a => a.priority === "MEDIUM" && !a.completed).length}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground">Pending</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-red-600">{highPriorityItems.length}</p>
+                  <p className="text-[9px] text-muted-foreground">Urgent</p>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Empty State */
+          <div className="flex-1 flex items-center justify-center p-4">
+            <div className="text-center">
+              <CheckSquare className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm font-medium mb-1">No Data Actions</p>
+              <p className="text-xs text-muted-foreground">
+                Generate Data Actions to see your action items here
+              </p>
+            </div>
           </div>
-        </div>
-
-        {/* Delete Insight Confirmation Dialog */}
-        <AlertDialog open={!!deletingTile} onOpenChange={() => setDeletingTile(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Pinned Insight</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to remove "{deletingTile?.title}"? This will remove it from all storyboards.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDeleteTile}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        )}
       </aside>
     </TooltipProvider>
   );
