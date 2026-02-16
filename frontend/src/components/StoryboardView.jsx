@@ -356,43 +356,6 @@ export const StoryboardView = ({
               ))
             )}
           </div>
-
-          {/* Story Tiles */}
-          {storyTiles.length > 0 && (
-            <div className="p-4 border-t border-border">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-                Pinned Insights: {storyTiles.length}
-              </p>
-              <div className="space-y-1 max-h-32 overflow-y-auto">
-                {storyTiles.map((tile) => (
-                  <div
-                    key={tile.id}
-                    className="group p-2 border border-border rounded-lg hover:border-primary/30 transition-colors relative"
-                  >
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs truncate flex-1 pr-4">{tile.title}</p>
-                      <div className="flex items-center gap-1">
-                        {tile.impact_score && (
-                          <Badge variant="outline" className={`text-[9px] ${priorityColors[tile.impact_score]}`}>
-                            {tile.impact_score}
-                          </Badge>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeletingTile(tile)}
-                          className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                          data-testid={`delete-tile-sidebar-${tile.id}`}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
