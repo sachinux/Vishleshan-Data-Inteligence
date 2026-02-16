@@ -347,9 +347,40 @@ def extract_pdf_content(file_bytes: bytes) -> tuple[str, List[Dict]]:
 def execute_data_query(df: pd.DataFrame, query_code: str) -> Dict[str, Any]:
     """Execute a data query on a DataFrame safely"""
     try:
-        # Create a safe execution environment
+        # Create a safe execution environment with necessary builtins
+        safe_builtins = {
+            'len': len,
+            'range': range,
+            'enumerate': enumerate,
+            'zip': zip,
+            'map': map,
+            'filter': filter,
+            'sorted': sorted,
+            'reversed': reversed,
+            'sum': sum,
+            'min': min,
+            'max': max,
+            'abs': abs,
+            'round': round,
+            'int': int,
+            'float': float,
+            'str': str,
+            'bool': bool,
+            'list': list,
+            'dict': dict,
+            'tuple': tuple,
+            'set': set,
+            'type': type,
+            'isinstance': isinstance,
+            'hasattr': hasattr,
+            'getattr': getattr,
+            'print': print,
+            'True': True,
+            'False': False,
+            'None': None,
+        }
         local_vars = {"df": df, "pd": pd, "np": np}
-        exec(query_code, {"__builtins__": {}}, local_vars)
+        exec(query_code, {"__builtins__": safe_builtins}, local_vars)
         
         result = local_vars.get("result", None)
         
