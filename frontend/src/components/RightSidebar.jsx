@@ -447,7 +447,7 @@ export const RightSidebar = ({
                         </p>
                       </div>
                     ) : (
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {pendingItems.map((action) => (
                           <div
                             key={action.id}
@@ -457,14 +457,14 @@ export const RightSidebar = ({
                               checked={action.completed}
                               onCheckedChange={(checked) => handleToggleAction(action.id, checked)}
                               disabled={togglingAction === action.id}
-                              className="mt-0.5"
+                              className="mt-0.5 flex-shrink-0"
                             />
                             <div className="flex-1 min-w-0">
-                              <p className="text-[9px] leading-tight line-clamp-2">
+                              <p className="text-[10px] leading-relaxed">
                                 {action.text}
                               </p>
                               {action.category && (
-                                <Badge variant="secondary" className="text-[7px] mt-1">
+                                <Badge variant="secondary" className="text-[8px] mt-1.5">
                                   {action.category}
                                 </Badge>
                               )}
