@@ -467,13 +467,37 @@ export const StoryboardView = ({
 
   return (
     <div className="flex flex-col h-full" data-testid="storyboard-view">
-      {/* Top Section - Kanban Board */}
-      <div className="flex-shrink-0 p-4 border-b border-border bg-muted/30">
+      {/* Top Section - Kanban Board (Collapsible) */}
+      <div className={`flex-shrink-0 border-b border-border bg-muted/30 transition-all duration-300 ${isKanbanCollapsed ? 'py-2 px-4' : 'p-4'}`}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-sm uppercase tracking-wider">
-            Data Action Reports
-          </h2>
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setIsKanbanCollapsed(!isKanbanCollapsed)}
+            className="flex items-center gap-2 hover:text-primary transition-colors"
+            data-testid="toggle-kanban-btn"
+          >
+            {isKanbanCollapsed ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronUp className="h-4 w-4" />
+            )}
+            <h2 className="font-semibold text-sm uppercase tracking-wider">
+              Data Action Reports
+            </h2>
+            {isKanbanCollapsed && (
+              <div className="flex items-center gap-2 ml-2">
+                <Badge variant="secondary" className="text-[10px]">
+                  {draftReports.length} Draft
+                </Badge>
+                <Badge variant="secondary" className="text-[10px] bg-blue-100 dark:bg-blue-900/30">
+                  {inProgressReports.length} In Progress
+                </Badge>
+                <Badge variant="secondary" className="text-[10px] bg-green-100 dark:bg-green-900/30">
+                  {completedReports.length} Completed
+                </Badge>
+              </div>
+            )}
+          </button>
           <Button
             onClick={() => setShowNewStoryboard(true)}
             disabled={storyTiles.length === 0}
@@ -486,53 +510,55 @@ export const StoryboardView = ({
           </Button>
         </div>
 
-        {/* Kanban Columns */}
-        <div className="flex gap-3 h-[180px]">
-          <KanbanColumn
-            title="Draft"
-            icon={FileEdit}
-            status="draft"
-            color="bg-slate-100 dark:bg-slate-800"
-            reports={draftReports}
-            selectedReport={activeReport}
-            onSelect={openReport}
-            onDelete={setDeletingStoryboard}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-            onDrop={handleDrop}
-          />
-          <KanbanColumn
-            title="In Progress"
-            icon={PlayCircle}
-            status="in-progress"
-            color="bg-blue-100 dark:bg-blue-900/30"
-            reports={inProgressReports}
-            selectedReport={activeReport}
-            onSelect={openReport}
-            onDelete={setDeletingStoryboard}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-            onDrop={handleDrop}
-          />
-          <KanbanColumn
-            title="Completed"
-            icon={CheckCircle}
-            status="completed"
-            color="bg-green-100 dark:bg-green-900/30"
-            reports={completedReports}
-            selectedReport={activeReport}
-            onSelect={openReport}
-            onDelete={setDeletingStoryboard}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-            onDrop={handleDrop}
-          />
-        </div>
+        {/* Kanban Columns - Collapsible */}
+        {!isKanbanCollapsed && (
+          <div className="flex gap-3 h-[180px] mt-4">
+            <KanbanColumn
+              title="Draft"
+              icon={FileEdit}
+              status="draft"
+              color="bg-slate-100 dark:bg-slate-800"
+              reports={draftReports}
+              selectedReport={activeReport}
+              onSelect={openReport}
+              onDelete={setDeletingStoryboard}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+              onDrop={handleDrop}
+            />
+            <KanbanColumn
+              title="In Progress"
+              icon={PlayCircle}
+              status="in-progress"
+              color="bg-blue-100 dark:bg-blue-900/30"
+              reports={inProgressReports}
+              selectedReport={activeReport}
+              onSelect={openReport}
+              onDelete={setDeletingStoryboard}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+              onDrop={handleDrop}
+            />
+            <KanbanColumn
+              title="Completed"
+              icon={CheckCircle}
+              status="completed"
+              color="bg-green-100 dark:bg-green-900/30"
+              reports={completedReports}
+              selectedReport={activeReport}
+              onSelect={openReport}
+              onDelete={setDeletingStoryboard}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+              onDrop={handleDrop}
+            />
+          </div>
+        )}
 
-        {storyTiles.length === 0 && storyboards.length === 0 && (
+        {!isKanbanCollapsed && storyTiles.length === 0 && storyboards.length === 0 && (
           <p className="text-xs text-muted-foreground text-center mt-3">
             Pin insights from chat to create reports
           </p>
