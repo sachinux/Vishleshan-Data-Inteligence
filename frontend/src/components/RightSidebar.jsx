@@ -350,17 +350,17 @@ export const RightSidebar = ({
               <ScrollArea className="flex-1">
                 <div className="p-3 space-y-3">
                   {/* Progress Overview */}
-                  <div className="p-3 border border-border rounded-lg bg-card">
+                  <div className="p-3 border border-border rounded-lg bg-card" role="region" aria-label="Progress Overview">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Progress
                       </span>
-                      <span className="text-xs font-medium">
+                      <span className="text-sm font-semibold" aria-label={`${completedCount} of ${totalCount} complete`}>
                         {completedCount}/{totalCount}
                       </span>
                     </div>
-                    <Progress value={progressPercent} className="h-2" />
-                    <p className="text-[10px] text-muted-foreground mt-2 truncate">
+                    <Progress value={progressPercent} className="h-2.5" aria-label={`${Math.round(progressPercent)}% complete`} />
+                    <p className="text-xs text-muted-foreground mt-2 break-words">
                       {activeStoryboard.title}
                     </p>
                   </div>
