@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Dialog, 
   DialogContent, 
@@ -15,13 +14,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTheme } from "@/components/ThemeProvider";
 import { 
   Plus, 
   ChevronDown, 
   FileSpreadsheet,
   FileText,
   Table,
-  Loader2
+  Loader2,
+  Sun,
+  Moon
 } from "lucide-react";
 
 export const Sidebar = ({
@@ -41,6 +43,7 @@ export const Sidebar = ({
   const [showNewWorkspace, setShowNewWorkspace] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
   const [creating, setCreating] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const handleCreateWorkspace = async () => {
     if (!newWorkspaceName.trim()) return;
@@ -73,27 +76,43 @@ export const Sidebar = ({
 
   return (
     <aside className="sidebar" data-testid="sidebar">
-      {/* Header - Fixed */}
+      {/* Header with Theme Toggle */}
       <div className="flex-shrink-0 p-4 border-b border-border">
-        <h1 className="font-heading text-base font-bold tracking-wider text-primary uppercase">
-          Data Storyteller
-        </h1>
-        <p className="text-[10px] text-muted-foreground mt-0.5 tracking-widest uppercase">
-          Studio
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-semibold text-sm tracking-tight">
+              Data Storyteller
+            </h1>
+            <p className="text-[10px] text-muted-foreground">
+              Studio
+            </p>
+          </div>
+          <button
+            onClick={toggleTheme}
+            className="theme-toggle"
+            data-testid="theme-toggle"
+            aria-label="Toggle theme"
+          >
+            {theme === "light" ? (
+              <Moon className="h-4 w-4" />
+            ) : (
+              <Sun className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Workspace Selector - Fixed */}
+      {/* Workspace Selector */}
       <div className="flex-shrink-0 p-3 border-b border-border">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
               variant="outline" 
-              className="w-full justify-between font-mono text-[10px] uppercase tracking-wider h-8"
+              className="w-full justify-between text-xs h-9 rounded-lg"
               data-testid="workspace-selector"
             >
               <span className="truncate">{currentWorkspace?.name || "Select Workspace"}</span>
-              <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0" />
+              <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-[200px]">
@@ -101,14 +120,14 @@ export const Sidebar = ({
               <DropdownMenuItem 
                 key={ws.id} 
                 onClick={() => setCurrentWorkspace(ws)}
-                className="font-mono text-xs"
+                className="text-xs"
               >
                 <span className="truncate">{ws.name}</span>
               </DropdownMenuItem>
             ))}
             <DropdownMenuItem 
               onClick={() => setShowNewWorkspace(true)}
-              className="font-mono text-xs text-primary"
+              className="text-xs"
             >
               <Plus className="h-3 w-3 mr-2 flex-shrink-0" />
               New Workspace
@@ -117,9 +136,11 @@ export const Sidebar = ({
         </DropdownMenu>
       </div>
 
-      {/* Navigation - Fixed */}
+      {/* Navigation */}
       <div className="flex-shrink-0 p-3 border-b border-border">
-        <p className="text-[10px] text-muted-foreground mb-2 tracking-widest uppercase">Navigation</p>
+        <p className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wider font-medium">
+          Navigation
+        </p>
         <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -128,13 +149,13 @@ export const Sidebar = ({
                 key={item.id}
                 onClick={() => setActiveView(item.id)}
                 data-testid={`nav-${item.id}`}
-                className={`w-full flex items-center gap-2 px-2 py-1.5 text-xs font-mono uppercase tracking-wider transition-colors ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-lg transition-all ${
                   activeView === item.id
-                    ? "bg-primary/10 text-primary border border-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted border border-transparent"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 }`}
               >
-                <Icon className="h-3 w-3 flex-shrink-0" />
+                <Icon className="h-4 w-4 flex-shrink-0" />
                 <span className="truncate">{item.label}</span>
               </button>
             );
@@ -142,10 +163,10 @@ export const Sidebar = ({
         </nav>
       </div>
 
-      {/* Datasets List - Scrollable */}
+      {/* Datasets List */}
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         <div className="flex-shrink-0 p-3 border-b border-border">
-          <p className="text-[10px] text-muted-foreground tracking-widest uppercase">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
             Datasets ({datasets.length})
           </p>
         </div>
@@ -163,15 +184,13 @@ export const Sidebar = ({
                     key={dataset.id}
                     onClick={() => setSelectedDataset(dataset)}
                     data-testid={`dataset-${dataset.id}`}
-                    className={`w-full flex items-center gap-2 p-2 text-left border transition-colors ${
-                      selectedDataset?.id === dataset.id 
-                        ? "border-primary bg-primary/10" 
-                        : "border-border hover:border-primary/50 bg-background"
+                    className={`file-item w-full ${
+                      selectedDataset?.id === dataset.id ? "active" : ""
                     }`}
                   >
-                    <Icon className="h-3 w-3 text-primary flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-mono truncate">
+                    <Icon className="h-4 w-4 flex-shrink-0 opacity-60" />
+                    <div className="flex-1 min-w-0 ml-2">
+                      <p className="text-xs font-medium truncate">
                         {dataset.filename}
                       </p>
                       <p className="text-[10px] text-muted-foreground">
@@ -186,24 +205,24 @@ export const Sidebar = ({
         </div>
       </div>
 
-      {/* Quick Profile - Fixed at bottom */}
+      {/* Quick Profile */}
       {dataProfile && selectedDataset && (
-        <div className="flex-shrink-0 p-3 border-t border-border">
-          <p className="text-[10px] text-muted-foreground mb-2 tracking-widest uppercase">
+        <div className="flex-shrink-0 p-3 border-t border-border bg-secondary/30">
+          <p className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wider font-medium">
             Quick Stats
           </p>
-          <div className="space-y-1 text-[10px] font-mono">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Rows</span>
-              <span className="text-primary">{dataProfile.row_count}</span>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="text-center p-2 rounded-lg bg-card border border-border">
+              <p className="text-sm font-semibold">{dataProfile.row_count}</p>
+              <p className="text-[9px] text-muted-foreground">Rows</p>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Columns</span>
-              <span className="text-primary">{dataProfile.column_count}</span>
+            <div className="text-center p-2 rounded-lg bg-card border border-border">
+              <p className="text-sm font-semibold">{dataProfile.column_count}</p>
+              <p className="text-[9px] text-muted-foreground">Cols</p>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Memory</span>
-              <span className="text-primary">{dataProfile.memory_usage}</span>
+            <div className="text-center p-2 rounded-lg bg-card border border-border">
+              <p className="text-[10px] font-semibold">{dataProfile.memory_usage}</p>
+              <p className="text-[9px] text-muted-foreground">Size</p>
             </div>
           </div>
         </div>
@@ -212,8 +231,8 @@ export const Sidebar = ({
       {/* Loading indicator */}
       {loading && (
         <div className="flex-shrink-0 p-3 border-t border-border flex items-center justify-center gap-2">
-          <Loader2 className="h-3 w-3 animate-spin text-primary" />
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          <span className="text-[10px] text-muted-foreground">
             Processing...
           </span>
         </div>
@@ -223,16 +242,13 @@ export const Sidebar = ({
       <Dialog open={showNewWorkspace} onOpenChange={setShowNewWorkspace}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-heading uppercase tracking-wider">
-              New Workspace
-            </DialogTitle>
+            <DialogTitle>New Workspace</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <Input
               placeholder="Workspace name"
               value={newWorkspaceName}
               onChange={(e) => setNewWorkspaceName(e.target.value)}
-              className="font-mono"
               data-testid="new-workspace-input"
               onKeyDown={(e) => e.key === "Enter" && handleCreateWorkspace()}
             />
@@ -241,19 +257,15 @@ export const Sidebar = ({
             <Button
               variant="outline"
               onClick={() => setShowNewWorkspace(false)}
-              className="font-mono uppercase"
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreateWorkspace}
               disabled={creating || !newWorkspaceName.trim()}
-              className="font-mono uppercase"
               data-testid="create-workspace-btn"
             >
-              {creating ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
+              {creating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Create
             </Button>
           </DialogFooter>
