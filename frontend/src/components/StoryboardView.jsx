@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -30,7 +31,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import axios from "axios";
 import {
@@ -57,6 +57,10 @@ import {
   CheckSquare,
   Trash2,
   X,
+  Clock,
+  PlayCircle,
+  CheckCircle,
+  FileEdit,
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -90,6 +94,157 @@ const stakeholderIcons = {
   analyst: BarChart3,
 };
 
+// Get report status based on action completion
+const getReportStatus = (storyboard) => {
+  const actions = storyboard?.action_items || [];
+  if (actions.length === 0) return "draft";
+  const completed = actions.filter(a => a.completed).length;
+  if (completed === actions.length) return "completed";
+  if (completed > 0) return "in-progress";
+  return "draft";
+};
+
+// Format relative time
+const getRelativeTime = (dateString) => {
+  if (!dateString) return "Just now";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+};
+
+// Report Card Component
+const ReportCard = ({ report, isSelected, onClick, onDelete, onDragStart, onDragOver, onDragEnd }) => {
+  const actions = report.action_items || [];
+  const completed = actions.filter(a => a.completed).length;
+  const total = actions.length;
+  const progress = total > 0 ? (completed / total) * 100 : 0;
+  const status = getReportStatus(report);
+
+  return (
+    <div
+      draggable
+      onDragStart={(e) => onDragStart(e, report)}
+      onDragOver={(e) => onDragOver(e, report)}
+      onDragEnd={onDragEnd}
+      onClick={() => onClick(report)}
+      className={`group p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+        isSelected
+          ? "border-primary bg-primary/5 shadow-sm"
+          : "border-border bg-card hover:border-primary/40"
+      }`}
+      data-testid={`report-card-${report.id}`}
+    >
+      {/* Title & Delete */}
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <h4 className="text-sm font-medium truncate flex-1">{report.title}</h4>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(report);
+          }}
+          className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive flex-shrink-0"
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="mb-2">
+        <Progress value={progress} className="h-1.5" />
+      </div>
+
+      {/* Stats Row */}
+      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1">
+            <CheckSquare className="h-3 w-3" />
+            {completed}/{total}
+          </span>
+          <span className="flex items-center gap-1">
+            <Presentation className="h-3 w-3" />
+            {report.frames?.length || 0}
+          </span>
+        </div>
+        <span className="flex items-center gap-1">
+          <Clock className="h-3 w-3" />
+          {getRelativeTime(report.updated_at || report.created_at)}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+// Kanban Column Component
+const KanbanColumn = ({ title, icon: Icon, reports, selectedReport, onSelect, onDelete, onDragStart, onDragOver, onDragEnd, onDrop, status, color }) => {
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.add("bg-muted/50");
+  };
+
+  const handleDragLeave = (e) => {
+    e.currentTarget.classList.remove("bg-muted/50");
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove("bg-muted/50");
+    onDrop(status);
+  };
+
+  return (
+    <div 
+      className="flex-1 min-w-0 flex flex-col"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Column Header */}
+      <div className={`flex items-center gap-2 px-3 py-2 rounded-t-lg ${color}`}>
+        <Icon className="h-4 w-4" />
+        <span className="text-xs font-semibold uppercase tracking-wider">{title}</span>
+        <Badge variant="secondary" className="text-[10px] ml-auto">
+          {reports.length}
+        </Badge>
+      </div>
+
+      {/* Column Content */}
+      <ScrollArea className="flex-1 border border-t-0 border-border rounded-b-lg bg-muted/20">
+        <div className="p-2 space-y-2 min-h-[120px]">
+          {reports.length === 0 ? (
+            <div className="text-center py-6 text-xs text-muted-foreground">
+              No reports
+            </div>
+          ) : (
+            reports.map((report) => (
+              <ReportCard
+                key={report.id}
+                report={report}
+                isSelected={selectedReport?.id === report.id}
+                onClick={onSelect}
+                onDelete={onDelete}
+                onDragStart={onDragStart}
+                onDragOver={onDragOver}
+                onDragEnd={onDragEnd}
+              />
+            ))
+          )}
+        </div>
+      </ScrollArea>
+    </div>
+  );
+};
+
 export const StoryboardView = ({
   workspace,
   storyTiles,
@@ -101,33 +256,44 @@ export const StoryboardView = ({
   deleteStoryTile,
   loading,
 }) => {
-  const [selectedStoryboard, setSelectedStoryboard] = useState(null);
+  const [openTabs, setOpenTabs] = useState([]); // Array of open report IDs
+  const [activeTabId, setActiveTabId] = useState(null);
   const [editingFrame, setEditingFrame] = useState(null);
   const [showNewStoryboard, setShowNewStoryboard] = useState(false);
   const [newTitle, setNewTitle] = useState("Data Actions");
   const [generating, setGenerating] = useState(false);
   const [exporting, setExporting] = useState(null);
   const [draggedIndex, setDraggedIndex] = useState(null);
-  const [activeTab, setActiveTab] = useState("story");
+  const [activeContentTab, setActiveContentTab] = useState("story");
   const [stakeholderView, setStakeholderView] = useState("executive");
   const [deletingStoryboard, setDeletingStoryboard] = useState(null);
-  const [deletingTile, setDeletingTile] = useState(null);
+  const [draggedReport, setDraggedReport] = useState(null);
 
-  useEffect(() => {
-    if (storyboards.length > 0 && !selectedStoryboard) {
-      setSelectedStoryboard(storyboards[0]);
-    }
-  }, [storyboards, selectedStoryboard]);
+  // Get the currently active report
+  const activeReport = storyboards.find(sb => sb.id === activeTabId);
 
-  // Sync selected storyboard with updates
-  useEffect(() => {
-    if (selectedStoryboard) {
-      const updated = storyboards.find(sb => sb.id === selectedStoryboard.id);
-      if (updated) {
-        setSelectedStoryboard(updated);
-      }
+  // Categorize reports by status
+  const draftReports = storyboards.filter(sb => getReportStatus(sb) === "draft");
+  const inProgressReports = storyboards.filter(sb => getReportStatus(sb) === "in-progress");
+  const completedReports = storyboards.filter(sb => getReportStatus(sb) === "completed");
+
+  // Open a report in a new tab
+  const openReport = (report) => {
+    if (!openTabs.includes(report.id)) {
+      setOpenTabs([...openTabs, report.id]);
     }
-  }, [storyboards, selectedStoryboard?.id]);
+    setActiveTabId(report.id);
+  };
+
+  // Close a tab
+  const closeTab = (reportId, e) => {
+    e?.stopPropagation();
+    const newTabs = openTabs.filter(id => id !== reportId);
+    setOpenTabs(newTabs);
+    if (activeTabId === reportId) {
+      setActiveTabId(newTabs[newTabs.length - 1] || null);
+    }
+  };
 
   const handleGenerateStoryboard = async () => {
     if (!newTitle.trim()) return;
@@ -135,12 +301,12 @@ export const StoryboardView = ({
     setGenerating(true);
     try {
       const newStoryboard = await generateStoryboard(newTitle);
-      setSelectedStoryboard(newStoryboard);
+      openReport(newStoryboard);
       setShowNewStoryboard(false);
       setNewTitle("Data Actions");
-      toast.success("Data Actions generated with action items!");
+      toast.success("Data Actions generated!");
     } catch (error) {
-      toast.error("Failed to generate. Make sure you have story tiles.");
+      toast.error("Failed to generate. Make sure you have pinned insights.");
     } finally {
       setGenerating(false);
     }
@@ -151,10 +317,8 @@ export const StoryboardView = ({
 
     try {
       await deleteStoryboard(deletingStoryboard.id);
-      if (selectedStoryboard?.id === deletingStoryboard.id) {
-        setSelectedStoryboard(null);
-      }
-      toast.success("Data Actions deleted");
+      closeTab(deletingStoryboard.id);
+      toast.success("Report deleted");
     } catch (error) {
       toast.error("Failed to delete");
     } finally {
@@ -162,25 +326,12 @@ export const StoryboardView = ({
     }
   };
 
-  const handleDeleteTile = async () => {
-    if (!deletingTile) return;
-
-    try {
-      await deleteStoryTile(deletingTile.id);
-      toast.success("Insight removed");
-    } catch (error) {
-      toast.error("Failed to delete insight");
-    } finally {
-      setDeletingTile(null);
-    }
-  };
-
   const handleExport = async (format) => {
-    if (!selectedStoryboard) return;
+    if (!activeReport) return;
 
     setExporting(format);
     try {
-      await exportStoryboard(selectedStoryboard.id, format);
+      await exportStoryboard(activeReport.id, format);
       toast.success(`Exported as ${format.toUpperCase()}`);
     } catch (error) {
       toast.error(`Failed to export as ${format.toUpperCase()}`);
@@ -190,24 +341,13 @@ export const StoryboardView = ({
   };
 
   const handleToggleActionItem = async (actionId, completed) => {
-    if (!selectedStoryboard) return;
+    if (!activeReport) return;
 
     try {
-      await axios.put(`${API}/storyboards/${selectedStoryboard.id}/action-items`, {
+      await axios.put(`${API}/storyboards/${activeReport.id}/action-items`, {
         action_id: actionId,
         completed: completed,
       });
-
-      // Update local state
-      const updatedActionItems = selectedStoryboard.action_items.map(item =>
-        item.id === actionId ? { ...item, completed } : item
-      );
-
-      setSelectedStoryboard({
-        ...selectedStoryboard,
-        action_items: updatedActionItems,
-      });
-
       toast.success(completed ? "Action completed!" : "Action reopened");
     } catch (error) {
       toast.error("Failed to update action item");
@@ -215,17 +355,14 @@ export const StoryboardView = ({
   };
 
   const handleFrameEdit = async (frameId, updates) => {
-    if (!selectedStoryboard) return;
+    if (!activeReport) return;
 
-    const updatedFrames = selectedStoryboard.frames.map((frame) =>
+    const updatedFrames = activeReport.frames.map((frame) =>
       frame.id === frameId ? { ...frame, ...updates } : frame
     );
 
     try {
-      const updated = await updateStoryboard(selectedStoryboard.id, {
-        frames: updatedFrames,
-      });
-      setSelectedStoryboard(updated);
+      await updateStoryboard(activeReport.id, { frames: updatedFrames });
       setEditingFrame(null);
       toast.success("Frame updated");
     } catch (error) {
@@ -233,15 +370,52 @@ export const StoryboardView = ({
     }
   };
 
-  const handleDragStart = (index) => {
-    setDraggedIndex(index);
+  // Drag handlers for Kanban
+  const handleDragStart = (e, report) => {
+    setDraggedReport(report);
+    e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e, index) => {
+  const handleDragOver = (e, report) => {
     e.preventDefault();
-    if (draggedIndex === null || draggedIndex === index) return;
+  };
 
-    const frames = [...selectedStoryboard.frames];
+  const handleDragEnd = () => {
+    setDraggedReport(null);
+  };
+
+  const handleDrop = async (newStatus) => {
+    if (!draggedReport) return;
+
+    // Update action items to reflect new status
+    const actions = draggedReport.action_items || [];
+    let updatedActions = [...actions];
+
+    if (newStatus === "completed" && actions.length > 0) {
+      // Mark all as completed
+      updatedActions = actions.map(a => ({ ...a, completed: true }));
+    } else if (newStatus === "draft") {
+      // Mark all as incomplete
+      updatedActions = actions.map(a => ({ ...a, completed: false }));
+    }
+
+    if (updatedActions !== actions) {
+      try {
+        await updateStoryboard(draggedReport.id, { action_items: updatedActions });
+        toast.success(`Report moved to ${newStatus.replace("-", " ")}`);
+      } catch (error) {
+        toast.error("Failed to update report status");
+      }
+    }
+
+    setDraggedReport(null);
+  };
+
+  const handleDragOverFrame = (e, index) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index || !activeReport) return;
+
+    const frames = [...activeReport.frames];
     const [removed] = frames.splice(draggedIndex, 1);
     frames.splice(index, 0, removed);
 
@@ -250,19 +424,16 @@ export const StoryboardView = ({
       order: idx,
     }));
 
-    setSelectedStoryboard({
-      ...selectedStoryboard,
-      frames: reorderedFrames,
-    });
+    // Update locally for smooth UX
     setDraggedIndex(index);
   };
 
-  const handleDragEnd = async () => {
-    if (draggedIndex === null || !selectedStoryboard) return;
+  const handleDragEndFrame = async () => {
+    if (draggedIndex === null || !activeReport) return;
 
     try {
-      await updateStoryboard(selectedStoryboard.id, {
-        frames: selectedStoryboard.frames,
+      await updateStoryboard(activeReport.id, {
+        frames: activeReport.frames,
       });
     } catch (error) {
       console.error("Failed to save frame order");
@@ -274,8 +445,8 @@ export const StoryboardView = ({
     return storyTiles.find((tile) => tile.id === tileId);
   };
 
-  const completedActions = selectedStoryboard?.action_items?.filter(a => a.completed)?.length || 0;
-  const totalActions = selectedStoryboard?.action_items?.length || 0;
+  const completedActions = activeReport?.action_items?.filter(a => a.completed)?.length || 0;
+  const totalActions = activeReport?.action_items?.length || 0;
 
   if (!workspace) {
     return (
@@ -284,7 +455,7 @@ export const StoryboardView = ({
           <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h2 className="font-semibold text-lg mb-2">No Workspace Selected</h2>
           <p className="text-muted-foreground text-sm">
-            Select a workspace to view storyboards
+            Select a workspace to view reports
           </p>
         </div>
       </div>
@@ -292,85 +463,127 @@ export const StoryboardView = ({
   }
 
   return (
-    <div className="storyboard-layout" data-testid="storyboard-view">
-      {/* Left Panel - Storyboard List */}
-      <div className="storyboard-sidebar">
-        <div className="storyboard-sidebar-header">
-          <h2 className="font-semibold text-sm uppercase tracking-wider mb-4">
-            Data Actions
+    <div className="flex flex-col h-full" data-testid="storyboard-view">
+      {/* Top Section - Kanban Board */}
+      <div className="flex-shrink-0 p-4 border-b border-border bg-muted/30">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold text-sm uppercase tracking-wider">
+            Data Action Reports
           </h2>
           <Button
             onClick={() => setShowNewStoryboard(true)}
             disabled={storyTiles.length === 0}
-            className="w-full text-xs"
+            size="sm"
+            className="text-xs"
             data-testid="generate-storyboard-btn"
           >
-            <Sparkles className="h-4 w-4 mr-2" />
-            Generate Data Actions
+            <Plus className="h-4 w-4 mr-1" />
+            New Report
           </Button>
-          {storyTiles.length === 0 && (
-            <p className="text-xs text-muted-foreground mt-2 text-center">
-              Pin insights from chat first
-            </p>
-          )}
         </div>
 
-        <div className="storyboard-sidebar-content">
-          <div className="p-4 space-y-2">
-            {storyboards.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-4">
-                No data actions yet
-              </p>
-            ) : (
-              storyboards.map((sb) => (
-                <div
-                  key={sb.id}
-                  className={`group relative p-3 text-left border rounded-lg transition-colors cursor-pointer ${
-                    selectedStoryboard?.id === sb.id
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
-                  }`}
-                >
-                  <div 
-                    onClick={() => setSelectedStoryboard(sb)}
-                    data-testid={`storyboard-item-${sb.id}`}
-                  >
-                    <p className="text-sm font-medium truncate pr-6">{sb.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {sb.frames?.length || 0} frames • {sb.action_items?.length || 0} actions
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeletingStoryboard(sb);
-                    }}
-                    className="absolute top-2 right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                    data-testid={`delete-storyboard-${sb.id}`}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))
-            )}
-          </div>
+        {/* Kanban Columns */}
+        <div className="flex gap-3 h-[180px]">
+          <KanbanColumn
+            title="Draft"
+            icon={FileEdit}
+            status="draft"
+            color="bg-slate-100 dark:bg-slate-800"
+            reports={draftReports}
+            selectedReport={activeReport}
+            onSelect={openReport}
+            onDelete={setDeletingStoryboard}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+          />
+          <KanbanColumn
+            title="In Progress"
+            icon={PlayCircle}
+            status="in-progress"
+            color="bg-blue-100 dark:bg-blue-900/30"
+            reports={inProgressReports}
+            selectedReport={activeReport}
+            onSelect={openReport}
+            onDelete={setDeletingStoryboard}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+          />
+          <KanbanColumn
+            title="Completed"
+            icon={CheckCircle}
+            status="completed"
+            color="bg-green-100 dark:bg-green-900/30"
+            reports={completedReports}
+            selectedReport={activeReport}
+            onSelect={openReport}
+            onDelete={setDeletingStoryboard}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+          />
         </div>
+
+        {storyTiles.length === 0 && storyboards.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center mt-3">
+            Pin insights from chat to create reports
+          </p>
+        )}
       </div>
 
-      {/* Right Panel - Storyboard Editor */}
-      <div className="storyboard-main">
-        {selectedStoryboard ? (
-          <>
-            {/* Header */}
-            <div className="storyboard-main-header flex items-center justify-between">
+      {/* Bottom Section - Report Tabs & Content */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* Report Tabs */}
+        {openTabs.length > 0 && (
+          <div className="flex-shrink-0 border-b border-border bg-card">
+            <div className="flex items-center gap-1 px-2 pt-2 overflow-x-auto">
+              {openTabs.map((tabId) => {
+                const report = storyboards.find(sb => sb.id === tabId);
+                if (!report) return null;
+                const isActive = activeTabId === tabId;
+                return (
+                  <div
+                    key={tabId}
+                    onClick={() => setActiveTabId(tabId)}
+                    className={`group flex items-center gap-2 px-3 py-1.5 rounded-t-md cursor-pointer transition-colors text-xs ${
+                      isActive
+                        ? "bg-background border border-b-0 border-border"
+                        : "bg-muted/50 hover:bg-muted border border-transparent"
+                    }`}
+                    data-testid={`report-tab-${tabId}`}
+                  >
+                    <span className={`truncate max-w-[120px] ${isActive ? "font-medium" : ""}`}>
+                      {report.title}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => closeTab(tabId, e)}
+                      className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Report Content */}
+        {activeReport ? (
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Report Header */}
+            <div className="flex-shrink-0 px-4 py-3 border-b border-border flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-lg uppercase tracking-wider">
-                  {selectedStoryboard.title}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {selectedStoryboard.frames?.length || 0} frames • {completedActions}/{totalActions} actions completed
+                <h3 className="font-semibold text-base">{activeReport.title}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {activeReport.frames?.length || 0} frames • {completedActions}/{totalActions} actions
                 </p>
               </div>
               <div className="flex gap-2">
@@ -380,12 +593,11 @@ export const StoryboardView = ({
                   onClick={() => handleExport("pdf")}
                   disabled={exporting === "pdf"}
                   className="text-xs"
-                  data-testid="export-pdf-btn"
                 >
                   {exporting === "pdf" ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
                   ) : (
-                    <FileText className="h-4 w-4 mr-1" />
+                    <FileText className="h-3 w-3 mr-1" />
                   )}
                   PDF
                 </Button>
@@ -395,21 +607,20 @@ export const StoryboardView = ({
                   onClick={() => handleExport("pptx")}
                   disabled={exporting === "pptx"}
                   className="text-xs"
-                  data-testid="export-pptx-btn"
                 >
                   {exporting === "pptx" ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
                   ) : (
-                    <Presentation className="h-4 w-4 mr-1" />
+                    <Presentation className="h-3 w-3 mr-1" />
                   )}
                   PPTX
                 </Button>
               </div>
             </div>
 
-            {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-              <TabsList className="mx-4 mt-2 w-fit">
+            {/* Content Tabs */}
+            <Tabs value={activeContentTab} onValueChange={setActiveContentTab} className="flex-1 flex flex-col min-h-0">
+              <TabsList className="mx-4 mt-2 w-fit flex-shrink-0">
                 <TabsTrigger value="story" className="text-xs">
                   <Presentation className="h-3 w-3 mr-1" />
                   Story
@@ -433,7 +644,7 @@ export const StoryboardView = ({
                 <ScrollArea className="h-full">
                   <div className="p-4 space-y-4">
                     {/* Executive Summary */}
-                    {selectedStoryboard.executive_summary && (
+                    {activeReport.executive_summary && (
                       <Card className="bg-primary/5 border-primary/20">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
@@ -442,26 +653,24 @@ export const StoryboardView = ({
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm">{selectedStoryboard.executive_summary}</p>
+                          <p className="text-sm">{activeReport.executive_summary}</p>
                         </CardContent>
                       </Card>
                     )}
 
                     {/* Frames */}
-                    {selectedStoryboard.frames?.map((frame, index) => (
+                    {activeReport.frames?.map((frame, index) => (
                       <div
                         key={frame.id}
                         draggable
-                        onDragStart={() => handleDragStart(index)}
-                        onDragOver={(e) => handleDragOver(e, index)}
-                        onDragEnd={handleDragEnd}
-                        data-testid={`frame-${frame.id}`}
-                        className={`storyboard-frame p-5 border border-border rounded-xl bg-card hover:border-primary/30 transition-all ${
+                        onDragStart={() => setDraggedIndex(index)}
+                        onDragOver={(e) => handleDragOverFrame(e, index)}
+                        onDragEnd={handleDragEndFrame}
+                        className={`p-5 border border-border rounded-xl bg-card hover:border-primary/30 transition-all ${
                           draggedIndex === index ? "opacity-50 scale-[0.98]" : ""
                         }`}
                       >
                         <div className="flex items-start gap-4">
-                          {/* Drag Handle & Number */}
                           <div className="flex items-center gap-2 text-muted-foreground cursor-grab pt-1">
                             <GripVertical className="h-4 w-4" />
                             <span className="text-sm font-medium">
@@ -469,7 +678,6 @@ export const StoryboardView = ({
                             </span>
                           </div>
 
-                          {/* Content */}
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-base uppercase tracking-wide mb-2">
                               {frame.title}
@@ -478,7 +686,6 @@ export const StoryboardView = ({
                               {frame.summary}
                             </p>
 
-                            {/* Frame KPIs */}
                             {frame.kpis?.length > 0 && (
                               <div className="flex flex-wrap gap-2 mb-4">
                                 {frame.kpis.map((kpi, i) => (
@@ -492,7 +699,6 @@ export const StoryboardView = ({
                               </div>
                             )}
 
-                            {/* Frame Action Items */}
                             {frame.action_items?.length > 0 && (
                               <div className="mb-4 p-3 bg-muted/30 rounded-lg">
                                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
@@ -512,29 +718,6 @@ export const StoryboardView = ({
                               </div>
                             )}
 
-                            {/* Included Tiles */}
-                            {frame.tile_refs?.length > 0 && (
-                              <div className="mb-4">
-                                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-                                  Included Tiles
-                                </p>
-                                <div className="flex flex-wrap gap-2">
-                                  {frame.tile_refs.map((tileId) => {
-                                    const tile = getTileById(tileId);
-                                    return tile ? (
-                                      <span
-                                        key={tileId}
-                                        className="px-2 py-1 text-xs bg-secondary rounded-md"
-                                      >
-                                        {tile.title}
-                                      </span>
-                                    ) : null;
-                                  })}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Speaker Notes */}
                             {frame.narrative_notes && (
                               <div className="p-3 bg-muted/50 rounded-lg">
                                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
@@ -547,13 +730,11 @@ export const StoryboardView = ({
                             )}
                           </div>
 
-                          {/* Edit Button */}
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setEditingFrame(frame)}
                             className="shrink-0 h-8 w-8 p-0"
-                            data-testid={`edit-frame-${frame.id}`}
                           >
                             <Edit2 className="h-4 w-4" />
                           </Button>
@@ -564,11 +745,10 @@ export const StoryboardView = ({
                 </ScrollArea>
               </TabsContent>
 
-              {/* Actions Tab - Checklist Mode */}
+              {/* Actions Tab */}
               <TabsContent value="actions" className="flex-1 overflow-hidden m-0">
                 <ScrollArea className="h-full">
                   <div className="p-4 space-y-4">
-                    {/* Progress */}
                     <Card>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm">Action Progress</CardTitle>
@@ -577,18 +757,12 @@ export const StoryboardView = ({
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="w-full bg-secondary rounded-full h-2">
-                          <div
-                            className="bg-primary h-2 rounded-full transition-all"
-                            style={{ width: totalActions > 0 ? `${(completedActions / totalActions) * 100}%` : '0%' }}
-                          />
-                        </div>
+                        <Progress value={totalActions > 0 ? (completedActions / totalActions) * 100 : 0} className="h-2" />
                       </CardContent>
                     </Card>
 
-                    {/* Priority Groups */}
                     {['HIGH', 'MEDIUM', 'LOW'].map((priority) => {
-                      const priorityActions = selectedStoryboard.action_items?.filter(a => a.priority === priority) || [];
+                      const priorityActions = activeReport.action_items?.filter(a => a.priority === priority) || [];
                       if (priorityActions.length === 0) return null;
 
                       return (
@@ -614,7 +788,6 @@ export const StoryboardView = ({
                                   checked={action.completed}
                                   onCheckedChange={(checked) => handleToggleActionItem(action.id, checked)}
                                   className="mt-0.5"
-                                  data-testid={`action-checkbox-${action.id}`}
                                 />
                                 <div className="flex-1">
                                   <p className={`text-sm ${action.completed ? 'line-through text-muted-foreground' : ''}`}>
@@ -633,7 +806,7 @@ export const StoryboardView = ({
                       );
                     })}
 
-                    {(!selectedStoryboard.action_items || selectedStoryboard.action_items.length === 0) && (
+                    {(!activeReport.action_items || activeReport.action_items.length === 0) && (
                       <div className="text-center py-8">
                         <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                         <p className="text-sm text-muted-foreground">No action items yet</p>
@@ -648,7 +821,7 @@ export const StoryboardView = ({
                 <ScrollArea className="h-full">
                   <div className="p-4">
                     <div className="grid grid-cols-2 gap-4">
-                      {selectedStoryboard.kpis?.map((kpi, i) => (
+                      {activeReport.kpis?.map((kpi, i) => (
                         <Card key={i} className="relative overflow-hidden">
                           <div className={`absolute top-0 left-0 w-1 h-full ${
                             kpi.status === 'green' ? 'bg-green-500' :
@@ -674,7 +847,7 @@ export const StoryboardView = ({
                       ))}
                     </div>
 
-                    {(!selectedStoryboard.kpis || selectedStoryboard.kpis.length === 0) && (
+                    {(!activeReport.kpis || activeReport.kpis.length === 0) && (
                       <div className="text-center py-8">
                         <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                         <p className="text-sm text-muted-foreground">No KPIs defined</p>
@@ -687,8 +860,7 @@ export const StoryboardView = ({
               {/* Stakeholder Views Tab */}
               <TabsContent value="stakeholders" className="flex-1 overflow-hidden m-0">
                 <div className="p-4 h-full flex flex-col">
-                  {/* View Selector */}
-                  <div className="flex gap-2 mb-4">
+                  <div className="flex gap-2 mb-4 flex-shrink-0">
                     {['executive', 'manager', 'analyst'].map((view) => {
                       const Icon = stakeholderIcons[view];
                       return (
@@ -706,9 +878,8 @@ export const StoryboardView = ({
                     })}
                   </div>
 
-                  {/* View Content */}
                   <ScrollArea className="flex-1">
-                    {selectedStoryboard.stakeholder_views?.[stakeholderView] ? (
+                    {activeReport.stakeholder_views?.[stakeholderView] ? (
                       <div className="space-y-4">
                         <Card>
                           <CardHeader>
@@ -722,19 +893,19 @@ export const StoryboardView = ({
                           </CardHeader>
                           <CardContent>
                             <p className="text-sm">
-                              {selectedStoryboard.stakeholder_views[stakeholderView].summary}
+                              {activeReport.stakeholder_views[stakeholderView].summary}
                             </p>
                           </CardContent>
                         </Card>
 
-                        {selectedStoryboard.stakeholder_views[stakeholderView].key_points?.length > 0 && (
+                        {activeReport.stakeholder_views[stakeholderView].key_points?.length > 0 && (
                           <Card>
                             <CardHeader className="pb-2">
                               <CardTitle className="text-sm">Key Points</CardTitle>
                             </CardHeader>
                             <CardContent>
                               <ul className="space-y-2">
-                                {selectedStoryboard.stakeholder_views[stakeholderView].key_points.map((point, i) => (
+                                {activeReport.stakeholder_views[stakeholderView].key_points.map((point, i) => (
                                   <li key={i} className="flex items-start gap-2 text-sm">
                                     <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                                     {point}
@@ -745,14 +916,14 @@ export const StoryboardView = ({
                           </Card>
                         )}
 
-                        {selectedStoryboard.stakeholder_views[stakeholderView].recommended_actions?.length > 0 && (
+                        {activeReport.stakeholder_views[stakeholderView].recommended_actions?.length > 0 && (
                           <Card>
                             <CardHeader className="pb-2">
                               <CardTitle className="text-sm">Recommended Actions</CardTitle>
                             </CardHeader>
                             <CardContent>
                               <ul className="space-y-2">
-                                {selectedStoryboard.stakeholder_views[stakeholderView].recommended_actions.map((action, i) => (
+                                {activeReport.stakeholder_views[stakeholderView].recommended_actions.map((action, i) => (
                                   <li key={i} className="flex items-start gap-2 text-sm">
                                     <ArrowRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                                     {action}
@@ -773,42 +944,42 @@ export const StoryboardView = ({
                 </div>
               </TabsContent>
             </Tabs>
-          </>
+          </div>
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-sm">
               <Presentation className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold text-lg mb-2">Create Data Actions</h3>
+              <h3 className="font-semibold text-lg mb-2">Select a Report</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Generate actionable insights from your pinned data to drive decisions
+                Click on a report card above to view its details, or create a new one
               </p>
               <Button
                 onClick={() => setShowNewStoryboard(true)}
                 disabled={storyTiles.length === 0}
               >
-                <Sparkles className="h-4 w-4 mr-2" />
-                Generate Data Actions
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Report
               </Button>
             </div>
           </div>
         )}
       </div>
 
-      {/* New Storyboard Dialog */}
+      {/* New Report Dialog */}
       <Dialog open={showNewStoryboard} onOpenChange={setShowNewStoryboard}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Generate Data Actions</DialogTitle>
+            <DialogTitle>Create New Report</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <Input
-              placeholder="Enter title..."
+              placeholder="Enter report title..."
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               data-testid="storyboard-title-input"
             />
             <p className="text-xs text-muted-foreground">
-              AI will organize your {storyTiles.length} pinned insights into actionable items:
+              AI will organize your {storyTiles.length} pinned insights into:
             </p>
             <ul className="text-xs text-muted-foreground space-y-1 ml-4">
               <li>• Executive summary</li>
@@ -824,7 +995,6 @@ export const StoryboardView = ({
             <Button
               onClick={handleGenerateStoryboard}
               disabled={generating || !newTitle.trim()}
-              data-testid="confirm-generate-btn"
             >
               {generating ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -853,11 +1023,11 @@ export const StoryboardView = ({
         </DialogContent>
       </Dialog>
 
-      {/* Delete Storyboard Confirmation */}
+      {/* Delete Confirmation */}
       <AlertDialog open={!!deletingStoryboard} onOpenChange={() => setDeletingStoryboard(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Data Actions</AlertDialogTitle>
+            <AlertDialogTitle>Delete Report</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete "{deletingStoryboard?.title}"? This action cannot be undone.
             </AlertDialogDescription>
@@ -866,27 +1036,6 @@ export const StoryboardView = ({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteStoryboard}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete Tile Confirmation */}
-      <AlertDialog open={!!deletingTile} onOpenChange={() => setDeletingTile(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Pinned Insight</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to remove "{deletingTile?.title}"? This will remove it from all data actions.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteTile}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
@@ -918,20 +1067,11 @@ const EditFrameForm = ({ frame, onSave, onCancel }) => {
     <div className="space-y-4 py-4">
       <div>
         <label className="text-sm font-medium mb-2 block">Title</label>
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          data-testid="edit-frame-title"
-        />
+        <Input value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
       <div>
         <label className="text-sm font-medium mb-2 block">Summary</label>
-        <Textarea
-          value={summary}
-          onChange={(e) => setSummary(e.target.value)}
-          rows={3}
-          data-testid="edit-frame-summary"
-        />
+        <Textarea value={summary} onChange={(e) => setSummary(e.target.value)} rows={3} />
       </div>
       <div>
         <label className="text-sm font-medium mb-2 block">Speaker Notes</label>
@@ -940,14 +1080,13 @@ const EditFrameForm = ({ frame, onSave, onCancel }) => {
           onChange={(e) => setNarrativeNotes(e.target.value)}
           rows={4}
           placeholder="Notes for presenting this frame..."
-          data-testid="edit-frame-notes"
         />
       </div>
       <DialogFooter>
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button onClick={handleSave} disabled={saving} data-testid="save-frame-btn">
+        <Button onClick={handleSave} disabled={saving}>
           {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
           Save Changes
         </Button>
