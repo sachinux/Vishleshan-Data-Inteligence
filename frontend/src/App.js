@@ -371,6 +371,9 @@ function AppContent() {
             API={API}
             chatMessages={chatMessages}
             setChatMessages={setChatMessages}
+            chatSettings={chatSettings}
+            updateChatSettings={updateChatSettings}
+            loading={loading}
           />
         )}
         
