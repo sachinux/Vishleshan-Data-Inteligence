@@ -40,9 +40,9 @@
 
 /* Right Sidebar - Bento Card */
 .right-sidebar {
-    width: 320px;
-    min-width: 320px;
-    max-width: 320px;
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
     height: calc(100vh - 24px);
     background-color: hsl(var(--card));
     border: 1px solid hsl(var(--border));
@@ -52,6 +52,13 @@
     flex-shrink: 0;
     overflow: hidden;
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.02);
+    transition: width 0.3s ease, min-width 0.3s ease, max-width 0.3s ease;
+}
+
+.right-sidebar.collapsed {
+    width: 48px;
+    min-width: 48px;
+    max-width: 48px;
 }
 
 .right-sidebar-header {
@@ -63,6 +70,43 @@
 .right-sidebar-section {
     padding: 0.75rem;
     flex-shrink: 0;
+}
+
+/* AI Warning Banner */
+.ai-warning-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.05), hsl(var(--primary) / 0.02));
+    border: 1px solid hsl(var(--primary) / 0.15);
+    border-radius: var(--radius);
+    margin: 0.5rem;
+}
+
+.ai-warning-banner .ai-icon {
+    flex-shrink: 0;
+    color: hsl(var(--primary));
+}
+
+.ai-warning-banner .ai-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.ai-warning-banner .ai-title {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: hsl(var(--primary));
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.ai-warning-banner .ai-description {
+    font-size: 0.625rem;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.4;
+    margin-top: 0.125rem;
 }
 
 /* Main content - Bento Card */
