@@ -367,29 +367,35 @@ export const RightSidebar = ({
 
                   {/* KPI Summary */}
                   {kpis.length > 0 && (
-                    <div className="p-3 border border-border rounded-lg bg-card">
+                    <div className="p-3 border border-border rounded-lg bg-card" role="region" aria-label="Key Metrics">
                       <div className="flex items-center gap-2 mb-3">
-                        <Target className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                        <Target className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                           Key Metrics
                         </span>
                       </div>
                       <div className="space-y-2">
                         {kpis.slice(0, 4).map((kpi, i) => (
-                          <div
-                            key={i}
-                            className={`p-2 rounded-lg ${statusColors[kpi.status] || 'bg-muted/50'}`}
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <span className="text-[10px] font-medium leading-tight flex-1">
-                                {kpi.label}
-                              </span>
-                              <div className="flex items-center gap-1 flex-shrink-0">
-                                <span className="text-xs font-bold whitespace-nowrap">{kpi.value}</span>
-                                <TrendIcon trend={kpi.trend} />
+                          <Tooltip key={i}>
+                            <TooltipTrigger asChild>
+                              <div
+                                className={`p-2.5 rounded-lg ${statusColors[kpi.status] || 'bg-muted/50'}`}
+                                role="listitem"
+                              >
+                                <p className="text-xs font-medium leading-snug mb-1 break-words">
+                                  {kpi.label}
+                                </p>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-sm font-bold break-all">{kpi.value}</span>
+                                  <TrendIcon trend={kpi.trend} />
+                                </div>
                               </div>
-                            </div>
-                          </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="max-w-[250px]">
+                              <p className="font-medium">{kpi.label}</p>
+                              <p className="text-xs text-muted-foreground">Value: {kpi.value}</p>
+                            </TooltipContent>
+                          </Tooltip>
                         ))}
                       </div>
                     </div>
