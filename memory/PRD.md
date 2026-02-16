@@ -170,6 +170,7 @@ Build a full-stack web app called "Data Storyteller Studio" that lets users uplo
 - `/app/frontend/src/App.js` - Root React component
 - `/app/frontend/src/components/ChatView.jsx` - Chat interface
 - `/app/frontend/src/components/ChatSettings.jsx` - Settings modal
-- `/app/frontend/src/components/Sidebar.jsx` - Left sidebar
+- `/app/frontend/src/components/DataGridView.jsx` - Excel-like data grid with row selection
+- `/app/frontend/src/components/Sidebar.jsx` - Left sidebar with Profile/Grid tabs
 - `/app/frontend/src/components/RightSidebar.jsx` - Right sidebar
 
