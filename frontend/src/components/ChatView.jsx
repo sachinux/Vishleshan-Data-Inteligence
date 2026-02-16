@@ -332,20 +332,6 @@ export const ChatView = ({
               </div>
             )}
           </div>
-                    Analyzing: {selectedDataset.filename}
-                  </p>
-                )}
-              </div>
-            </div>
-            {!selectedDataset && (
-              <div className="flex items-center gap-2 text-amber-500">
-                <AlertCircle className="h-4 w-4" />
-                <span className="text-xs uppercase tracking-wider">
-                  No dataset selected
-                </span>
-              </div>
-            )}
-          </div>
 
           {/* Messages - SCROLLABLE */}
           <div className="flex-1 overflow-y-auto min-h-0">
@@ -355,7 +341,7 @@ export const ChatView = ({
                   {/* Welcome Section */}
                   <div className="text-center mb-8">
                     <Brain className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <h3 className="font-heading text-lg uppercase tracking-wider mb-2">
+                    <h3 className="font-semibold text-lg mb-2">
                       Ask Your Data
                     </h3>
                     <p className="text-sm text-muted-foreground mb-6">
