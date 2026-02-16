@@ -342,15 +342,6 @@ export const Sidebar = ({
                         </p>
                       </div>
                     </button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => openDeleteDatasetDialog(dataset, e)}
-                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                      data-testid={`delete-dataset-${dataset.id}`}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
                   </div>
                 );
               })}
