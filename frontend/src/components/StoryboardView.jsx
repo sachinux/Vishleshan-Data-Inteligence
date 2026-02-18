@@ -322,15 +322,14 @@ export const StoryboardView = ({
   };
 
   const handleGenerateStoryboard = async () => {
-    if (!newTitle.trim()) return;
-
     setGenerating(true);
     try {
-      const newStoryboard = await generateStoryboard(newTitle);
+      // Pass empty string to let backend auto-generate title
+      const newStoryboard = await generateStoryboard(newTitle.trim() || "");
       openReport(newStoryboard);
       setShowNewStoryboard(false);
-      setNewTitle("Data Actions");
-      toast.success("Data Actions generated!");
+      setNewTitle(""); // Reset to empty for next time
+      toast.success(`Report "${newStoryboard.title}" generated!`);
     } catch (error) {
       toast.error("Failed to generate. Make sure you have pinned insights.");
     } finally {
