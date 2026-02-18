@@ -257,6 +257,9 @@ export const StoryboardView = ({
   deleteStoryboard,
   deleteStoryTile,
   loading,
+  workspaces,
+  onCreateWorkspace,
+  onSelectWorkspace,
 }) => {
   const [openTabs, setOpenTabs] = useState([]); // Array of open report IDs
   const [activeTabId, setActiveTabId] = useState(null);
@@ -271,6 +274,20 @@ export const StoryboardView = ({
   const [deletingStoryboard, setDeletingStoryboard] = useState(null);
   const [draggedReport, setDraggedReport] = useState(null);
   const [isKanbanCollapsed, setIsKanbanCollapsed] = useState(false);
+  const [showWorkspaceSelect, setShowWorkspaceSelect] = useState(false);
+  const [creatingWorkspace, setCreatingWorkspace] = useState(false);
+
+  const handleCreateWorkspace = async () => {
+    setCreatingWorkspace(true);
+    try {
+      await onCreateWorkspace();
+      toast.success("Workspace created!");
+    } catch (error) {
+      toast.error("Failed to create workspace");
+    } finally {
+      setCreatingWorkspace(false);
+    }
+  };
 
   // Get the currently active report
   const activeReport = storyboards.find(sb => sb.id === activeTabId);
