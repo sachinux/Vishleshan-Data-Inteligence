@@ -453,38 +453,40 @@ export const StoryboardView = ({
 
   if (!workspace) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-            <Presentation className="h-8 w-8 text-primary" />
+      <div className="flex-1 flex items-center justify-center p-8 h-full">
+        <div className="text-center max-w-lg mx-auto">
+          <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-8">
+            <Presentation className="h-10 w-10 text-primary" />
           </div>
-          <h2 className="text-xl font-semibold mb-3">
+          <h1 className="text-2xl font-semibold mb-4 tracking-tight">
             No Workspace Selected
-          </h2>
-          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+          </h1>
+          <p className="text-base text-muted-foreground mb-8 leading-relaxed max-w-md mx-auto">
             Data Actions allow you to automate workflows based on insights. 
             Select a workspace to create rules, triggers, and automated reports.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
             <Button 
-              className="gap-2"
+              size="lg"
+              className="gap-2 px-6 bg-foreground text-background hover:bg-foreground/90"
               data-testid="empty-select-workspace-actions"
             >
-              <Target className="h-4 w-4" />
+              <Target className="h-5 w-5" />
               Select Workspace
             </Button>
             <Button 
               variant="outline"
-              className="gap-2"
+              size="lg"
+              className="gap-2 px-6"
               data-testid="empty-create-workspace-actions"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               Create Workspace
             </Button>
           </div>
-          <div className="p-3 bg-muted/50 rounded-lg border border-border">
-            <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
-              <Lightbulb className="h-3 w-3 text-amber-500" />
+          <div className="p-4 bg-muted/30 rounded-xl border border-border max-w-sm mx-auto">
+            <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+              <Lightbulb className="h-4 w-4 text-amber-500" />
               You'll need at least one pinned insight to create a data action.
             </p>
           </div>
