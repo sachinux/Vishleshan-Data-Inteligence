@@ -1005,10 +1005,12 @@ export const StoryboardView = ({
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-sm">
-              <Presentation className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold text-lg mb-2">Select a Report</h3>
-              <p className="text-sm text-muted-foreground">
-                Click on a report card above to view its details
+              <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-5">
+                <Presentation className="h-7 w-7 text-muted-foreground" />
+              </div>
+              <h3 className="text-base font-semibold mb-2">Select a Report</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Click on a report card in the Kanban board above to view its details, or create a new report.
               </p>
             </div>
           </div>
