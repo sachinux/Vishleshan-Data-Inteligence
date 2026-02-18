@@ -151,14 +151,35 @@ export const WorkspaceView = ({
   if (!workspace) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="font-heading text-xl uppercase tracking-wider mb-2">
-            No Workspace Selected
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+            <Database className="h-8 w-8 text-primary" />
+          </div>
+          <h2 className="text-xl font-semibold mb-3">
+            Start by Creating Your First Workspace
           </h2>
-          <p className="text-muted-foreground text-sm">
-            Create or select a workspace to get started
+          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+            Your Data helps you organize datasets, analysis, and actions in one place. 
+            Create a new workspace or select an existing one to begin.
           </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button 
+              onClick={() => {/* This would need to be passed as prop */}}
+              className="gap-2"
+              data-testid="empty-create-workspace"
+            >
+              <Plus className="h-4 w-4" />
+              Create Workspace
+            </Button>
+            <Button 
+              variant="outline"
+              className="gap-2"
+              data-testid="empty-select-workspace"
+            >
+              <ChevronDown className="h-4 w-4" />
+              Select Existing Workspace
+            </Button>
+          </div>
         </div>
       </div>
     );
