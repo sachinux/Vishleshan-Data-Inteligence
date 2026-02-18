@@ -454,12 +454,40 @@ export const StoryboardView = ({
   if (!workspace) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="font-semibold text-lg mb-2">No Workspace Selected</h2>
-          <p className="text-muted-foreground text-sm">
-            Select a workspace to view reports
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+            <Presentation className="h-8 w-8 text-primary" />
+          </div>
+          <h2 className="text-xl font-semibold mb-3">
+            No Workspace Selected
+          </h2>
+          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+            Data Actions allow you to automate workflows based on insights. 
+            Select a workspace to create rules, triggers, and automated reports.
           </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+            <Button 
+              className="gap-2"
+              data-testid="empty-select-workspace-actions"
+            >
+              <Target className="h-4 w-4" />
+              Select Workspace
+            </Button>
+            <Button 
+              variant="outline"
+              className="gap-2"
+              data-testid="empty-create-workspace-actions"
+            >
+              <Plus className="h-4 w-4" />
+              Create Workspace
+            </Button>
+          </div>
+          <div className="p-3 bg-muted/50 rounded-lg border border-border">
+            <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
+              <Lightbulb className="h-3 w-3 text-amber-500" />
+              You'll need at least one pinned insight to create a data action.
+            </p>
+          </div>
         </div>
       </div>
     );
