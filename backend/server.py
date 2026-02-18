@@ -25,6 +25,11 @@ from reportlab.lib.units import inch
 from pptx import Presentation
 from pptx.util import Inches, Pt
 
+# ML Libraries
+import scipy
+import sklearn
+from sklearn import model_selection, preprocessing, ensemble, linear_model, tree, metrics
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
