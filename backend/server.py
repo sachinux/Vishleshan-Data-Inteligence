@@ -1253,7 +1253,7 @@ Dataset Schema:
     encoded_cols_info = ""
     if df_preprocessed is not None:
         # Check for auto-encoded columns
-        encoded_cols = [col for col in df.columns if col.endswith('_encoded')]
+        encoded_cols = [col for col in df_preprocessed.columns if col.endswith('_encoded')]
         if encoded_cols:
             encoded_cols_info = f"\n\nAUTO-ENCODED COLUMNS AVAILABLE (use these for Yes/No data):\n"
             for col in encoded_cols:
