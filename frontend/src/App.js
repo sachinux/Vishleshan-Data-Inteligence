@@ -448,6 +448,9 @@ function AppContent() {
             deleteStoryboard={deleteStoryboard}
             deleteStoryTile={deleteStoryTile}
             loading={loading}
+            workspaces={workspaces}
+            onCreateWorkspace={createWorkspace}
+            onSelectWorkspace={setCurrentWorkspace}
           />
         )}
       </main>
