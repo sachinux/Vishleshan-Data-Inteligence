@@ -102,6 +102,14 @@ class ChatMessage(BaseModel):
     error: Optional[str] = None
     suggestions: List[str] = []
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    # 3-Layer System
+    analysis_success: bool = True  # Whether analysis succeeded
+    analysis_method: str = "auto"  # auto, statistical, aggregation, chart_only
+    layer1_insight: Optional[Dict[str, Any]] = None  # Business Intelligence layer (user visible)
+    layer2_reasoning: Optional[Dict[str, Any]] = None  # AI Reasoning layer (collapsible)
+    layer3_runtime: Optional[Dict[str, Any]] = None  # Runtime execution layer (collapsible/hidden)
+    confidence_score: Optional[int] = None  # Only set when analysis succeeds
+    alternative_methods: List[str] = []  # Available methods to try if failed
 
 class ChatRequest(BaseModel):
     workspace_id: str
