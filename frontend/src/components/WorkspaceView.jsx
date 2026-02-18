@@ -74,6 +74,7 @@ export const WorkspaceView = ({
   workspaces,
   onCreateWorkspace,
   onSelectWorkspace,
+  onNavigateToAnalysis,
 }) => {
   const [googleSheetUrl, setGoogleSheetUrl] = useState("");
   const [importing, setImporting] = useState(false);
