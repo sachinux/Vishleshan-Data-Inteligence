@@ -8,6 +8,7 @@ Vishleshan is a full-stack web application for data analysis that allows users t
 - **Backend**: FastAPI + Python
 - **Database**: MongoDB
 - **LLM**: OpenAI GPT-5.2 via Emergent LLM Key
+- **ML Libraries**: scikit-learn, scipy, pandas, numpy
 
 ## Core Features
 
@@ -23,7 +24,7 @@ Vishleshan is a full-stack web application for data analysis that allows users t
 - Prompt Library for saving/reusing prompts
 - Smart suggestions for follow-up questions
 
-### 3. 3-Layer Analysis System ✅ (NEW - Feb 2026)
+### 3. 3-Layer Analysis System ✅
 A stable architecture that separates concerns:
 
 **Layer 1 - Business Intelligence (User Visible)**
@@ -44,7 +45,7 @@ A stable architecture that separates concerns:
 - Execution time
 - Error details (for debugging)
 
-### 4. AI Model Orchestrator ✅ (NEW - Feb 2026)
+### 4. AI Model Orchestrator ✅
 AI-powered automatic model selection:
 
 **Available Models:**
@@ -59,19 +60,36 @@ AI-powered automatic model selection:
 - Percentage scores for each model considered
 - Small popover badge showing selected model
 - Model selection info in Layer 2
-- Reasoning for why model was selected
 
-### 5. Failure State Handling ✅ (NEW - Feb 2026)
+### 5. ML-Powered Analysis ✅ (NEW - Feb 2026)
+Full machine learning capabilities:
+
+**Auto-Preprocessing:**
+- Yes/No columns automatically converted to 0/1 (_encoded suffix)
+- Categorical encoding handled automatically
+- Data cleaning for ML operations
+
+**Available ML Operations:**
+- **Churn Drivers**: Random Forest feature importance
+- **Churn Probability**: Predict risk for each customer
+- **Correlation Analysis**: Find factors correlated with outcomes
+- **Classification**: Logistic Regression, Decision Trees
+- **Clustering**: K-means, DBSCAN
+
+**Whitelisted Libraries:**
+- sklearn (model_selection, preprocessing, ensemble, linear_model, tree, metrics)
+- scipy
+- pandas, numpy
+- math, statistics, datetime
+
+### 6. Failure State Handling ✅
 - Graceful failure UI with amber/mild alert styling
 - "Retry" button
-- "Switch Method" dropdown with 3 alternatives:
-  - Statistical Summary
-  - Simple Aggregation
-  - Chart Only
-- "Learn More" collapsible with technical explanation
+- "Switch Method" dropdown
+- "Learn More" collapsible
 - No confidence % shown on failure
 
-### 6. Data Actions (Storyboard View)
+### 7. Data Actions (Storyboard View)
 - Collapsible Kanban board (Draft, In Progress, Completed)
 - Report management with tabs
 - Executive summary, KPIs, action items
