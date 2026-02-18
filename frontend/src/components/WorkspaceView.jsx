@@ -213,7 +213,7 @@ export const WorkspaceView = ({
                   data-testid="empty-select-workspace"
                 >
                   <FolderOpen className="h-5 w-5" />
-                  Select Existing Workspace
+                  Select Workspace
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-0" align="center">
