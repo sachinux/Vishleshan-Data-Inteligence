@@ -1244,17 +1244,26 @@ You are a data analysis assistant.{response_style_instructions} The user asked: 
 {context_instructions}
 {schema_info}
 
+IMPORTANT DATA HANDLING RULES:
+1. For columns with Yes/No values: Use the auto-generated '_encoded' column (e.g., 'churn_encoded' for 'churn' column) which has 0/1 values
+2. For categorical columns in ML: Use LabelEncoder or pd.get_dummies() to convert to numeric
+3. For correlation with binary targets: Use the encoded column, not the original string column
+4. sklearn is available: train_test_split, RandomForestClassifier, LogisticRegression, LabelEncoder, StandardScaler are pre-imported
+
 Generate a JSON response with:
 1. "plan": A brief explanation of what analysis you'll perform (1-2 sentences)
-2. "code": Python code using pandas to analyze the data. The DataFrame is available as 'df'. Store the result in a variable called 'result'. The result should be a DataFrame, Series, or scalar value.
+2. "code": Python code using pandas/sklearn to analyze the data. The DataFrame is available as 'df'. 
+   - For Yes/No columns, use df['column_encoded'] if available
+   - Always encode categorical variables before ML operations
+   - Store the result in a variable called 'result'. The result should be a DataFrame, Series, dict, or scalar value.
 3. "chart_type": If visualization is appropriate, specify one of: "bar", "line", "scatter", "pie", "heatmap", or null if no chart needed
 4. "chart_config": If chart_type is specified, provide config with "x_column", "y_column", "title", and optionally "color_by"
 5. "suggestions": List of 3 follow-up questions the user might want to ask
 
-Return ONLY valid JSON, no markdown formatting.
-Example:
-{{"plan": "I'll calculate the average sales by region", "code": "result = df.groupby('region')['sales'].mean()", "chart_type": "bar", "chart_config": {{"x_column": "region", "y_column": "sales", "title": "Average Sales by Region"}}, "suggestions": ["Show top 5 regions", "Compare year over year", "Filter by date range"]}}
-"""
+EXAMPLE FOR CHURN ANALYSIS:
+{{"plan": "I'll identify top churn drivers using feature importance", "code": "# Use encoded columns for binary targets\\nX = df[['age', 'tenure', 'monthly_charges']].fillna(0)\\ny = df['churn_encoded'].fillna(0)\\nmodel = RandomForestClassifier(n_estimators=100, random_state=42)\\nmodel.fit(X, y)\\nimportance = pd.DataFrame({{'feature': X.columns, 'importance': model.feature_importances_}})\\nresult = importance.sort_values('importance', ascending=False)", "chart_type": "bar", "chart_config": {{"x_column": "feature", "y_column": "importance", "title": "Top Churn Drivers"}}, "suggestions": ["Show churn probability by customer", "Compare churned vs retained", "Analyze by contract type"]}}
+
+Return ONLY valid JSON, no markdown formatting."""
     
     # AI Model Orchestrator - Select best analysis method
     model_selection = ModelOrchestrator.select_model(user_message, df)
