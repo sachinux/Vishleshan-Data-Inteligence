@@ -450,21 +450,57 @@ export const ChatView = ({
             ask questions, and generate AI-powered insights.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-            <Button 
-              size="lg"
-              className="gap-2 px-6 bg-foreground text-background hover:bg-foreground/90"
-              data-testid="empty-select-workspace-analysis"
-            >
-              <Search className="h-5 w-5" />
-              Select Workspace
-            </Button>
+            <Popover open={showWorkspaceSelect} onOpenChange={setShowWorkspaceSelect}>
+              <PopoverTrigger asChild>
+                <Button 
+                  size="lg"
+                  className="gap-2 px-6 bg-foreground text-background hover:bg-foreground/90"
+                  data-testid="empty-select-workspace-analysis"
+                >
+                  <FolderOpen className="h-5 w-5" />
+                  Select Workspace
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-0" align="center">
+                <div className="p-3 border-b border-border">
+                  <p className="text-sm font-medium">Select Workspace</p>
+                </div>
+                <div className="max-h-[200px] overflow-auto">
+                  {workspaces && workspaces.length > 0 ? (
+                    workspaces.map((ws) => (
+                      <button
+                        key={ws.id}
+                        onClick={() => {
+                          onSelectWorkspace(ws);
+                          setShowWorkspaceSelect(false);
+                        }}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2"
+                      >
+                        <Database className="h-4 w-4 text-muted-foreground" />
+                        {ws.name}
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-3 py-4 text-sm text-muted-foreground text-center">
+                      No workspaces yet
+                    </p>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button 
               variant="outline"
               size="lg"
               className="gap-2 px-6"
+              onClick={handleCreateWorkspace}
+              disabled={creatingWorkspace}
               data-testid="empty-create-workspace-analysis"
             >
-              <Plus className="h-5 w-5" />
+              {creatingWorkspace ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Plus className="h-5 w-5" />
+              )}
               Create New Workspace
             </Button>
           </div>
