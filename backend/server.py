@@ -1222,9 +1222,12 @@ async def chat(request: ChatRequest):
     
     # Get dataset info if available
     df = None
+    df_preprocessed = None
     schema_info = ""
     if dataset_id and dataset_id in datasets_store:
         df = datasets_store[dataset_id]
+        # Preprocess to get encoded columns
+        df_preprocessed = preprocess_dataframe_for_analysis(df)
         profile = profile_dataframe(df)
         schema_info = f"""
 Dataset Schema:
@@ -1237,11 +1240,18 @@ Dataset Schema:
             if col.mean_value is not None:
                 schema_info += f", mean={col.mean_value:.2f}"
             schema_info += "\n"
+        
+        # Add info about auto-encoded columns
+        encoded_cols = [c for c in df_preprocessed.columns if c.endswith('_encoded')]
+        if encoded_cols:
+            schema_info += "\nAuto-encoded columns (use for Yes/No data):\n"
+            for col in encoded_cols:
+                schema_info += f"  * {col} - binary 0/1 version\n"
     
     # Generate analysis plan using LLM
     # Build info about encoded columns
     encoded_cols_info = ""
-    if df is not None:
+    if df_preprocessed is not None:
         # Check for auto-encoded columns
         encoded_cols = [col for col in df.columns if col.endswith('_encoded')]
         if encoded_cols:
