@@ -1239,31 +1239,46 @@ Dataset Schema:
             schema_info += "\n"
     
     # Generate analysis plan using LLM
+    # Build info about encoded columns
+    encoded_cols_info = ""
+    if df is not None:
+        # Check for auto-encoded columns
+        encoded_cols = [col for col in df.columns if col.endswith('_encoded')]
+        if encoded_cols:
+            encoded_cols_info = f"\n\nAUTO-ENCODED COLUMNS AVAILABLE (use these for Yes/No data):\n"
+            for col in encoded_cols:
+                original = col.replace('_encoded', '')
+                encoded_cols_info += f"  - '{col}' (binary 0/1 version of '{original}')\n"
+    
     analysis_prompt = f"""
 You are a data analysis assistant.{response_style_instructions} The user asked: "{user_message}"
 {context_instructions}
 {schema_info}
+{encoded_cols_info}
 
-IMPORTANT DATA HANDLING RULES:
-1. For columns with Yes/No values: Use the auto-generated '_encoded' column (e.g., 'churn_encoded' for 'churn' column) which has 0/1 values
-2. For categorical columns in ML: Use LabelEncoder or pd.get_dummies() to convert to numeric
-3. For correlation with binary targets: Use the encoded column, not the original string column
-4. sklearn is available: train_test_split, RandomForestClassifier, LogisticRegression, LabelEncoder, StandardScaler are pre-imported
+CRITICAL DATA HANDLING RULES:
+1. For Yes/No columns: ALWAYS use the '_encoded' version (e.g., df['churn_encoded'] NOT df['churn'])
+2. For correlation with churn: Use df['churn_encoded'] as your target variable
+3. For ML models: Use the encoded columns directly, they're already 0/1
+4. For categorical features: Use pd.get_dummies() to one-hot encode
+5. Available ML tools: train_test_split, RandomForestClassifier, LogisticRegression, LabelEncoder, StandardScaler
 
 Generate a JSON response with:
 1. "plan": A brief explanation of what analysis you'll perform (1-2 sentences)
-2. "code": Python code using pandas/sklearn to analyze the data. The DataFrame is available as 'df'. 
-   - For Yes/No columns, use df['column_encoded'] if available
-   - Always encode categorical variables before ML operations
-   - Store the result in a variable called 'result'. The result should be a DataFrame, Series, dict, or scalar value.
-3. "chart_type": If visualization is appropriate, specify one of: "bar", "line", "scatter", "pie", "heatmap", or null if no chart needed
-4. "chart_config": If chart_type is specified, provide config with "x_column", "y_column", "title", and optionally "color_by"
-5. "suggestions": List of 3 follow-up questions the user might want to ask
+2. "code": Python code. The DataFrame is 'df'. MUST store result in 'result' variable.
+3. "chart_type": One of "bar", "line", "scatter", "pie", "heatmap", or null
+4. "chart_config": If chart, provide {{"x_column": "...", "y_column": "...", "title": "..."}}
+5. "suggestions": List of 3 follow-up questions
 
-EXAMPLE FOR CHURN ANALYSIS:
-{{"plan": "I'll identify top churn drivers using feature importance", "code": "# Use encoded columns for binary targets\\nX = df[['age', 'tenure', 'monthly_charges']].fillna(0)\\ny = df['churn_encoded'].fillna(0)\\nmodel = RandomForestClassifier(n_estimators=100, random_state=42)\\nmodel.fit(X, y)\\nimportance = pd.DataFrame({{'feature': X.columns, 'importance': model.feature_importances_}})\\nresult = importance.sort_values('importance', ascending=False)", "chart_type": "bar", "chart_config": {{"x_column": "feature", "y_column": "importance", "title": "Top Churn Drivers"}}, "suggestions": ["Show churn probability by customer", "Compare churned vs retained", "Analyze by contract type"]}}
+EXAMPLES:
 
-Return ONLY valid JSON, no markdown formatting."""
+Correlation Analysis:
+{{"plan": "I'll calculate correlation between numeric features and churn", "code": "numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()\\nif 'churn_encoded' in df.columns:\\n    correlations = df[numeric_cols].corrwith(df['churn_encoded'])\\n    result = correlations.sort_values(ascending=False).to_frame('correlation')\\nelse:\\n    result = df[numeric_cols].corr()", "chart_type": "bar", "chart_config": {{"x_column": "index", "y_column": "correlation", "title": "Correlation with Churn"}}, "suggestions": ["Top churn drivers", "Churn by segment", "High-risk customers"]}}
+
+Churn Drivers:
+{{"plan": "I'll identify top churn drivers using Random Forest", "code": "X = pd.get_dummies(df[['age', 'tenure', 'monthly_charges', 'contract_type']], drop_first=True).fillna(0)\\ny = df['churn_encoded'].fillna(0)\\nmodel = RandomForestClassifier(n_estimators=100, random_state=42)\\nmodel.fit(X, y)\\nresult = pd.DataFrame({{'feature': X.columns, 'importance': model.feature_importances_}}).sort_values('importance', ascending=False)", "chart_type": "bar", "chart_config": {{"x_column": "feature", "y_column": "importance", "title": "Top Churn Drivers"}}, "suggestions": ["Churn probability", "High risk customers", "Retention strategies"]}}
+
+Return ONLY valid JSON, no markdown."""
     
     # AI Model Orchestrator - Select best analysis method
     model_selection = ModelOrchestrator.select_model(user_message, df)
