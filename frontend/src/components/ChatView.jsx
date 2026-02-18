@@ -159,6 +159,8 @@ export const ChatView = ({
   const [detailPanel, setDetailPanel] = useState(null);
   const [clarifying, setClarifying] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [lastQuery, setLastQuery] = useState(null);  // Store last query for retry
   
   // File upload states
   const [showFileUpload, setShowFileUpload] = useState(false);
