@@ -419,13 +419,36 @@ export const ChatView = ({
   if (!workspace) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="font-heading text-xl uppercase tracking-wider mb-2">
-            No Workspace Selected
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+            <Brain className="h-8 w-8 text-primary" />
+          </div>
+          <h2 className="text-xl font-semibold mb-3">
+            Choose a Workspace to Analyze Your Data
           </h2>
-          <p className="text-muted-foreground text-sm">
-            Select a workspace to start chatting with your data
+          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+            Insights are generated inside a workspace. Select a workspace to explore datasets, 
+            ask questions, and generate AI-powered insights.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+            <Button 
+              className="gap-2"
+              data-testid="empty-select-workspace-analysis"
+            >
+              <Search className="h-4 w-4" />
+              Select Workspace
+            </Button>
+            <Button 
+              variant="outline"
+              className="gap-2"
+              data-testid="empty-create-workspace-analysis"
+            >
+              <Sparkles className="h-4 w-4" />
+              Create New Workspace
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground italic">
+            💡 No data yet? Upload a dataset after creating a workspace.
           </p>
         </div>
       </div>
