@@ -349,7 +349,7 @@ function AppContent() {
   }, [selectedDataset, fetchDataProfile]);
 
   const navItems = [
-    { id: "workspace", label: "Workspace", icon: Database },
+    { id: "workspace", label: "Your Data", icon: Database },
     { id: "chat", label: "Analysis", icon: MessageSquare },
     { id: "storyboard", label: "Data Actions", icon: LayoutDashboard },
   ];
