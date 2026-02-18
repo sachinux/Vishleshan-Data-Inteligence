@@ -415,6 +415,12 @@ def execute_data_query(df: pd.DataFrame, query_code: str) -> Dict[str, Any]:
                 "type": "scalar",
                 "data": result
             }
+        elif isinstance(result, (np.integer, np.floating)):
+            # Handle numpy scalar types
+            return {
+                "type": "scalar",
+                "data": float(result) if isinstance(result, np.floating) else int(result)
+            }
         elif isinstance(result, dict):
             return {
                 "type": "dict",
