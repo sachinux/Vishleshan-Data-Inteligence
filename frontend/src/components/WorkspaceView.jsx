@@ -46,6 +46,10 @@ import {
   Plus,
   ChevronDown,
   FolderOpen,
+  MessageSquare,
+  Send,
+  Bot,
+  ArrowRight,
 } from "lucide-react";
 
 import {
