@@ -76,6 +76,8 @@ import {
   Plus,
   Star,
   StarOff,
+  FolderOpen,
+  Database,
 } from "lucide-react";
 import { ChartRenderer } from "@/components/ChartRenderer";
 import { DataTable } from "@/components/DataTable";
