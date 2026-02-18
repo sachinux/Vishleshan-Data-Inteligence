@@ -42,6 +42,9 @@ import {
   AlertTriangle,
   Sparkles,
   Trash2,
+  Database,
+  Plus,
+  ChevronDown,
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
