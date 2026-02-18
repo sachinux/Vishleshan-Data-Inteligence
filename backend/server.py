@@ -1141,6 +1141,130 @@ Provide a clear, concise answer in 2-3 sentences. If there was an error, explain
         await db.chat_messages.insert_one(doc)
         return error_chat.model_dump()
 
+
+class AlternativeAnalysisRequest(BaseModel):
+    workspace_id: str
+    dataset_id: str
+    method: str  # statistical, aggregation, chart_only
+    original_query: Optional[str] = None
+
+
+@api_router.post("/chat/alternative")
+async def chat_alternative(request: AlternativeAnalysisRequest):
+    """Run analysis using an alternative method when primary fails"""
+    workspace_id = request.workspace_id
+    dataset_id = request.dataset_id
+    method = request.method
+    
+    if dataset_id not in datasets_store:
+        raise HTTPException(status_code=404, detail="Dataset not found in memory")
+    
+    df = datasets_store[dataset_id]
+    
+    # Initialize layers
+    layer1_insight = {"summary": "", "recommendations": [], "key_findings": []}
+    layer2_reasoning = {"methodology": "", "steps": [], "data_quality_notes": []}
+    layer3_runtime = {"code": None, "execution_time_ms": 0, "error_details": None, "stack_trace": None}
+    
+    try:
+        import time
+        start_time = time.time()
+        
+        if method == "statistical":
+            result = AnalysisMethods.statistical_summary(df)
+            layer2_reasoning["methodology"] = "Generated statistical summary of all columns"
+            layer2_reasoning["steps"] = ["Identified numeric and categorical columns", "Calculated descriptive statistics", "Compiled summary"]
+            
+            if result["success"]:
+                layer1_insight["summary"] = f"Statistical summary: {result['data']['total_rows']} rows, {result['data']['total_columns']} columns"
+                layer1_insight["key_findings"] = [
+                    f"Dataset has {result['data']['numeric_columns']} numeric columns",
+                    f"Dataset has {result['data']['categorical_columns']} categorical columns",
+                    f"Memory usage: {result['data']['memory_usage']}"
+                ]
+                
+        elif method == "aggregation":
+            result = AnalysisMethods.simple_aggregation(df)
+            layer2_reasoning["methodology"] = "Performed simple aggregation on numeric column"
+            layer2_reasoning["steps"] = ["Selected first numeric column", "Calculated sum, mean, median, min, max", "Compiled results"]
+            
+            if result["success"]:
+                data = result['data']
+                layer1_insight["summary"] = f"Analysis of '{data['column']}': Mean = {data['mean']:.2f}, Sum = {data['sum']:.2f}"
+                layer1_insight["key_findings"] = [
+                    f"Mean: {data['mean']:.2f}",
+                    f"Min: {data['min']:.2f}, Max: {data['max']:.2f}",
+                    f"Count: {data['count']} records"
+                ]
+                
+        elif method == "chart_only":
+            result = AnalysisMethods.chart_only(df)
+            layer2_reasoning["methodology"] = "Generated chart without complex analysis"
+            layer2_reasoning["steps"] = ["Identified suitable columns", "Generated chart configuration", "Prepared visualization data"]
+            
+            if result["success"]:
+                layer1_insight["summary"] = f"Created {result['chart_config']['type']} chart: {result['chart_config']['title']}"
+                layer1_insight["recommendations"] = ["View the chart for visual patterns"]
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown method: {method}")
+        
+        layer3_runtime["execution_time_ms"] = int((time.time() - start_time) * 1000)
+        
+        # Calculate confidence
+        confidence_score = 70 if result.get("success") else None
+        
+        # Prepare response content
+        content = layer1_insight["summary"] if result.get("success") else f"Alternative analysis failed: {result.get('error', 'Unknown error')}"
+        
+        # Build table_data for display
+        table_data = None
+        if result.get("success") and result.get("data"):
+            if method == "statistical":
+                # Convert stats to displayable format
+                table_data = {
+                    "type": "dict",
+                    "data": result["data"]
+                }
+            elif method == "aggregation":
+                table_data = {
+                    "type": "dict",
+                    "data": result["data"]
+                }
+            elif method == "chart_only" and result.get("data"):
+                table_data = {
+                    "type": "dataframe",
+                    "data": result["data"],
+                    "row_count": len(result["data"])
+                }
+        
+        # Create response message
+        assistant_chat = ChatMessage(
+            workspace_id=workspace_id,
+            role="assistant",
+            content=content,
+            plan=layer2_reasoning["methodology"],
+            table_data=table_data,
+            chart_config=result.get("chart_config") if method == "chart_only" and result.get("success") else None,
+            error=result.get("error") if not result.get("success") else None,
+            suggestions=["Try another method", "Ask a specific question", "Upload more data"],
+            analysis_success=result.get("success", False),
+            analysis_method=method,
+            layer1_insight=layer1_insight,
+            layer2_reasoning=layer2_reasoning,
+            layer3_runtime=layer3_runtime,
+            confidence_score=confidence_score,
+            alternative_methods=[]
+        )
+        
+        doc = prepare_for_mongo(assistant_chat.model_dump())
+        await db.chat_messages.insert_one(doc)
+        
+        return assistant_chat.model_dump()
+        
+    except Exception as e:
+        logger.error(f"Error in alternative analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/chat/{workspace_id}")
 async def get_chat_history(workspace_id: str):
     messages = await db.chat_messages.find(
