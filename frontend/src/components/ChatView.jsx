@@ -418,36 +418,38 @@ export const ChatView = ({
 
   if (!workspace) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-            <Brain className="h-8 w-8 text-primary" />
+      <div className="flex-1 flex items-center justify-center p-8 h-full">
+        <div className="text-center max-w-lg mx-auto">
+          <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-8">
+            <Brain className="h-10 w-10 text-primary" />
           </div>
-          <h2 className="text-xl font-semibold mb-3">
+          <h1 className="text-2xl font-semibold mb-4 tracking-tight">
             Choose a Workspace to Analyze Your Data
-          </h2>
-          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+          </h1>
+          <p className="text-base text-muted-foreground mb-8 leading-relaxed max-w-md mx-auto">
             Insights are generated inside a workspace. Select a workspace to explore datasets, 
             ask questions, and generate AI-powered insights.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
             <Button 
-              className="gap-2"
+              size="lg"
+              className="gap-2 px-6 bg-foreground text-background hover:bg-foreground/90"
               data-testid="empty-select-workspace-analysis"
             >
-              <Search className="h-4 w-4" />
+              <Search className="h-5 w-5" />
               Select Workspace
             </Button>
             <Button 
               variant="outline"
-              className="gap-2"
+              size="lg"
+              className="gap-2 px-6"
               data-testid="empty-create-workspace-analysis"
             >
-              <Sparkles className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               Create New Workspace
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground italic">
+          <p className="text-sm text-muted-foreground">
             💡 No data yet? Upload a dataset after creating a workspace.
           </p>
         </div>
