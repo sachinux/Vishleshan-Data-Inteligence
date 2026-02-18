@@ -1123,9 +1123,17 @@ Example:
 {{"plan": "I'll calculate the average sales by region", "code": "result = df.groupby('region')['sales'].mean()", "chart_type": "bar", "chart_config": {{"x_column": "region", "y_column": "sales", "title": "Average Sales by Region"}}, "suggestions": ["Show top 5 regions", "Compare year over year", "Filter by date range"]}}
 """
     
+    # AI Model Orchestrator - Select best analysis method
+    model_selection = ModelOrchestrator.select_model(user_message, df)
+    
     # Initialize 3-layer response structure
     layer1_insight = {"summary": "", "recommendations": [], "key_findings": []}
-    layer2_reasoning = {"methodology": "", "steps": [], "data_quality_notes": []}
+    layer2_reasoning = {
+        "methodology": "", 
+        "steps": [], 
+        "data_quality_notes": [],
+        "model_selection": model_selection  # Include model selection in Layer 2
+    }
     layer3_runtime = {"code": None, "execution_time_ms": 0, "error_details": None, "stack_trace": None}
     analysis_success = True
     confidence_score = None
