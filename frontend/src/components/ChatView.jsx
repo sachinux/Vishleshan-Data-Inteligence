@@ -785,7 +785,7 @@ export const ChatView = ({
           )}
 
           {/* Enhanced Input Area */}
-          <div className="chat-input-area">
+          <div className="chat-input-area chat-input-prominent">
             {/* File Upload Mini Panel */}
             {showFileUpload && (
               <div 
