@@ -505,21 +505,6 @@ export const ChatView = ({
                 </div>
               </PopoverContent>
             </Popover>
-            <Button 
-              variant="outline"
-              size="lg"
-              className="gap-2 px-6"
-              onClick={handleCreateWorkspace}
-              disabled={creatingWorkspace}
-              data-testid="empty-create-workspace-analysis"
-            >
-              {creatingWorkspace ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Plus className="h-5 w-5" />
-              )}
-              Create New Workspace
-            </Button>
           </div>
           <div className="p-4 bg-muted/30 rounded-xl border border-border max-w-sm mx-auto">
             <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
