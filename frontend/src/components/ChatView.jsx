@@ -1287,6 +1287,19 @@ const MessageBubble = ({
   // Check if analysis failed
   const analysisFailed = message.analysis_success === false || message.error;
   const confidenceScore = message.confidence_score;
+  const modelSelection = message.model_selection;
+
+  // Get icon for model
+  const getModelIcon = (iconName) => {
+    switch (iconName) {
+      case "brain": return Brain;
+      case "bar-chart": return BarChart3;
+      case "calculator": return TrendingUp;
+      case "pie-chart": return PieChart;
+      case "trending-up": return TrendingUp;
+      default: return Brain;
+    }
+  };
 
   return (
     <div className="message message-assistant animate-fade-in">
@@ -1295,14 +1308,76 @@ const MessageBubble = ({
             LAYER 1 - BUSINESS INTELLIGENCE (Always Visible)
         ═══════════════════════════════════════════════════════════════════ */}
         <div className="layer-1-bi">
-          {/* Header with confidence (only shown on success) */}
+          {/* Header with Model Selector and Confidence */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Brain className="h-4 w-4 text-primary" />
               <span className="text-xs text-muted-foreground uppercase tracking-wider">
                 AI Analysis
               </span>
-              {message.analysis_method && message.analysis_method !== "auto" && (
+              
+              {/* Model Selector Popover */}
+              {modelSelection && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors text-xs font-medium text-primary cursor-pointer">
+                      <Sparkles className="h-3 w-3" />
+                      {modelSelection.selected_name}
+                      <span className="text-primary/70">{modelSelection.selected_score}%</span>
+                      <ChevronDown className="h-3 w-3 opacity-50" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0" align="start">
+                    <div className="p-3 border-b border-border bg-primary/5">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-semibold">Model Router</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {modelSelection.reason}
+                      </p>
+                    </div>
+                    <div className="p-2">
+                      <p className="text-xs text-muted-foreground px-2 py-1 uppercase tracking-wider">
+                        Models Considered
+                      </p>
+                      <div className="space-y-1">
+                        {modelSelection.alternatives?.map((alt, idx) => {
+                          const AltIcon = getModelIcon(alt.icon);
+                          const isSelected = alt.id === modelSelection.selected;
+                          return (
+                            <div 
+                              key={alt.id}
+                              className={`flex items-center justify-between p-2 rounded-md ${
+                                isSelected ? 'bg-primary/10 border border-primary/30' : 'hover:bg-muted'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <AltIcon className={`h-4 w-4 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                                <div>
+                                  <p className={`text-sm ${isSelected ? 'font-medium text-primary' : ''}`}>
+                                    {alt.name}
+                                    {isSelected && <span className="ml-1 text-xs">(Selected)</span>}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">{alt.description}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Progress value={alt.score} className="w-12 h-1.5" />
+                                <span className={`text-xs font-mono ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+                                  {alt.score}%
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+              
+              {message.analysis_method && message.analysis_method !== "auto" && !modelSelection && (
                 <Badge variant="secondary" className="text-[10px]">
                   {message.analysis_method}
                 </Badge>
