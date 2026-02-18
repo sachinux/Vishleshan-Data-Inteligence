@@ -808,6 +808,118 @@ Return ONLY valid JSON.
         raise HTTPException(status_code=500, detail=str(e))
 
 # Chat endpoints
+class AnalysisMethods:
+    """Pre-built analysis methods for fallback"""
+    
+    @staticmethod
+    def statistical_summary(df: pd.DataFrame) -> Dict[str, Any]:
+        """Generate statistical summary without code execution"""
+        try:
+            numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+            categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+            
+            summary = {
+                "total_rows": len(df),
+                "total_columns": len(df.columns),
+                "numeric_columns": len(numeric_cols),
+                "categorical_columns": len(categorical_cols),
+                "memory_usage": f"{df.memory_usage(deep=True).sum() / 1024:.2f} KB"
+            }
+            
+            # Numeric statistics
+            if numeric_cols:
+                stats = df[numeric_cols].describe().to_dict()
+                summary["numeric_stats"] = stats
+            
+            # Categorical value counts
+            if categorical_cols:
+                cat_stats = {}
+                for col in categorical_cols[:3]:  # Limit to 3 columns
+                    cat_stats[col] = df[col].value_counts().head(5).to_dict()
+                summary["categorical_stats"] = cat_stats
+            
+            return {
+                "type": "statistical_summary",
+                "data": summary,
+                "success": True
+            }
+        except Exception as e:
+            return {"type": "statistical_summary", "error": str(e), "success": False}
+    
+    @staticmethod
+    def simple_aggregation(df: pd.DataFrame, column: str = None) -> Dict[str, Any]:
+        """Simple aggregation without complex code"""
+        try:
+            numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+            
+            if not numeric_cols:
+                return {"type": "aggregation", "error": "No numeric columns found", "success": False}
+            
+            target_col = column if column in numeric_cols else numeric_cols[0]
+            
+            result = {
+                "column": target_col,
+                "sum": float(df[target_col].sum()),
+                "mean": float(df[target_col].mean()),
+                "median": float(df[target_col].median()),
+                "min": float(df[target_col].min()),
+                "max": float(df[target_col].max()),
+                "std": float(df[target_col].std()),
+                "count": int(df[target_col].count())
+            }
+            
+            return {
+                "type": "aggregation",
+                "data": result,
+                "success": True
+            }
+        except Exception as e:
+            return {"type": "aggregation", "error": str(e), "success": False}
+    
+    @staticmethod
+    def chart_only(df: pd.DataFrame) -> Dict[str, Any]:
+        """Generate chart config without complex analysis"""
+        try:
+            numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+            categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+            
+            if numeric_cols and categorical_cols:
+                # Bar chart with category vs numeric
+                y_col = numeric_cols[0]
+                x_col = categorical_cols[0]
+                
+                chart_data = df.groupby(x_col)[y_col].mean().head(10).reset_index()
+                
+                return {
+                    "type": "chart_only",
+                    "chart_config": {
+                        "type": "bar",
+                        "x_column": x_col,
+                        "y_column": y_col,
+                        "title": f"Average {y_col} by {x_col}"
+                    },
+                    "data": chart_data.to_dict(orient="records"),
+                    "success": True
+                }
+            elif numeric_cols and len(numeric_cols) >= 2:
+                # Scatter plot with two numeric columns
+                return {
+                    "type": "chart_only",
+                    "chart_config": {
+                        "type": "scatter",
+                        "x_column": numeric_cols[0],
+                        "y_column": numeric_cols[1],
+                        "title": f"{numeric_cols[0]} vs {numeric_cols[1]}"
+                    },
+                    "data": df[[numeric_cols[0], numeric_cols[1]]].head(100).to_dict(orient="records"),
+                    "success": True
+                }
+            else:
+                return {"type": "chart_only", "error": "Not enough columns for chart", "success": False}
+        except Exception as e:
+            return {"type": "chart_only", "error": str(e), "success": False}
+
+
 @api_router.post("/chat")
 async def chat(request: ChatRequest):
     workspace_id = request.workspace_id
@@ -876,7 +988,18 @@ Example:
 {{"plan": "I'll calculate the average sales by region", "code": "result = df.groupby('region')['sales'].mean()", "chart_type": "bar", "chart_config": {{"x_column": "region", "y_column": "sales", "title": "Average Sales by Region"}}, "suggestions": ["Show top 5 regions", "Compare year over year", "Filter by date range"]}}
 """
     
+    # Initialize 3-layer response structure
+    layer1_insight = {"summary": "", "recommendations": [], "key_findings": []}
+    layer2_reasoning = {"methodology": "", "steps": [], "data_quality_notes": []}
+    layer3_runtime = {"code": None, "execution_time_ms": 0, "error_details": None, "stack_trace": None}
+    analysis_success = True
+    confidence_score = None
+    alternative_methods = ["statistical", "aggregation", "chart_only"]
+    
     try:
+        import time
+        start_time = time.time()
+        
         llm_response = await get_llm_response(analysis_prompt)
         
         # Parse LLM response
@@ -899,14 +1022,46 @@ Example:
                 "suggestions": ["Upload a dataset first", "Ask about specific columns", "Request a summary"]
             }
         
+        # Populate Layer 2 - AI Reasoning
+        layer2_reasoning["methodology"] = analysis.get("plan", "")
+        layer2_reasoning["steps"] = [
+            "Parsed user query",
+            "Analyzed dataset schema",
+            "Generated analysis plan",
+            "Created execution code"
+        ]
+        
         # Execute the analysis code
         result_data = None
         error = None
+        layer3_runtime["code"] = analysis.get("code")
+        
         if df is not None and "code" in analysis:
+            exec_start = time.time()
             result_data = execute_data_query(df, analysis["code"])
+            layer3_runtime["execution_time_ms"] = int((time.time() - exec_start) * 1000)
+            
             if "error" in result_data:
                 error = result_data["error"]
+                layer3_runtime["error_details"] = error
+                layer3_runtime["stack_trace"] = f"Code execution failed: {error}"
                 result_data = None
+                analysis_success = False
+        
+        # Calculate confidence score (only if successful)
+        if analysis_success and result_data:
+            confidence_score = 50
+            if result_data.get("data"):
+                confidence_score += 20
+            if analysis.get("chart_type"):
+                confidence_score += 15
+            if analysis.get("plan"):
+                confidence_score += 10
+            if len(result_data.get("data", [])) > 0:
+                confidence_score += 5
+            confidence_score = min(confidence_score, 100)
+        else:
+            confidence_score = None  # Don't show confidence on failure
         
         # Generate natural language answer
         system_message = f"You are a friendly data analyst explaining results to a business user.{response_style_instructions}"
@@ -921,7 +1076,17 @@ Provide a clear, concise answer in 2-3 sentences. If there was an error, explain
 """
         answer = await get_llm_response(answer_prompt, system_message)
         
-        # Create assistant response
+        # Populate Layer 1 - Business Intelligence
+        layer1_insight["summary"] = answer
+        if result_data and analysis_success:
+            layer1_insight["key_findings"] = [
+                f"Analyzed {result_data.get('row_count', 0)} rows of data",
+                analysis.get("plan", "Analysis completed")
+            ]
+            if analysis.get("chart_type"):
+                layer1_insight["recommendations"].append(f"View the {analysis.get('chart_type')} chart for visual insights")
+        
+        # Create assistant response with 3-layer structure
         assistant_chat = ChatMessage(
             workspace_id=workspace_id,
             role="assistant",
@@ -934,7 +1099,15 @@ Provide a clear, concise answer in 2-3 sentences. If there was an error, explain
                 **analysis.get("chart_config", {})
             } if analysis.get("chart_type") else None,
             error=error,
-            suggestions=analysis.get("suggestions", [])
+            suggestions=analysis.get("suggestions", []),
+            # 3-Layer fields
+            analysis_success=analysis_success,
+            analysis_method="auto",
+            layer1_insight=layer1_insight,
+            layer2_reasoning=layer2_reasoning,
+            layer3_runtime=layer3_runtime,
+            confidence_score=confidence_score,
+            alternative_methods=alternative_methods if not analysis_success else []
         )
         
         doc = prepare_for_mongo(assistant_chat.model_dump())
@@ -944,12 +1117,25 @@ Provide a clear, concise answer in 2-3 sentences. If there was an error, explain
     
     except Exception as e:
         logger.error(f"Error in chat: {e}")
+        
+        # Populate error info in layers
+        layer3_runtime["error_details"] = str(e)
+        layer3_runtime["stack_trace"] = f"Exception: {type(e).__name__}: {str(e)}"
+        layer1_insight["summary"] = "Analysis temporarily unavailable in this environment."
+        
         error_chat = ChatMessage(
             workspace_id=workspace_id,
             role="assistant",
-            content=f"I encountered an error while processing your request. Please try rephrasing your question.",
+            content="I encountered an issue processing your request. You can try an alternative analysis method or retry.",
             error=str(e),
-            suggestions=["Try a simpler question", "Check if dataset is loaded", "Ask about available columns"]
+            suggestions=["Try a simpler question", "Check if dataset is loaded", "Ask about available columns"],
+            analysis_success=False,
+            analysis_method="auto",
+            layer1_insight=layer1_insight,
+            layer2_reasoning=layer2_reasoning,
+            layer3_runtime=layer3_runtime,
+            confidence_score=None,
+            alternative_methods=["statistical", "aggregation", "chart_only"]
         )
         doc = prepare_for_mongo(error_chat.model_dump())
         await db.chat_messages.insert_one(doc)
