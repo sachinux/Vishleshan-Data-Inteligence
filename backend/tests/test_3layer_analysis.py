@@ -33,6 +33,8 @@ def test_workspace(api_client):
 @pytest.fixture(scope="module")
 def test_dataset(api_client, test_workspace):
     """Upload a test dataset"""
+    import io
+    
     # Create test CSV content
     csv_content = """name,age,salary,department,years_experience
 Alice,30,75000,Engineering,5
@@ -46,16 +48,17 @@ Henry,45,110000,Sales,18
 Ivy,29,62000,Marketing,4
 Jack,33,82000,Engineering,6"""
     
-    files = {'file': ('test_data.csv', csv_content, 'text/csv')}
+    # Use a fresh session without Content-Type header for multipart
+    upload_session = requests.Session()
+    files = {'file': ('test_data.csv', io.StringIO(csv_content), 'text/csv')}
     data = {'workspace_id': test_workspace['id']}
     
-    response = api_client.post(
+    response = upload_session.post(
         f"{BASE_URL}/api/datasets/upload",
         files=files,
-        data=data,
-        headers={}  # Remove Content-Type for multipart
+        data=data
     )
-    assert response.status_code == 200
+    assert response.status_code == 200, f"Upload failed: {response.text}"
     result = response.json()
     return result['dataset']
 
