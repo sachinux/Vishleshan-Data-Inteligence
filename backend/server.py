@@ -1435,7 +1435,7 @@ Return ONLY valid JSON.
             layer1_insight["summary"] = answer
             layer1_insight["key_findings"] = layer1_data.get("key_findings", [])
             layer1_insight["recommendations"] = layer1_data.get("recommendations", [])
-        except (json.JSONDecodeError, Exception) as e:
+        except (json.JSONDecodeError, Exception):
             # Fallback to simple answer
             answer_prompt = f"""
 The user asked: "{user_message}"
