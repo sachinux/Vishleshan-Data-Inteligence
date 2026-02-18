@@ -370,19 +370,26 @@ def preprocess_dataframe_for_analysis(df: pd.DataFrame) -> pd.DataFrame:
     df_clean = df.copy()
     
     for col in df_clean.columns:
-        # Check if column has Yes/No or True/False values
-        if df_clean[col].dtype == 'object':
-            unique_vals = df_clean[col].dropna().str.lower().unique()
-            
-            # Convert Yes/No to 1/0
-            if set(unique_vals) <= {'yes', 'no', 'y', 'n'}:
-                mapping = {'yes': 1, 'no': 0, 'y': 1, 'n': 0, 'Yes': 1, 'No': 0, 'YES': 1, 'NO': 0}
-                df_clean[f'{col}_encoded'] = df_clean[col].map(lambda x: mapping.get(str(x).lower() if pd.notna(x) else x, x))
-            
-            # Convert True/False strings to 1/0
-            elif set(unique_vals) <= {'true', 'false'}:
-                mapping = {'true': 1, 'false': 0, 'True': 1, 'False': 0, 'TRUE': 1, 'FALSE': 0}
-                df_clean[f'{col}_encoded'] = df_clean[col].map(lambda x: mapping.get(str(x) if pd.notna(x) else x, x))
+        col_dtype = str(df_clean[col].dtype)
+        # Check if column is string-like (object, str, string, category)
+        if col_dtype in ('object', 'str', 'string', 'category') or 'str' in col_dtype.lower():
+            try:
+                unique_vals = df_clean[col].dropna().astype(str).str.lower().unique()
+                unique_set = set(unique_vals)
+                
+                # Convert Yes/No to 1/0
+                if unique_set <= {'yes', 'no', 'y', 'n'}:
+                    df_clean[f'{col}_encoded'] = df_clean[col].apply(
+                        lambda x: 1 if str(x).lower() in ('yes', 'y') else (0 if str(x).lower() in ('no', 'n') else None)
+                    )
+                
+                # Convert True/False strings to 1/0
+                elif unique_set <= {'true', 'false'}:
+                    df_clean[f'{col}_encoded'] = df_clean[col].apply(
+                        lambda x: 1 if str(x).lower() == 'true' else (0 if str(x).lower() == 'false' else None)
+                    )
+            except Exception:
+                pass  # Skip columns that can't be processed
     
     return df_clean
 
