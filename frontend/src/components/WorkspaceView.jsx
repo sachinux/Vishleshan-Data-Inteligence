@@ -45,7 +45,14 @@ import {
   Database,
   Plus,
   ChevronDown,
+  FolderOpen,
 } from "lucide-react";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
