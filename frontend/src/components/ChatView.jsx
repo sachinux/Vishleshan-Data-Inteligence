@@ -1402,20 +1402,54 @@ const MessageBubble = ({
             )}
           </div>
 
-          {/* Main Content / Summary */}
-          <p className="text-sm mb-4">{message.content}</p>
+          {/* ═══════════════════════════════════════════════════════════════════
+              STRUCTURED LAYER 1 CONTENT - Business Intelligence
+          ═══════════════════════════════════════════════════════════════════ */}
+          
+          {/* Title - Bold, prominent */}
+          {message.layer1_insight?.title && !analysisFailed && (
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              {message.layer1_insight.title}
+            </h3>
+          )}
+          
+          {/* Answer - Direct response to user query */}
+          <p className="text-sm text-foreground mb-4 leading-relaxed">
+            {message.content}
+          </p>
 
-          {/* Key Findings (from layer1_insight) */}
+          {/* Key Findings - Bullet points with data */}
           {message.layer1_insight?.key_findings?.length > 0 && !analysisFailed && (
-            <div className="mb-4 p-3 bg-primary/5 border border-primary/10 rounded-lg">
-              <p className="text-xs text-primary uppercase tracking-wider mb-2 font-semibold">
+            <div className="mb-4 p-4 bg-gradient-to-r from-primary/5 to-primary/10 border-l-4 border-primary rounded-r-lg">
+              <p className="text-xs text-primary font-semibold uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Lightbulb className="h-3.5 w-3.5" />
                 Key Findings
               </p>
-              <ul className="space-y-1">
+              <ul className="space-y-2">
                 {message.layer1_insight.key_findings.map((finding, idx) => (
-                  <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <span className="text-primary mt-1">•</span>
-                    {finding}
+                  <li key={idx} className="flex items-start gap-3 text-sm">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/20 text-primary text-xs flex items-center justify-center font-semibold">
+                      {idx + 1}
+                    </span>
+                    <span className="text-foreground">{finding}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Recommendations - Actionable next steps */}
+          {message.layer1_insight?.recommendations?.length > 0 && !analysisFailed && (
+            <div className="mb-4 p-4 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-wider mb-3 flex items-center gap-2">
+                <TrendingUp className="h-3.5 w-3.5" />
+                Recommended Actions
+              </p>
+              <ul className="space-y-2">
+                {message.layer1_insight.recommendations.map((rec, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm">
+                    <ChevronRight className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-foreground">{rec}</span>
                   </li>
                 ))}
               </ul>
@@ -1472,18 +1506,6 @@ const MessageBubble = ({
                 config={message.chart_config}
                 data={message.table_data}
               />
-            </div>
-          )}
-
-          {/* Recommendations */}
-          {message.layer1_insight?.recommendations?.length > 0 && !analysisFailed && (
-            <div className="mb-4 flex flex-wrap gap-2">
-              {message.layer1_insight.recommendations.map((rec, idx) => (
-                <Badge key={idx} variant="outline" className="text-xs">
-                  <Lightbulb className="h-3 w-3 mr-1" />
-                  {rec}
-                </Badge>
-              ))}
             </div>
           )}
         </div>
