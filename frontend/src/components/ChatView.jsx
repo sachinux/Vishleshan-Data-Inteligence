@@ -216,9 +216,10 @@ export const ChatView = ({
       for (const file of files) {
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("workspace_id", workspace.id);
         
         const response = await axios.post(
-          `${API_BASE}/workspaces/${workspace.id}/upload`,
+          `${API_BASE}/datasets/upload`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
