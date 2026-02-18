@@ -1087,12 +1087,17 @@ export const StoryboardView = ({
             <DialogTitle>Create New Report</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <Input
-              placeholder="Enter report title..."
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              data-testid="storyboard-title-input"
-            />
+            <div>
+              <Input
+                placeholder="Auto-generated from insights..."
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                data-testid="storyboard-title-input"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Leave blank to auto-generate a title from your insights
+              </p>
+            </div>
             <p className="text-xs text-muted-foreground">
               AI will organize your {storyTiles.length} pinned insights into:
             </p>
@@ -1109,7 +1114,7 @@ export const StoryboardView = ({
             </Button>
             <Button
               onClick={handleGenerateStoryboard}
-              disabled={generating || !newTitle.trim()}
+              disabled={generating}
             >
               {generating ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
