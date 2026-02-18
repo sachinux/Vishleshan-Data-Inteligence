@@ -174,6 +174,88 @@
     border-radius: 0 0 var(--radius) var(--radius);
 }
 
+/* Prominent chat input styling */
+.chat-input-prominent {
+    background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--card)) 100%);
+    border: 2px solid hsl(var(--primary) / 0.2);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: 0 -4px 20px -5px hsl(var(--primary) / 0.1);
+}
+
+.chat-input-prominent:focus-within {
+    border-color: hsl(var(--primary) / 0.4);
+    box-shadow: 0 -4px 30px -5px hsl(var(--primary) / 0.15);
+}
+
+/* Inactive chat preview for Your Data page */
+.chat-preview-inactive {
+    position: relative;
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted) / 0.5) 100%);
+    border: 2px dashed hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.chat-preview-inactive::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.03) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.chat-preview-inactive:hover {
+    border-color: hsl(var(--primary) / 0.4);
+    border-style: solid;
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--primary) / 0.05) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px -10px hsl(var(--primary) / 0.2);
+}
+
+.chat-preview-inactive .preview-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    font-size: 0.65rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Page transition animation */
+.page-transition-enter {
+    opacity: 0;
+    transform: translateX(20px);
+}
+
+.page-transition-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.page-transition-exit {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.page-transition-exit-active {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
 /* Query Navigator - Bento sidebar in chat */
 .query-navigator {
     width: 220px;
