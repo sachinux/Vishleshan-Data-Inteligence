@@ -1386,26 +1386,71 @@ Return ONLY valid JSON, no markdown."""
         
         # Generate natural language answer
         system_message = f"You are a friendly data analyst explaining results to a business user.{response_style_instructions}"
-        answer_prompt = f"""
+        
+        # Generate structured Layer 1 content
+        layer1_prompt = f"""
+Based on this analysis, create a structured business insight response.
+
+User Question: "{user_message}"
+Analysis Method: {analysis.get('plan', 'N/A')}
+Result Data: {json.dumps(result_data) if result_data else 'No result'}
+Error: {error if error else 'None'}
+{context_instructions}
+
+Return a JSON with:
+1. "title": A clear, action-oriented title (3-7 words) that summarizes the answer
+2. "answer": Direct answer to the user's question in 1-2 sentences
+3. "key_findings": Array of 2-4 specific, data-backed insights (be specific with numbers)
+4. "recommendations": Array of 1-2 actionable next steps (optional)
+
+Example for "What are the top churn drivers?":
+{{
+  "title": "Tenure & Contract Type Drive Churn",
+  "answer": "Customers with shorter tenure and month-to-month contracts have the highest churn risk.",
+  "key_findings": [
+    "Tenure is the #1 predictor (32% importance)",
+    "Month-to-month contracts have 3x higher churn",
+    "Average churner tenure: 4.5 months vs 29 months retained"
+  ],
+  "recommendations": [
+    "Focus retention efforts on customers with <6 month tenure",
+    "Consider incentives for annual contract upgrades"
+  ]
+}}
+
+Return ONLY valid JSON.
+"""
+        
+        try:
+            layer1_response = await get_llm_response(layer1_prompt)
+            clean_l1 = layer1_response.strip()
+            if clean_l1.startswith("```"):
+                clean_l1 = clean_l1.split("```")[1]
+                if clean_l1.startswith("json"):
+                    clean_l1 = clean_l1[4:]
+            layer1_data = json.loads(clean_l1.strip())
+            
+            answer = layer1_data.get("answer", "Analysis complete.")
+            layer1_insight["title"] = layer1_data.get("title", "Analysis Results")
+            layer1_insight["summary"] = answer
+            layer1_insight["key_findings"] = layer1_data.get("key_findings", [])
+            layer1_insight["recommendations"] = layer1_data.get("recommendations", [])
+        except (json.JSONDecodeError, Exception) as e:
+            # Fallback to simple answer
+            answer_prompt = f"""
 The user asked: "{user_message}"
 Analysis plan: {analysis.get('plan', 'N/A')}
 Result: {json.dumps(result_data) if result_data else 'No result'}
 Error: {error if error else 'None'}
 {context_instructions}
 
-Provide a clear, concise answer in 2-3 sentences. If there was an error, explain what might have gone wrong and suggest fixes.
+Provide a clear, concise answer in 2-3 sentences.
 """
-        answer = await get_llm_response(answer_prompt, system_message)
-        
-        # Populate Layer 1 - Business Intelligence
-        layer1_insight["summary"] = answer
-        if result_data and analysis_success:
-            layer1_insight["key_findings"] = [
-                f"Analyzed {result_data.get('row_count', 0)} rows of data",
-                analysis.get("plan", "Analysis completed")
-            ]
-            if analysis.get("chart_type"):
-                layer1_insight["recommendations"].append(f"View the {analysis.get('chart_type')} chart for visual insights")
+            answer = await get_llm_response(answer_prompt, system_message)
+            layer1_insight["title"] = "Analysis Results"
+            layer1_insight["summary"] = answer
+            layer1_insight["key_findings"] = []
+            layer1_insight["recommendations"] = []
         
         # Create assistant response with 3-layer structure
         assistant_chat = ChatMessage(
