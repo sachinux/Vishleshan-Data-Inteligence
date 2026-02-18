@@ -449,9 +449,12 @@ export const ChatView = ({
               Create New Workspace
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground">
-            💡 No data yet? Upload a dataset after creating a workspace.
-          </p>
+          <div className="p-4 bg-muted/30 rounded-xl border border-border max-w-sm mx-auto">
+            <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+              <Lightbulb className="h-4 w-4 text-amber-500" />
+              No data yet? Upload a dataset after creating a workspace.
+            </p>
+          </div>
         </div>
       </div>
     );
