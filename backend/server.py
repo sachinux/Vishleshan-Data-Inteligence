@@ -1304,7 +1304,7 @@ async def update_chat_settings(workspace_id: str, update: ChatSettingsUpdate):
     update_data["workspace_id"] = workspace_id
     
     # Upsert: create if doesn't exist, update if it does
-    result = await db.chat_settings.update_one(
+    await db.chat_settings.update_one(
         {"workspace_id": workspace_id},
         {"$set": update_data},
         upsert=True
