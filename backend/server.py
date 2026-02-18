@@ -1732,7 +1732,7 @@ async def create_storyboard(input: StoryboardCreate):
     return storyboard
 
 @api_router.post("/storyboards/generate")
-async def generate_storyboard(workspace_id: str = Form(...), title: str = Form("Data Story")):
+async def generate_storyboard(workspace_id: str = Form(...), title: str = Form("")):
     """Auto-generate an actionable storyboard from existing story tiles"""
     tiles = await db.story_tiles.find({"workspace_id": workspace_id}, {"_id": 0}).to_list(100)
     
@@ -1748,6 +1748,31 @@ async def generate_storyboard(workspace_id: str = Form(...), title: str = Form("
         "action_items": t.get("action_items", []),
         "impact_score": t.get("impact_score", "MEDIUM")
     } for t in tiles])
+    
+    # Auto-generate a smart title if not provided
+    if not title or title in ("Data Actions", "Data Story", ""):
+        title_prompt = f"""
+Based on these analysis insights, generate a short, specific report title (3-6 words).
+The title should describe what the report is about.
+
+Insights:
+{tiles_summary}
+
+Examples of good titles:
+- "Customer Churn Risk Analysis"
+- "Q4 Revenue Deep Dive"
+- "Product Performance Insights"
+- "User Engagement Trends"
+- "Sales Pipeline Analysis"
+
+Return ONLY the title, no quotes or explanation.
+"""
+        try:
+            title = await get_llm_response(title_prompt)
+            title = title.strip().strip('"\'')[:50]  # Clean and limit length
+        except Exception:
+            # Fallback: use the first tile's title or a generic name
+            title = f"{tiles[0]['title']} Report" if tiles else "Data Analysis Report"
     
     # Use LLM to generate comprehensive storyboard
     storyboard_prompt = f"""
