@@ -359,10 +359,41 @@ def extract_pdf_content(file_bytes: bytes) -> tuple[str, List[Dict]]:
     
     return "\n\n".join(text_content), tables
 
+
+def preprocess_dataframe_for_analysis(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Auto-preprocess dataframe to handle common issues:
+    - Convert Yes/No, True/False strings to 0/1
+    - Handle categorical columns
+    - Clean numeric columns
+    """
+    df_clean = df.copy()
+    
+    for col in df_clean.columns:
+        # Check if column has Yes/No or True/False values
+        if df_clean[col].dtype == 'object':
+            unique_vals = df_clean[col].dropna().str.lower().unique()
+            
+            # Convert Yes/No to 1/0
+            if set(unique_vals) <= {'yes', 'no', 'y', 'n'}:
+                mapping = {'yes': 1, 'no': 0, 'y': 1, 'n': 0, 'Yes': 1, 'No': 0, 'YES': 1, 'NO': 0}
+                df_clean[f'{col}_encoded'] = df_clean[col].map(lambda x: mapping.get(str(x).lower() if pd.notna(x) else x, x))
+            
+            # Convert True/False strings to 1/0
+            elif set(unique_vals) <= {'true', 'false'}:
+                mapping = {'true': 1, 'false': 0, 'True': 1, 'False': 0, 'TRUE': 1, 'FALSE': 0}
+                df_clean[f'{col}_encoded'] = df_clean[col].map(lambda x: mapping.get(str(x) if pd.notna(x) else x, x))
+    
+    return df_clean
+
+
 def execute_data_query(df: pd.DataFrame, query_code: str) -> Dict[str, Any]:
-    """Execute a data query on a DataFrame safely"""
+    """Execute a data query on a DataFrame safely with ML support"""
     try:
-        # Allowed modules for import
+        # Pre-process dataframe to handle common issues
+        df_processed = preprocess_dataframe_for_analysis(df)
+        
+        # Allowed modules for import - including sklearn
         ALLOWED_MODULES = {
             'pandas': pd,
             'pd': pd,
@@ -373,21 +404,34 @@ def execute_data_query(df: pd.DataFrame, query_code: str) -> Dict[str, Any]:
             'datetime': __import__('datetime'),
             'collections': __import__('collections'),
             're': __import__('re'),
+            'scipy': scipy,
+            'sklearn': sklearn,
         }
         
         def safe_import(name, globals=None, locals=None, fromlist=(), level=0):
-            """Controlled import that only allows whitelisted modules"""
+            """Controlled import that allows whitelisted modules including sklearn"""
+            # Direct module match
             if name in ALLOWED_MODULES:
                 return ALLOWED_MODULES[name]
-            # Handle 'from X import Y' style imports
+            
+            # Handle submodule imports like 'sklearn.model_selection'
             base_module = name.split('.')[0]
             if base_module in ALLOWED_MODULES:
+                # For sklearn and scipy, we need to actually import the submodule
+                if base_module in ('sklearn', 'scipy'):
+                    try:
+                        return __import__(name, globals, locals, fromlist, level)
+                    except ImportError as e:
+                        raise ImportError(f"Failed to import '{name}': {e}")
                 return ALLOWED_MODULES[base_module]
-            raise ImportError(f"Import of '{name}' is not allowed in this environment")
+            
+            raise ImportError(f"Import of '{name}' is not allowed. Allowed: pandas, numpy, sklearn, scipy, math, statistics, datetime")
         
         # Create a safe execution environment with necessary builtins
         safe_builtins = {
-            '__import__': safe_import,  # Controlled import function
+            '__import__': safe_import,
+            '__name__': '__main__',
+            '__doc__': None,
             'len': len,
             'range': range,
             'enumerate': enumerate,
@@ -409,11 +453,14 @@ def execute_data_query(df: pd.DataFrame, query_code: str) -> Dict[str, Any]:
             'dict': dict,
             'tuple': tuple,
             'set': set,
+            'frozenset': frozenset,
             'type': type,
             'isinstance': isinstance,
+            'issubclass': issubclass,
             'hasattr': hasattr,
             'getattr': getattr,
             'setattr': setattr,
+            'delattr': delattr,
             'print': print,
             'any': any,
             'all': all,
@@ -424,6 +471,23 @@ def execute_data_query(df: pd.DataFrame, query_code: str) -> Dict[str, Any]:
             'chr': chr,
             'divmod': divmod,
             'pow': pow,
+            'hex': hex,
+            'bin': bin,
+            'oct': oct,
+            'id': id,
+            'hash': hash,
+            'callable': callable,
+            'iter': iter,
+            'next': next,
+            'object': object,
+            'Exception': Exception,
+            'ValueError': ValueError,
+            'TypeError': TypeError,
+            'KeyError': KeyError,
+            'IndexError': IndexError,
+            'AttributeError': AttributeError,
+            'RuntimeError': RuntimeError,
+            'StopIteration': StopIteration,
             'True': True,
             'False': False,
             'None': None,
@@ -431,12 +495,26 @@ def execute_data_query(df: pd.DataFrame, query_code: str) -> Dict[str, Any]:
         
         # Pre-import commonly used modules into local namespace
         local_vars = {
-            "df": df, 
+            "df": df_processed,  # Use preprocessed dataframe
+            "df_original": df,   # Also provide original
             "pd": pd, 
             "np": np,
             "math": __import__('math'),
             "datetime": __import__('datetime'),
             "statistics": __import__('statistics'),
+            "scipy": scipy,
+            "sklearn": sklearn,
+            # Pre-import common sklearn modules
+            "train_test_split": model_selection.train_test_split,
+            "cross_val_score": model_selection.cross_val_score,
+            "RandomForestClassifier": ensemble.RandomForestClassifier,
+            "RandomForestRegressor": ensemble.RandomForestRegressor,
+            "LogisticRegression": linear_model.LogisticRegression,
+            "LinearRegression": linear_model.LinearRegression,
+            "DecisionTreeClassifier": tree.DecisionTreeClassifier,
+            "LabelEncoder": preprocessing.LabelEncoder,
+            "StandardScaler": preprocessing.StandardScaler,
+            "OneHotEncoder": preprocessing.OneHotEncoder,
         }
         
         exec(query_code, {"__builtins__": safe_builtins}, local_vars)
