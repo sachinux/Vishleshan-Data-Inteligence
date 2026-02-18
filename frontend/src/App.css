@@ -121,6 +121,19 @@
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.02);
+    /* Smooth page transition */
+    animation: fadeSlideIn 0.3s ease-out;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Chat area - Main container */
