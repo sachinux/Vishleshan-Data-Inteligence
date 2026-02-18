@@ -1,221 +1,179 @@
-# Data Storyteller Studio - PRD
+# Vishleshan - Data Intelligence Platform
 
-## Original Problem Statement
-Build a full-stack web app called "Data Storyteller Studio" that lets users upload data files (CSV, Excel, Google Sheets, PDFs) and turn them into interactive charts, insights, and storyboards.
-
-## User Choices
-- **LLM Provider**: OpenAI GPT-5.2 via Emergent LLM Key
-- **Google Sheets**: Simple URL parsing (public sheets only)
-- **PDF Extraction**: Advanced table detection with pdfplumber
-- **Export Formats**: Both PDF and PPTX
-- **Design**: Bento style minimal white with light/dark theme toggle
+## Product Overview
+Vishleshan is a full-stack web application for data analysis that allows users to upload data files (CSV, Excel, Google Sheets, PDF), analyze them using natural language queries in a chat interface, and generate interactive charts and insights.
 
 ## Architecture
+- **Frontend**: React + Tailwind CSS + shadcn/ui
+- **Backend**: FastAPI + Python
+- **Database**: MongoDB
+- **LLM**: OpenAI GPT-5.2 via Emergent LLM Key
 
-### Backend (FastAPI)
-- `/app/backend/server.py` - Main API with all endpoints
-- MongoDB for persistence (workspaces, datasets, chat messages, story tiles, storyboards, chat_settings)
-- In-memory DataFrame storage for dataset analysis
-- OpenAI GPT-5.2 integration via emergentintegrations library
+## Core Features
 
-### Frontend (React + Tailwind)
-- **Sidebar.jsx** - Workspace selector, navigation, dataset list, theme toggle
-- **WorkspaceView.jsx** - File upload, Google Sheets import, data profiling
-- **ChatView.jsx** - Natural language chat with chart rendering, settings
-- **ChatSettings.jsx** - AI customization modal (context & response style)
-- **ChartRenderer.jsx** - Recharts-based visualization (bar, line, pie, scatter)
-- **DataTable.jsx** - Paginated data display
-- **StoryboardView.jsx** - Story tiles, storyboard editor with drag-drop
-- **RightSidebar.jsx** - Storyboard, Pinned Insights, Narrative Coach
+### 1. Data Management (Your Data View)
+- Upload CSV, Excel, Google Sheets (via URL), PDF files
+- Auto-profiling of uploaded datasets
+- Dataset preview and management
+- Inactive chat preview with smooth transition to Analysis
 
-## Core Requirements (Static)
+### 2. Chat-Based Analysis (Analysis View)
+- Natural language querying of data
+- In-chat file uploads
+- Prompt Library for saving/reusing prompts
+- Smart suggestions for follow-up questions
 
-### File Handling
-- [x] CSV upload with pandas parsing
-- [x] Excel (.xlsx, .xls) upload with openpyxl
-- [x] Google Sheets via public URL export
-- [x] PDF text/table extraction with pdfplumber
+### 3. 3-Layer Analysis System ✅ (NEW - Feb 2026)
+A stable architecture that separates concerns:
 
-### Data Engine
-- [x] Unified dataset model with column profiles
-- [x] Type detection (numeric, string, datetime)
-- [x] Statistics: nulls, unique counts, min/max, mean
-- [x] DataFrame operations for query execution
+**Layer 1 - Business Intelligence (User Visible)**
+- Charts, insights, recommendations
+- Key findings
+- Clean, actionable results
+- Confidence score (only shown on success)
 
-### Chat UX
-- [x] Left sidebar with file list and profile
-- [x] Main chat with plan, result, table, chart
-- [x] Toggleable code view (hidden by default)
-- [x] Error explanations with suggestions
-- [x] Chat Settings with Context and Response Style customization
+**Layer 2 - AI Reasoning (Collapsible, collapsed by default)**
+- "What I did" explanation
+- Methodology used
+- Steps taken
+- Model selection info
 
-### Visualization
-- [x] Auto-generated chart specs (bar, line, pie, scatter)
-- [x] Interactive charts with hover, legend toggle
-- [x] Chart type switching controls
-- [x] CSV export for chart data
+**Layer 3 - Runtime (Collapsible, collapsed by default)**
+- Python sandbox details
+- Generated code
+- Execution time
+- Error details (for debugging)
 
-### Story Tiles & Storyboard
-- [x] Create tiles from chat messages
-- [x] Tile fields: id, title, key_metrics, explanation, chart_config
-- [x] Storyboard with ordered frames
-- [x] Drag-and-drop frame reordering
-- [x] Edit frame titles and narrative notes
+### 4. AI Model Orchestrator ✅ (NEW - Feb 2026)
+AI-powered automatic model selection:
 
-### Export
-- [x] PDF export with reportlab
-- [x] PPTX export with python-pptx
-- [x] JSON export endpoint
+**Available Models:**
+- Deep Analysis - LLM-powered code generation for complex queries
+- Statistical Summary - Fast statistical profiling
+- Aggregation Engine - Direct numeric calculations (sum, mean, count)
+- Chart Generator - Direct visualization
+- Pattern Detector - Anomaly and trend detection
 
-## What's Been Implemented
+**Features:**
+- Automatic model selection based on query analysis
+- Percentage scores for each model considered
+- Small popover badge showing selected model
+- Model selection info in Layer 2
+- Reasoning for why model was selected
 
-### Session - February 16, 2026 (Bug Fix)
-- **P0 Bug Fixed**: Chat code execution `__import__ not found` error
-- **Root Cause**: Backend Python sandbox blocked all builtins in `execute_data_query()`
-- **Fix**: Added whitelist of safe built-in functions (len, sum, range, etc.)
-- **File**: `/app/backend/server.py`
+### 5. Failure State Handling ✅ (NEW - Feb 2026)
+- Graceful failure UI with amber/mild alert styling
+- "Retry" button
+- "Switch Method" dropdown with 3 alternatives:
+  - Statistical Summary
+  - Simple Aggregation
+  - Chart Only
+- "Learn More" collapsible with technical explanation
+- No confidence % shown on failure
 
-### Session - February 16, 2026 (continued)
-- **Kanban Board**: Implemented 3-column layout (Draft, In Progress, Completed) for report management
-- **Tabbed Reports**: Multiple reports can be opened in tabs for quick switching
-- **Report Cards**: Show title, progress bar, action count, frame count, last updated
-- **Drag & Drop**: Move reports between columns to change status
-- **Removed**: Pinned Insights section from Data Actions view
+### 6. Data Actions (Storyboard View)
+- Collapsible Kanban board (Draft, In Progress, Completed)
+- Report management with tabs
+- Executive summary, KPIs, action items
+- PDF/PPTX export (UI only, backend pending)
 
-### Session - February 16, 2026
-- **UI Fix**: Right sidebar width increased from 280px to 320px
-- **Layout Fix**: Fixed overlapping text in Key Metrics, To Do, and Quick Stats sections
-- **Improved Readability**: Better spacing for action items and KPI cards
+## API Endpoints
 
-### Previous Sessions
+### Chat Endpoints
+- `POST /api/chat` - Main analysis endpoint with 3-layer response
+- `POST /api/chat/alternative` - Alternative analysis methods
+- `GET /api/chat/{workspace_id}` - Get chat history
 
-### Feb 16, 2026
-- **Chat Settings Feature**: Added settings modal to customize AI behavior
-  - Context: Custom instructions the AI remembers (up to 1000 chars)
-  - Response Style: How the AI responds (up to 50 chars, e.g., "professional, concise")
-  - Backend: `/api/chat-settings/{workspace_id}` GET/PUT endpoints
-  - Frontend: ChatSettings.jsx modal component
-  - Settings persist per workspace in MongoDB
+### Dataset Endpoints
+- `POST /api/datasets/upload` - Upload dataset
+- `GET /api/datasets/{workspace_id}` - List datasets
+- `GET /api/datasets/{dataset_id}/profile` - Get profile
+- `GET /api/datasets/{dataset_id}/preview` - Preview data
 
-- **Storyboard UX Improvements**: Simplified the storyboard view
-  - Cleaner frame cards with rounded corners and subtle borders
-  - Simplified UX copy ("Included Tiles", "Speaker Notes")
-  - Removed confusing CTAs and redundant elements
-  - Better visual hierarchy with numbered frames (01, 02, 03)
-  - Cleaner right sidebar with simplified "Pinned Insights" section
-
-- **Excel-like Data Grid with Row Selection**: Added Profile/Grid tabs
-  - New "Grid" tab in left sidebar for Excel-like data view
-  - **50-50 Split View**: Grid appears at top of Analysis section when activated
-  - **"Show Table" / "Hide Table"** toggle button in chat header
-  - Row selection with checkboxes (single and multi-select)
-  - Sortable columns, pagination (50 rows per page)
-  - **"Narrate Story"** - AI generates a narrative from selected rows
-  - **"Compare Data"** - AI compares and contrasts selected rows
-  - Both generate visual charts and can be pinned as insights
-  - Backend: `/api/datasets/{id}/rows` and `/api/datasets/selected-rows/analyze` endpoints
-  - Frontend: DataGridView.jsx component
-
-- **Interactive Actionable Storyboards**: Major enhancement to storyboard generation
-  - **Renamed to "Data Actions"** throughout the UI
-  - **Executive Summary**: AI-generated 2-3 sentence summary at the top
-  - **KPI Dashboard**: Color-coded KPIs (green/yellow/red) with trend indicators
-  - **Action Items Checklist**: 
-    - Prioritized actions (HIGH/MEDIUM/LOW)
-    - Category badges (Operations, Product, Marketing, Sales)
-    - Progress tracking with completion checkboxes
-    - Progress bar showing completed vs total
-  - **Stakeholder Views**: Different perspectives for:
-    - Executive: High-level summary, key points, recommended actions
-    - Manager: Tactical overview with operational focus
-    - Analyst: Detailed findings with technical recommendations
-  - **Delete functionality**:
-    - Delete Data Actions (storyboards) with confirmation dialog
-    - Delete Pinned Insights with confirmation dialog
-    - Hover to reveal delete button on items
-  - **Frame-level enhancements**:
-    - Inline KPIs with status indicators
-    - Frame-specific action items
-  - Backend: Enhanced `/api/storyboards/generate` with rich LLM prompts
-  - Frontend: Tabbed interface (Story | Actions | KPIs | Views)
-
-### Jan 9, 2026
-- 16 API endpoints (all tested and working)
-- Workspace CRUD operations
-- File upload for CSV, Excel, PDF
-- Google Sheets import via URL
-- Data profiling with column statistics
-- Chat endpoint with LLM analysis
-- Story tile creation from messages
-- Storyboard generation and editing
-- PDF/PPTX/JSON export
-- Three-column layout with fixed sidebars
-- Bento UI theme with light/dark toggle
-- Workspace/dataset deletion with confirmation dialogs
-- Progress indicator for chat queries
-
-## User Personas
-
-### Primary: Business Analyst
-- Uploads sales/marketing data
-- Asks natural language questions
-- Creates executive presentation decks
-
-### Secondary: Data Scientist
-- Quick exploration of datasets
-- Validates patterns with visualizations
-- Shares findings with stakeholders
-
-## Prioritized Backlog
-
-### P0 (MVP Complete)
-- [x] All core features implemented
-- [x] Chat Settings (Context & Response Style)
-
-### P1 (High Priority)
-- [x] Profile/Grid tabs in left sidebar
-- [ ] Quick Start Templates (Data Audit, Deep Dive)
-- [ ] Excel multi-sheet support
-- [ ] Heatmap chart type
-
-### P2 (Medium Priority)
-- [ ] Search and filter for Query Navigator
-- [ ] Timestamps for queries
-- [ ] Bulk deletion for datasets
-- [ ] Rename/description editing for datasets
-- [ ] Narrative Coach functionality
-- [ ] Custom chart color themes
-
-### P3 (Nice to Have)
-- [ ] User authentication
-- [ ] Workspace sharing
-- [ ] Real-time collaboration
-- [ ] Scheduled report generation
-- [ ] Email export delivery
-- [ ] Dashboard embedding
-
-## Key API Endpoints
+### Workspace Endpoints
 - `POST /api/workspaces` - Create workspace
-- `PUT /api/workspaces/{id}` - Update workspace
-- `DELETE /api/workspaces/{id}` - Delete workspace
-- `POST /api/datasets/upload` - Upload data file
-- `DELETE /api/datasets/{id}` - Delete dataset
-- `GET /api/datasets/{id}/rows` - Get paginated rows for grid view
-- `POST /api/datasets/selected-rows/analyze` - Analyze selected rows (narrate/compare)
-- `POST /api/chat` - Process user query
-- `GET /api/chat-settings/{workspace_id}` - Get chat settings
-- `PUT /api/chat-settings/{workspace_id}` - Update chat settings
-- `POST /api/story-tiles/from-message` - Create story tile
-- `POST /api/storyboards/generate` - Generate storyboard
-- `POST /api/export/pdf/{id}` - Export to PDF
-- `POST /api/export/pptx/{id}` - Export to PPTX
+- `GET /api/workspaces` - List workspaces
+- `PUT /api/workspaces/{workspace_id}` - Update workspace
 
-## Files of Reference
-- `/app/backend/server.py` - All API logic
-- `/app/frontend/src/App.js` - Root React component
-- `/app/frontend/src/components/ChatView.jsx` - Chat interface
-- `/app/frontend/src/components/ChatSettings.jsx` - Settings modal
-- `/app/frontend/src/components/DataGridView.jsx` - Excel-like data grid with row selection
-- `/app/frontend/src/components/Sidebar.jsx` - Left sidebar with Profile/Grid tabs
-- `/app/frontend/src/components/RightSidebar.jsx` - Right sidebar
+## Data Models
 
+### ChatMessage
+```python
+{
+  id: str,
+  workspace_id: str,
+  role: str,  # user, assistant
+  content: str,
+  plan: str,
+  code: str,
+  table_data: dict,
+  chart_config: dict,
+  error: str,
+  suggestions: list,
+  # 3-Layer System
+  analysis_success: bool,
+  analysis_method: str,
+  layer1_insight: dict,
+  layer2_reasoning: dict,
+  layer3_runtime: dict,
+  confidence_score: int,
+  alternative_methods: list,
+  model_selection: dict  # {selected, reason, alternatives}
+}
+```
+
+## Completed Work (Feb 2026)
+
+### Session 1
+- Basic app scaffolding
+- Workspace and dataset management
+- Chat interface
+- Chart generation
+
+### Session 2 (Current)
+- ✅ 3-Layer Analysis System (Layer 1, 2, 3)
+- ✅ AI Model Orchestrator with automatic selection
+- ✅ Failure state redesign with Retry/Switch Method
+- ✅ Confidence score only on success
+- ✅ Model selector popover badge
+- ✅ Layer 2 includes model selection info
+
+## Upcoming Tasks (P1)
+- Quick Start Templates (Data Audit, Deep Dive)
+- Assignees and due dates for action items
+- "Select All" checkbox in Data Grid header
+
+## Future Tasks (P2)
+- PDF/PPTX Export for Data Actions
+- Search and filter for Query Navigator
+- Bulk deletion for datasets
+- What-If scenario analysis
+- Drill-down charts
+
+## Known Limitations
+- PDF/PPTX export buttons are UI-only (no backend)
+- Dataset store is in-memory (cleared on restart)
+- No user authentication implemented
+
+## File Structure
+```
+/app/
+├── backend/
+│   ├── server.py          # FastAPI app with 3-layer system
+│   ├── requirements.txt
+│   └── .env
+├── frontend/
+│   ├── src/
+│   │   ├── App.js
+│   │   ├── App.css
+│   │   └── components/
+│   │       ├── ChatView.jsx    # 3-layer UI, model selector
+│   │       ├── WorkspaceView.jsx
+│   │       ├── StoryboardView.jsx
+│   │       ├── RightSidebar.jsx
+│   │       └── Sidebar.jsx
+│   ├── package.json
+│   └── .env
+└── memory/
+    └── PRD.md
+```
