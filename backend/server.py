@@ -1387,34 +1387,51 @@ Return ONLY valid JSON, no markdown."""
         # Generate natural language answer
         system_message = f"You are a friendly data analyst explaining results to a business user.{response_style_instructions}"
         
+        # Format result data for LLM
+        formatted_result = "No result"
+        if result_data:
+            if result_data.get("type") == "dataframe" and result_data.get("data"):
+                formatted_result = f"DataFrame with {len(result_data.get('data', []))} rows:\n{json.dumps(result_data.get('data', [])[:10], indent=2)}"
+            elif result_data.get("type") == "scalar":
+                formatted_result = f"Value: {result_data.get('data')}"
+            elif result_data.get("type") == "dict":
+                formatted_result = f"Dict: {json.dumps(result_data.get('data', {}), indent=2)}"
+            elif result_data.get("type") == "series":
+                formatted_result = f"Series: {json.dumps(result_data.get('data', {}), indent=2)}"
+            else:
+                formatted_result = json.dumps(result_data)
+        
         # Generate structured Layer 1 content
         layer1_prompt = f"""
 Based on this analysis, create a structured business insight response.
 
 User Question: "{user_message}"
 Analysis Method: {analysis.get('plan', 'N/A')}
-Result Data: {json.dumps(result_data) if result_data else 'No result'}
+Result Data: {formatted_result}
 Error: {error if error else 'None'}
+Analysis Success: {analysis_success}
 {context_instructions}
+
+IMPORTANT: Use the ACTUAL numbers from the Result Data above. Do NOT say "data not available" if Result Data shows actual values.
 
 Return a JSON with:
 1. "title": A clear, action-oriented title (3-7 words) that summarizes the answer
-2. "answer": Direct answer to the user's question in 1-2 sentences
-3. "key_findings": Array of 2-4 specific, data-backed insights (be specific with numbers)
+2. "answer": Direct answer to the user's question in 1-2 sentences using the actual data
+3. "key_findings": Array of 2-4 specific insights with ACTUAL numbers from the Result Data
 4. "recommendations": Array of 1-2 actionable next steps (optional)
 
-Example for "What are the top churn drivers?":
+Example for churn drivers with Result Data showing tenure=35%, age=32%:
 {{
-  "title": "Tenure & Contract Type Drive Churn",
-  "answer": "Customers with shorter tenure and month-to-month contracts have the highest churn risk.",
+  "title": "Tenure & Age Drive Churn",
+  "answer": "Tenure (35%) and age (32%) are the strongest predictors of customer churn.",
   "key_findings": [
-    "Tenure is the #1 predictor (32% importance)",
-    "Month-to-month contracts have 3x higher churn",
-    "Average churner tenure: 4.5 months vs 29 months retained"
+    "Tenure is the #1 predictor at 35% importance",
+    "Age is #2 at 32% importance", 
+    "Monthly charges contribute 30%"
   ],
   "recommendations": [
-    "Focus retention efforts on customers with <6 month tenure",
-    "Consider incentives for annual contract upgrades"
+    "Focus retention on new customers (<6 month tenure)",
+    "Create age-specific retention programs"
   ]
 }}
 
