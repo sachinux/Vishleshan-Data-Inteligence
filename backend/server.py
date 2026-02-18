@@ -110,6 +110,8 @@ class ChatMessage(BaseModel):
     layer3_runtime: Optional[Dict[str, Any]] = None  # Runtime execution layer (collapsible/hidden)
     confidence_score: Optional[int] = None  # Only set when analysis succeeds
     alternative_methods: List[str] = []  # Available methods to try if failed
+    # Model Orchestrator - AI selects best analysis method
+    model_selection: Optional[Dict[str, Any]] = None  # {selected, reason, alternatives: [{name, score, description}]}
 
 class ChatRequest(BaseModel):
     workspace_id: str
