@@ -1255,7 +1255,7 @@ Dataset Schema:
         # Check for auto-encoded columns
         encoded_cols = [col for col in df_preprocessed.columns if col.endswith('_encoded')]
         if encoded_cols:
-            encoded_cols_info = f"\n\nAUTO-ENCODED COLUMNS AVAILABLE (use these for Yes/No data):\n"
+            encoded_cols_info = "\n\nAUTO-ENCODED COLUMNS AVAILABLE (use these for Yes/No data):\n"
             for col in encoded_cols:
                 original = col.replace('_encoded', '')
                 encoded_cols_info += f"  - '{col}' (binary 0/1 version of '{original}')\n"
