@@ -153,33 +153,34 @@ export const WorkspaceView = ({
 
   if (!workspace) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-            <Database className="h-8 w-8 text-primary" />
+      <div className="flex-1 flex items-center justify-center p-8 h-full">
+        <div className="text-center max-w-lg mx-auto">
+          <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-8">
+            <Database className="h-10 w-10 text-primary" />
           </div>
-          <h2 className="text-xl font-semibold mb-3">
+          <h1 className="text-2xl font-semibold mb-4 tracking-tight">
             Start by Creating Your First Workspace
-          </h2>
-          <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+          </h1>
+          <p className="text-base text-muted-foreground mb-8 leading-relaxed max-w-md mx-auto">
             Your Data helps you organize datasets, analysis, and actions in one place. 
             Create a new workspace or select an existing one to begin.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              onClick={() => {/* This would need to be passed as prop */}}
-              className="gap-2"
+              size="lg"
+              className="gap-2 px-6 bg-foreground text-background hover:bg-foreground/90"
               data-testid="empty-create-workspace"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               Create Workspace
             </Button>
             <Button 
               variant="outline"
-              className="gap-2"
+              size="lg"
+              className="gap-2 px-6"
               data-testid="empty-select-workspace"
             >
-              <ChevronDown className="h-4 w-4" />
+              <CheckCircle className="h-5 w-5" />
               Select Existing Workspace
             </Button>
           </div>
