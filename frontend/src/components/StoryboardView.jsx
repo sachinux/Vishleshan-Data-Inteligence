@@ -489,11 +489,26 @@ export const StoryboardView = ({
             Select a workspace to create rules, triggers, and automated reports.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <Button 
+              size="lg"
+              className="gap-2 px-6 bg-foreground text-background hover:bg-foreground/90"
+              onClick={handleCreateWorkspace}
+              disabled={creatingWorkspace}
+              data-testid="empty-create-workspace-actions"
+            >
+              {creatingWorkspace ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Plus className="h-5 w-5" />
+              )}
+              Create Workspace
+            </Button>
             <Popover open={showWorkspaceSelect} onOpenChange={setShowWorkspaceSelect}>
               <PopoverTrigger asChild>
                 <Button 
+                  variant="outline"
                   size="lg"
-                  className="gap-2 px-6 bg-foreground text-background hover:bg-foreground/90"
+                  className="gap-2 px-6"
                   data-testid="empty-select-workspace-actions"
                 >
                   <FolderOpen className="h-5 w-5" />
@@ -527,21 +542,6 @@ export const StoryboardView = ({
                 </div>
               </PopoverContent>
             </Popover>
-            <Button 
-              variant="outline"
-              size="lg"
-              className="gap-2 px-6"
-              onClick={handleCreateWorkspace}
-              disabled={creatingWorkspace}
-              data-testid="empty-create-workspace-actions"
-            >
-              {creatingWorkspace ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Plus className="h-5 w-5" />
-              )}
-              Create Workspace
-            </Button>
           </div>
           <div className="p-4 bg-muted/30 rounded-xl border border-border max-w-sm mx-auto">
             <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
