@@ -589,14 +589,25 @@ export const WorkspaceView = ({
             </TooltipProvider>
           ) : (
             <div className="flex-1 flex items-center justify-center h-full">
-              <div className="text-center">
-                <FileSpreadsheet className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="font-heading text-sm uppercase tracking-wider mb-2">
+              <div className="text-center max-w-sm">
+                <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-5">
+                  <FileSpreadsheet className="h-7 w-7 text-muted-foreground" />
+                </div>
+                <h3 className="text-base font-semibold mb-2">
                   No Dataset Selected
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  Upload a new dataset or select an existing one to view its profile and start analyzing.
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Upload or select a dataset to view its profile
-                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload Dataset
+                </Button>
               </div>
             </div>
           )}
