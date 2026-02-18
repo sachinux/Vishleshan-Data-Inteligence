@@ -998,7 +998,6 @@ Example:
     
     try:
         import time
-        start_time = time.time()
         
         llm_response = await get_llm_response(analysis_prompt)
         
