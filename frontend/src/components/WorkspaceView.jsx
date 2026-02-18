@@ -186,20 +186,56 @@ export const WorkspaceView = ({
             <Button 
               size="lg"
               className="gap-2 px-6 bg-foreground text-background hover:bg-foreground/90"
+              onClick={handleCreateWorkspace}
+              disabled={creatingWorkspace}
               data-testid="empty-create-workspace"
             >
-              <Plus className="h-5 w-5" />
+              {creatingWorkspace ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Plus className="h-5 w-5" />
+              )}
               Create Workspace
             </Button>
-            <Button 
-              variant="outline"
-              size="lg"
-              className="gap-2 px-6"
-              data-testid="empty-select-workspace"
-            >
-              <CheckCircle className="h-5 w-5" />
-              Select Existing Workspace
-            </Button>
+            <Popover open={showWorkspaceSelect} onOpenChange={setShowWorkspaceSelect}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline"
+                  size="lg"
+                  className="gap-2 px-6"
+                  data-testid="empty-select-workspace"
+                >
+                  <FolderOpen className="h-5 w-5" />
+                  Select Existing Workspace
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-0" align="center">
+                <div className="p-3 border-b border-border">
+                  <p className="text-sm font-medium">Select Workspace</p>
+                </div>
+                <div className="max-h-[200px] overflow-auto">
+                  {workspaces && workspaces.length > 0 ? (
+                    workspaces.map((ws) => (
+                      <button
+                        key={ws.id}
+                        onClick={() => {
+                          onSelectWorkspace(ws);
+                          setShowWorkspaceSelect(false);
+                        }}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2"
+                      >
+                        <Database className="h-4 w-4 text-muted-foreground" />
+                        {ws.name}
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-3 py-4 text-sm text-muted-foreground text-center">
+                      No workspaces yet
+                    </p>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
