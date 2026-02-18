@@ -681,6 +681,62 @@ export const WorkspaceView = ({
         </div>
       </div>
 
+      {/* AI Chat Preview - Bottom Section */}
+      {workspace && datasets.length > 0 && (
+        <div 
+          className="chat-preview-inactive mx-4 mb-4"
+          onClick={onNavigateToAnalysis}
+          data-testid="chat-preview"
+        >
+          <span className="preview-badge">AI Powered</span>
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Bot className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base font-semibold mb-1">
+                Ready to Analyze Your Data?
+              </h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Ask questions in plain English and get instant insights with AI-powered analysis and visualizations.
+              </p>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-muted/50 rounded-lg px-4 py-2.5 border border-border/50">
+                  <span className="text-sm text-muted-foreground">
+                    "What are the top trends in my data?"
+                  </span>
+                </div>
+                <Button 
+                  size="sm" 
+                  className="gap-2 bg-foreground text-background hover:bg-foreground/90"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNavigateToAnalysis();
+                  }}
+                >
+                  Start Analysis
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 mt-4 pt-3 border-t border-border/50">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <MessageSquare className="h-3.5 w-3.5" />
+              Natural language queries
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Sparkles className="h-3.5 w-3.5" />
+              Auto-generated charts
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <TrendingUp className="h-3.5 w-3.5" />
+              Smart insights
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Dataset Confirmation Dialog */}
       <AlertDialog open={!!deletingDataset} onOpenChange={() => setDeletingDataset(null)}>
         <AlertDialogContent>
