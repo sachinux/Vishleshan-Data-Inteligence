@@ -432,6 +432,83 @@ export const ChatView = ({
     }
   };
 
+  // Handle retry analysis
+  const handleRetry = async (message) => {
+    if (!workspace || !selectedDataset) {
+      toast.error("Please select a dataset first");
+      return;
+    }
+    
+    // Find the last user message before this assistant message
+    const msgIndex = messages.findIndex(m => m.id === message.id);
+    let userQuery = null;
+    for (let i = msgIndex - 1; i >= 0; i--) {
+      if (messages[i].role === "user") {
+        userQuery = messages[i].content;
+        break;
+      }
+    }
+    
+    if (!userQuery) {
+      toast.error("Could not find original query to retry");
+      return;
+    }
+    
+    setRetrying(true);
+    try {
+      const response = await axios.post(`${API_BASE}/chat`, {
+        workspace_id: workspace.id,
+        message: userQuery,
+        dataset_id: selectedDataset.id,
+      });
+      
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: `🔄 Retry: ${userQuery}`, id: Date.now().toString() },
+        response.data,
+      ]);
+      toast.success("Analysis retried!");
+    } catch (error) {
+      toast.error("Retry failed");
+    } finally {
+      setRetrying(false);
+    }
+  };
+
+  // Handle switch to alternative method
+  const handleSwitchMethod = async (method) => {
+    if (!workspace || !selectedDataset) {
+      toast.error("Please select a dataset first");
+      return;
+    }
+    
+    setSending(true);
+    try {
+      const response = await axios.post(`${API_BASE}/chat/alternative`, {
+        workspace_id: workspace.id,
+        dataset_id: selectedDataset.id,
+        method: method,
+      });
+      
+      const methodNames = {
+        statistical: "Statistical Summary",
+        aggregation: "Simple Aggregation",
+        chart_only: "Chart Only"
+      };
+      
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: `📊 ${methodNames[method] || method}`, id: Date.now().toString() },
+        response.data,
+      ]);
+      toast.success(`${methodNames[method] || method} generated!`);
+    } catch (error) {
+      toast.error(`Failed to run ${method} analysis`);
+    } finally {
+      setSending(false);
+    }
+  };
+
   const handleExpandDetail = (message, type) => {
     setDetailPanel({ message, type });
   };
