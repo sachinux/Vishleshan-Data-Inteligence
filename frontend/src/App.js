@@ -388,6 +388,9 @@ function AppContent() {
             importGoogleSheet={importGoogleSheet}
             loading={loading}
             onDatasetDeleted={handleDatasetDeleted}
+            workspaces={workspaces}
+            onCreateWorkspace={createWorkspace}
+            onSelectWorkspace={setCurrentWorkspace}
           />
         )}
         
