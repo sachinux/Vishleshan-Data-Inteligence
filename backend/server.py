@@ -1249,7 +1249,8 @@ Provide a clear, concise answer in 2-3 sentences. If there was an error, explain
             layer2_reasoning=layer2_reasoning,
             layer3_runtime=layer3_runtime,
             confidence_score=confidence_score,
-            alternative_methods=alternative_methods if not analysis_success else []
+            alternative_methods=alternative_methods if not analysis_success else [],
+            model_selection=model_selection
         )
         
         doc = prepare_for_mongo(assistant_chat.model_dump())
@@ -1277,7 +1278,8 @@ Provide a clear, concise answer in 2-3 sentences. If there was an error, explain
             layer2_reasoning=layer2_reasoning,
             layer3_runtime=layer3_runtime,
             confidence_score=None,
-            alternative_methods=["statistical", "aggregation", "chart_only"]
+            alternative_methods=["statistical", "aggregation", "chart_only"],
+            model_selection=model_selection if 'model_selection' in dir() else None
         )
         doc = prepare_for_mongo(error_chat.model_dump())
         await db.chat_messages.insert_one(doc)
