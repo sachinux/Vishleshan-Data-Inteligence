@@ -144,6 +144,9 @@ export const ChatView = ({
   setShowGridSplit,
   uploadFile,
   onDatasetUploaded,
+  workspaces,
+  onCreateWorkspace,
+  onSelectWorkspace,
 }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -163,6 +166,22 @@ export const ChatView = ({
   
   // Prompt library states
   const [showPromptLibrary, setShowPromptLibrary] = useState(false);
+  
+  // Workspace selection states
+  const [showWorkspaceSelect, setShowWorkspaceSelect] = useState(false);
+  const [creatingWorkspace, setCreatingWorkspace] = useState(false);
+
+  const handleCreateWorkspace = async () => {
+    setCreatingWorkspace(true);
+    try {
+      await onCreateWorkspace();
+      toast.success("Workspace created!");
+    } catch (error) {
+      toast.error("Failed to create workspace");
+    } finally {
+      setCreatingWorkspace(false);
+    }
+  };
   const [showSavePrompt, setShowSavePrompt] = useState(false);
   const [savedPrompts, setSavedPrompts] = useState([]);
   const [newPromptName, setNewPromptName] = useState("");
