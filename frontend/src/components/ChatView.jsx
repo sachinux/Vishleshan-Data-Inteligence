@@ -174,12 +174,20 @@ export const ChatView = ({
   // Workspace selection states
   const [showWorkspaceSelect, setShowWorkspaceSelect] = useState(false);
   const [creatingWorkspace, setCreatingWorkspace] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [newWorkspaceName, setNewWorkspaceName] = useState("");
 
   const handleCreateWorkspace = async () => {
+    if (!newWorkspaceName.trim()) {
+      toast.error("Please enter a workspace name");
+      return;
+    }
     setCreatingWorkspace(true);
     try {
-      await onCreateWorkspace();
+      await onCreateWorkspace(newWorkspaceName.trim());
       toast.success("Workspace created!");
+      setShowCreateDialog(false);
+      setNewWorkspaceName("");
     } catch (error) {
       toast.error("Failed to create workspace");
     } finally {
