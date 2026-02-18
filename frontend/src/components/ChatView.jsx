@@ -1614,6 +1614,42 @@ const MessageBubble = ({
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="mb-4 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                {/* Model Selection Info in Layer 2 */}
+                {(modelSelection || message.layer2_reasoning?.model_selection) && (
+                  <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <span className="text-xs text-primary uppercase tracking-wider font-semibold">
+                        Model Selection
+                      </span>
+                    </div>
+                    <p className="text-sm mb-3">
+                      {(modelSelection || message.layer2_reasoning?.model_selection)?.reason}
+                    </p>
+                    <div className="space-y-2">
+                      {(modelSelection || message.layer2_reasoning?.model_selection)?.alternatives?.slice(0, 3).map((alt) => {
+                        const isSelected = alt.id === (modelSelection || message.layer2_reasoning?.model_selection)?.selected;
+                        return (
+                          <div 
+                            key={alt.id}
+                            className={`flex items-center justify-between text-xs p-2 rounded ${
+                              isSelected ? 'bg-primary/10' : 'bg-muted/50'
+                            }`}
+                          >
+                            <span className={isSelected ? 'font-medium text-primary' : 'text-muted-foreground'}>
+                              {alt.name}
+                              {isSelected && ' ✓'}
+                            </span>
+                            <span className={`font-mono ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+                              {alt.score}%
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {message.layer2_reasoning.methodology && (
                   <div className="mb-3">
                     <p className="text-xs text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1 font-semibold">
