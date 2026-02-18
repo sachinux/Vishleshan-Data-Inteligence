@@ -1247,6 +1247,50 @@ export const ChatView = ({
           }}
           loading={parentLoading}
         />
+
+        {/* Create Workspace Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New Workspace</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Workspace Name</label>
+                <Input
+                  value={newWorkspaceName}
+                  onChange={(e) => setNewWorkspaceName(e.target.value)}
+                  placeholder="e.g., Q4 Sales Analysis"
+                  data-testid="new-workspace-name-input"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newWorkspaceName.trim()) {
+                      handleCreateWorkspace();
+                    }
+                  }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                A workspace helps you organize related datasets and analyses together.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateWorkspace}
+                disabled={creatingWorkspace || !newWorkspaceName.trim()}
+              >
+                {creatingWorkspace ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Plus className="h-4 w-4 mr-2" />
+                )}
+                Create
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </TooltipProvider>
   );
