@@ -543,7 +543,7 @@ export const ChatView = ({
             <Button 
               size="lg"
               className="gap-2 px-6 bg-foreground text-background hover:bg-foreground/90"
-              onClick={handleCreateWorkspace}
+              onClick={() => setShowCreateDialog(true)}
               disabled={creatingWorkspace}
               data-testid="empty-create-workspace-analysis"
             >
