@@ -429,6 +429,9 @@ function AppContent() {
                   setDatasets(prev => [...prev, newDataset]);
                   setSelectedDataset(newDataset);
                 }}
+                workspaces={workspaces}
+                onCreateWorkspace={createWorkspace}
+                onSelectWorkspace={setCurrentWorkspace}
               />
             </div>
           </div>
