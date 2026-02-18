@@ -1168,9 +1168,14 @@ const MessageBubble = ({
   onSuggestionClick,
   onClarify,
   clarifying,
-  onExpandDetail
+  onExpandDetail,
+  onRetry,
+  onSwitchMethod,
+  retrying
 }) => {
-  const [showCode, setShowCode] = useState(false);
+  const [showLayer2, setShowLayer2] = useState(false);  // AI Reasoning - collapsed by default
+  const [showLayer3, setShowLayer3] = useState(false);  // Runtime - collapsed by default
+  const [showLearnMore, setShowLearnMore] = useState(false);
 
   const getChartIcon = (type) => {
     switch (type) {
@@ -1187,16 +1192,6 @@ const MessageBubble = ({
     }
   };
 
-  // Calculate LLM Effectiveness Score (simulated based on response quality)
-  const calculateEffectivenessScore = () => {
-    let score = 50;
-    if (message.table_data?.data?.length > 0) score += 20;
-    if (message.chart_config?.type) score += 15;
-    if (message.plan) score += 10;
-    if (!message.error) score += 5;
-    return Math.min(score, 100);
-  };
-
   if (message.role === "user") {
     return (
       <div className="message message-user">
@@ -1207,190 +1202,420 @@ const MessageBubble = ({
     );
   }
 
-  const effectivenessScore = calculateEffectivenessScore();
+  // Check if analysis failed
+  const analysisFailed = message.analysis_success === false || message.error;
+  const confidenceScore = message.confidence_score;
 
   return (
     <div className="message message-assistant animate-fade-in">
       <div className="message-content max-w-full">
-        {/* LLM Effectiveness Score */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Brain className="h-4 w-4 text-primary" />
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">
-              AI Analysis
-            </span>
+        {/* ═══════════════════════════════════════════════════════════════════
+            LAYER 1 - BUSINESS INTELLIGENCE (Always Visible)
+        ═══════════════════════════════════════════════════════════════════ */}
+        <div className="layer-1-bi">
+          {/* Header with confidence (only shown on success) */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Brain className="h-4 w-4 text-primary" />
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                AI Analysis
+              </span>
+              {message.analysis_method && message.analysis_method !== "auto" && (
+                <Badge variant="secondary" className="text-[10px]">
+                  {message.analysis_method}
+                </Badge>
+              )}
+            </div>
+            {/* Only show confidence when analysis succeeds */}
+            {!analysisFailed && confidenceScore && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Confidence</span>
+                      <Progress value={confidenceScore} className="w-16 h-1.5" />
+                      <span className="text-xs font-mono text-primary">{confidenceScore}%</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Analysis confidence based on data quality and results</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
+
+          {/* Main Content / Summary */}
+          <p className="text-sm mb-4">{message.content}</p>
+
+          {/* Key Findings (from layer1_insight) */}
+          {message.layer1_insight?.key_findings?.length > 0 && !analysisFailed && (
+            <div className="mb-4 p-3 bg-primary/5 border border-primary/10 rounded-lg">
+              <p className="text-xs text-primary uppercase tracking-wider mb-2 font-semibold">
+                Key Findings
+              </p>
+              <ul className="space-y-1">
+                {message.layer1_insight.key_findings.map((finding, idx) => (
+                  <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    {finding}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Table Data */}
+          {message.table_data && message.table_data.data && !analysisFailed && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Result Data
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onExpandDetail(message, "table")}
+                  className="h-6 text-xs"
+                  data-testid="expand-table"
+                >
+                  <Maximize2 className="h-3 w-3 mr-1" />
+                  Expand
+                </Button>
+              </div>
+              <DataTable data={message.table_data} />
+            </div>
+          )}
+
+          {/* Chart */}
+          {message.chart_config && message.chart_config.type && !analysisFailed && (
+            <div className="chart-container mb-4">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Confidence</span>
-                  <Progress value={effectivenessScore} className="w-16 h-1.5" />
-                  <span className="text-xs font-mono text-primary">{effectivenessScore}%</span>
+                  {(() => {
+                    const Icon = getChartIcon(message.chart_config.type);
+                    return <Icon className="h-4 w-4 text-primary" />;
+                  })()}
+                  <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                    {message.chart_config.title || "Chart"}
+                  </span>
                 </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-xs">LLM Effectiveness Score based on response quality</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onExpandDetail(message, "chart")}
+                  className="h-6 text-xs"
+                  data-testid="expand-chart"
+                >
+                  <Maximize2 className="h-3 w-3 mr-1" />
+                  Expand
+                </Button>
+              </div>
+              <ChartRenderer
+                config={message.chart_config}
+                data={message.table_data}
+              />
+            </div>
+          )}
+
+          {/* Recommendations */}
+          {message.layer1_insight?.recommendations?.length > 0 && !analysisFailed && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {message.layer1_insight.recommendations.map((rec, idx) => (
+                <Badge key={idx} variant="outline" className="text-xs">
+                  <Lightbulb className="h-3 w-3 mr-1" />
+                  {rec}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Plan */}
-        {message.plan && (
-          <div className="mb-3 p-3 bg-muted/50 border-l-2 border-primary">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-              <Lightbulb className="h-3 w-3 inline mr-1" />
-              What I did
-            </p>
-            <p className="text-sm">{message.plan}</p>
-          </div>
-        )}
+        {/* ═══════════════════════════════════════════════════════════════════
+            FAILURE STATE - Redesigned Alert with Actions
+        ═══════════════════════════════════════════════════════════════════ */}
+        {analysisFailed && (
+          <div className="failure-state mb-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">
+                  Analysis temporarily unavailable
+                </p>
+                <p className="text-xs text-muted-foreground mb-4">
+                  The primary analysis method encountered an issue. Try an alternative approach below.
+                </p>
+                
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onRetry && onRetry(message)}
+                    disabled={retrying}
+                    className="text-xs border-amber-500/30 hover:border-amber-500 hover:bg-amber-500/10"
+                    data-testid="retry-analysis"
+                  >
+                    {retrying ? (
+                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                    ) : (
+                      <Zap className="h-3 w-3 mr-1" />
+                    )}
+                    Retry
+                  </Button>
+                  
+                  {/* Switch Method Dropdown */}
+                  {message.alternative_methods?.length > 0 && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs border-amber-500/30 hover:border-amber-500 hover:bg-amber-500/10"
+                          data-testid="switch-method-btn"
+                        >
+                          <GitBranch className="h-3 w-3 mr-1" />
+                          Switch Method
+                          <ChevronDown className="h-3 w-3 ml-1" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-56 p-0" align="start">
+                        <div className="p-2">
+                          <p className="text-xs text-muted-foreground px-2 py-1 mb-1">
+                            Alternative analysis methods
+                          </p>
+                          {message.alternative_methods.map((method) => (
+                            <button
+                              key={method}
+                              onClick={() => onSwitchMethod && onSwitchMethod(method)}
+                              className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors flex items-center gap-2"
+                              data-testid={`switch-to-${method}`}
+                            >
+                              {method === "statistical" && <BarChart3 className="h-4 w-4 text-blue-500" />}
+                              {method === "aggregation" && <TrendingUp className="h-4 w-4 text-green-500" />}
+                              {method === "chart_only" && <PieChart className="h-4 w-4 text-purple-500" />}
+                              <span className="capitalize">{method.replace("_", " ")}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
 
-        {/* Main Content */}
-        <p className="text-sm mb-4">{message.content}</p>
-
-        {/* Error */}
-        {message.error && (
-          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/30">
-            <div className="flex items-center gap-2 mb-1">
-              <AlertCircle className="h-4 w-4 text-destructive" />
-              <span className="text-xs text-destructive uppercase tracking-wider">
-                Error
-              </span>
-            </div>
-            <p className="text-sm text-destructive">{message.error}</p>
-          </div>
-        )}
-
-        {/* Table Data */}
-        {message.table_data && message.table_data.data && (
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                Result Data
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onExpandDetail(message, "table")}
-                className="h-6 text-xs"
-                data-testid="expand-table"
-              >
-                <Maximize2 className="h-3 w-3 mr-1" />
-                Expand
-              </Button>
-            </div>
-            <DataTable data={message.table_data} />
-          </div>
-        )}
-
-        {/* Chart */}
-        {message.chart_config && message.chart_config.type && (
-          <div className="chart-container mb-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                {(() => {
-                  const Icon = getChartIcon(message.chart_config.type);
-                  return <Icon className="h-4 w-4 text-primary" />;
-                })()}
-                <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                  {message.chart_config.title || "Chart"}
-                </span>
+                {/* Learn More Collapsible */}
+                <Collapsible open={showLearnMore} onOpenChange={setShowLearnMore}>
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                      <HelpCircle className="h-3 w-3" />
+                      Learn more
+                      {showLearnMore ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="mt-3 p-3 bg-muted/50 rounded-md text-xs text-muted-foreground space-y-2">
+                      <p><strong>Why did this happen?</strong></p>
+                      <p>The AI-generated analysis code encountered an execution error. This can happen due to:</p>
+                      <ul className="list-disc list-inside space-y-1 ml-2">
+                        <li>Unexpected data format or missing columns</li>
+                        <li>Complex calculation that exceeded runtime limits</li>
+                        <li>Syntax issues in generated code</li>
+                      </ul>
+                      <p className="mt-2"><strong>What can you do?</strong></p>
+                      <ul className="list-disc list-inside space-y-1 ml-2">
+                        <li><strong>Retry:</strong> Try the same analysis again</li>
+                        <li><strong>Statistical Summary:</strong> Get basic stats without complex code</li>
+                        <li><strong>Simple Aggregation:</strong> Calculate sum, mean, etc.</li>
+                        <li><strong>Chart Only:</strong> Generate a visualization directly</li>
+                      </ul>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onExpandDetail(message, "chart")}
-                className="h-6 text-xs"
-                data-testid="expand-chart"
-              >
-                <Maximize2 className="h-3 w-3 mr-1" />
-                Expand
-              </Button>
             </div>
-            <ChartRenderer
-              config={message.chart_config}
-              data={message.table_data}
-            />
           </div>
         )}
 
-        {/* Code Toggle */}
-        {message.code && (
-          <Collapsible open={showCode} onOpenChange={setShowCode}>
+        {/* ═══════════════════════════════════════════════════════════════════
+            LAYER 2 - AI REASONING (Collapsible, Hidden by Default)
+        ═══════════════════════════════════════════════════════════════════ */}
+        {message.layer2_reasoning && (
+          <Collapsible open={showLayer2} onOpenChange={setShowLayer2}>
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
-                className="mb-2 font-mono text-xs"
+                className="mb-2 font-mono text-xs w-full justify-between hover:bg-muted/50"
+                data-testid="toggle-layer2"
               >
-                <Code className="h-3 w-3 mr-2" />
-                {showCode ? "Hide" : "Show"} Code
-                {showCode ? (
-                  <ChevronUp className="h-3 w-3 ml-2" />
-                ) : (
-                  <ChevronDown className="h-3 w-3 ml-2" />
-                )}
+                <span className="flex items-center gap-2">
+                  <Lightbulb className="h-3 w-3 text-amber-500" />
+                  What I Did (AI Reasoning)
+                </span>
+                {showLayer2 ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <pre className="code-block text-xs overflow-x-auto">
-                <code>{message.code}</code>
-              </pre>
+              <div className="mb-4 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                {message.layer2_reasoning.methodology && (
+                  <div className="mb-3">
+                    <p className="text-xs text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1 font-semibold">
+                      Methodology
+                    </p>
+                    <p className="text-sm">{message.layer2_reasoning.methodology}</p>
+                  </div>
+                )}
+                {message.layer2_reasoning.steps?.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-xs text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1 font-semibold">
+                      Steps Taken
+                    </p>
+                    <ol className="list-decimal list-inside space-y-1 text-xs text-muted-foreground">
+                      {message.layer2_reasoning.steps.map((step, idx) => (
+                        <li key={idx}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+                {message.layer2_reasoning.data_quality_notes?.length > 0 && (
+                  <div>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1 font-semibold">
+                      Data Quality Notes
+                    </p>
+                    <ul className="space-y-1 text-xs text-muted-foreground">
+                      {message.layer2_reasoning.data_quality_notes.map((note, idx) => (
+                        <li key={idx} className="flex items-start gap-1">
+                          <span>•</span> {note}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </CollapsibleContent>
           </Collapsible>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
-          {/* Clarify This */}
-          {message.id && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onClarify(message)}
-                    disabled={clarifying === message.id}
-                    className="font-mono text-xs"
-                    data-testid={`clarify-${message.id}`}
-                  >
-                    {clarifying === message.id ? (
-                      <Loader2 className="h-3 w-3 animate-spin mr-2" />
-                    ) : (
-                      <HelpCircle className="h-3 w-3 mr-2" />
-                    )}
-                    Clarify This
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Get a more detailed explanation</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+        {/* ═══════════════════════════════════════════════════════════════════
+            LAYER 3 - RUNTIME EXECUTION (Collapsible, Hidden by Default)
+        ═══════════════════════════════════════════════════════════════════ */}
+        {(message.code || message.layer3_runtime) && (
+          <Collapsible open={showLayer3} onOpenChange={setShowLayer3}>
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mb-2 font-mono text-xs w-full justify-between hover:bg-muted/50"
+                data-testid="toggle-layer3"
+              >
+                <span className="flex items-center gap-2">
+                  <Code className="h-3 w-3 text-blue-500" />
+                  Runtime Details (Technical)
+                </span>
+                {showLayer3 ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mb-4 p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg space-y-3">
+                {/* Execution Time */}
+                {message.layer3_runtime?.execution_time_ms !== undefined && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="text-blue-500 font-semibold">Execution:</span>
+                    <span>{message.layer3_runtime.execution_time_ms}ms</span>
+                  </div>
+                )}
+                
+                {/* Code */}
+                {message.code && (
+                  <div>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1 font-semibold">
+                      Generated Code
+                    </p>
+                    <pre className="code-block text-xs overflow-x-auto bg-muted rounded-md p-2">
+                      <code>{message.code}</code>
+                    </pre>
+                  </div>
+                )}
+                
+                {/* Error Details (for debugging) */}
+                {message.layer3_runtime?.error_details && (
+                  <div>
+                    <p className="text-xs text-red-500 uppercase tracking-wider mb-1 font-semibold">
+                      Error Details
+                    </p>
+                    <pre className="text-xs text-red-400 bg-red-500/10 p-2 rounded-md overflow-x-auto">
+                      {message.layer3_runtime.error_details}
+                    </pre>
+                  </div>
+                )}
+                
+                {/* Stack Trace */}
+                {message.layer3_runtime?.stack_trace && (
+                  <div>
+                    <p className="text-xs text-red-500 uppercase tracking-wider mb-1 font-semibold">
+                      Stack Trace
+                    </p>
+                    <pre className="text-xs text-muted-foreground bg-muted p-2 rounded-md overflow-x-auto">
+                      {message.layer3_runtime.stack_trace}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
 
-          {/* Save as Tile */}
-          {message.id && (message.table_data || message.chart_config) && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onSaveAsTile(message)}
-              disabled={savingTile === message.id}
-              className="font-mono text-xs"
-              data-testid={`save-tile-${message.id}`}
-            >
-              {savingTile === message.id ? (
-                <Loader2 className="h-3 w-3 animate-spin mr-2" />
-              ) : (
-                <Pin className="h-3 w-3 mr-2" />
-              )}
-              Pin Insight
-            </Button>
-          )}
-        </div>
+        {/* Action Buttons (only show on success) */}
+        {!analysisFailed && (
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
+            {/* Clarify This */}
+            {message.id && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onClarify(message)}
+                      disabled={clarifying === message.id}
+                      className="font-mono text-xs"
+                      data-testid={`clarify-${message.id}`}
+                    >
+                      {clarifying === message.id ? (
+                        <Loader2 className="h-3 w-3 animate-spin mr-2" />
+                      ) : (
+                        <HelpCircle className="h-3 w-3 mr-2" />
+                      )}
+                      Clarify This
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Get a more detailed explanation</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+
+            {/* Save as Tile */}
+            {message.id && (message.table_data || message.chart_config) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onSaveAsTile(message)}
+                disabled={savingTile === message.id}
+                className="font-mono text-xs"
+                data-testid={`save-tile-${message.id}`}
+              >
+                {savingTile === message.id ? (
+                  <Loader2 className="h-3 w-3 animate-spin mr-2" />
+                ) : (
+                  <Pin className="h-3 w-3 mr-2" />
+                )}
+                Pin Insight
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* Suggestions */}
         {message.suggestions && message.suggestions.length > 0 && (
