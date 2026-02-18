@@ -391,6 +391,7 @@ function AppContent() {
             workspaces={workspaces}
             onCreateWorkspace={createWorkspace}
             onSelectWorkspace={setCurrentWorkspace}
+            onNavigateToAnalysis={() => setActiveView("chat")}
           />
         )}
         
