@@ -357,8 +357,32 @@ def extract_pdf_content(file_bytes: bytes) -> tuple[str, List[Dict]]:
 def execute_data_query(df: pd.DataFrame, query_code: str) -> Dict[str, Any]:
     """Execute a data query on a DataFrame safely"""
     try:
+        # Allowed modules for import
+        ALLOWED_MODULES = {
+            'pandas': pd,
+            'pd': pd,
+            'numpy': np,
+            'np': np,
+            'math': __import__('math'),
+            'statistics': __import__('statistics'),
+            'datetime': __import__('datetime'),
+            'collections': __import__('collections'),
+            're': __import__('re'),
+        }
+        
+        def safe_import(name, globals=None, locals=None, fromlist=(), level=0):
+            """Controlled import that only allows whitelisted modules"""
+            if name in ALLOWED_MODULES:
+                return ALLOWED_MODULES[name]
+            # Handle 'from X import Y' style imports
+            base_module = name.split('.')[0]
+            if base_module in ALLOWED_MODULES:
+                return ALLOWED_MODULES[base_module]
+            raise ImportError(f"Import of '{name}' is not allowed in this environment")
+        
         # Create a safe execution environment with necessary builtins
         safe_builtins = {
+            '__import__': safe_import,  # Controlled import function
             'len': len,
             'range': range,
             'enumerate': enumerate,
@@ -384,12 +408,32 @@ def execute_data_query(df: pd.DataFrame, query_code: str) -> Dict[str, Any]:
             'isinstance': isinstance,
             'hasattr': hasattr,
             'getattr': getattr,
+            'setattr': setattr,
             'print': print,
+            'any': any,
+            'all': all,
+            'slice': slice,
+            'repr': repr,
+            'format': format,
+            'ord': ord,
+            'chr': chr,
+            'divmod': divmod,
+            'pow': pow,
             'True': True,
             'False': False,
             'None': None,
         }
-        local_vars = {"df": df, "pd": pd, "np": np}
+        
+        # Pre-import commonly used modules into local namespace
+        local_vars = {
+            "df": df, 
+            "pd": pd, 
+            "np": np,
+            "math": __import__('math'),
+            "datetime": __import__('datetime'),
+            "statistics": __import__('statistics'),
+        }
+        
         exec(query_code, {"__builtins__": safe_builtins}, local_vars)
         
         result = local_vars.get("result", None)
