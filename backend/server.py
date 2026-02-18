@@ -809,6 +809,139 @@ Return ONLY valid JSON.
         logger.error(f"Error analyzing selected rows: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# Model Orchestrator - AI selects best analysis method
+class ModelOrchestrator:
+    """AI-powered model selection based on query and data characteristics"""
+    
+    MODELS = {
+        "deep_analysis": {
+            "name": "Deep Analysis",
+            "description": "LLM-powered code generation for complex queries",
+            "icon": "brain",
+            "best_for": ["complex calculations", "custom aggregations", "multi-step analysis"]
+        },
+        "statistical": {
+            "name": "Statistical Summary",
+            "description": "Fast statistical profiling without code execution",
+            "icon": "bar-chart",
+            "best_for": ["data overview", "summary statistics", "column profiling"]
+        },
+        "aggregation": {
+            "name": "Aggregation Engine",
+            "description": "Direct numeric calculations (sum, mean, count)",
+            "icon": "calculator",
+            "best_for": ["totals", "averages", "counts", "simple math"]
+        },
+        "chart_generator": {
+            "name": "Chart Generator",
+            "description": "Direct visualization without complex analysis",
+            "icon": "pie-chart",
+            "best_for": ["visualizations", "charts", "graphs", "plots"]
+        },
+        "pattern_detector": {
+            "name": "Pattern Detector",
+            "description": "Anomaly and trend detection algorithms",
+            "icon": "trending-up",
+            "best_for": ["anomalies", "outliers", "trends", "patterns"]
+        }
+    }
+    
+    @classmethod
+    def select_model(cls, query: str, df: pd.DataFrame = None) -> Dict[str, Any]:
+        """Select the best model based on query analysis"""
+        query_lower = query.lower()
+        
+        # Score each model based on query keywords
+        scores = {}
+        
+        # Deep Analysis keywords
+        deep_keywords = ["calculate", "compute", "analyze", "correlation", "regression", 
+                        "predict", "compare", "filter", "group by", "pivot", "transform"]
+        scores["deep_analysis"] = sum(1 for k in deep_keywords if k in query_lower) * 15
+        
+        # Statistical keywords
+        stat_keywords = ["summary", "describe", "profile", "overview", "statistics", 
+                        "stats", "info", "columns", "schema", "types", "nulls"]
+        scores["statistical"] = sum(1 for k in stat_keywords if k in query_lower) * 18
+        
+        # Aggregation keywords
+        agg_keywords = ["sum", "total", "average", "mean", "count", "min", "max", 
+                       "median", "how many", "how much"]
+        scores["aggregation"] = sum(1 for k in agg_keywords if k in query_lower) * 20
+        
+        # Chart keywords
+        chart_keywords = ["chart", "graph", "plot", "visualize", "visualization", 
+                         "bar", "line", "pie", "scatter", "show me", "display"]
+        scores["chart_generator"] = sum(1 for k in chart_keywords if k in query_lower) * 17
+        
+        # Pattern keywords
+        pattern_keywords = ["trend", "pattern", "anomaly", "outlier", "unusual", 
+                          "detect", "find patterns", "time series"]
+        scores["pattern_detector"] = sum(1 for k in pattern_keywords if k in query_lower) * 16
+        
+        # Add baseline scores based on data characteristics
+        if df is not None:
+            numeric_cols = len(df.select_dtypes(include=[np.number]).columns)
+            categorical_cols = len(df.select_dtypes(include=['object', 'category']).columns)
+            
+            # Boost statistical for profiling-type queries
+            if numeric_cols > 0:
+                scores["statistical"] += 5
+                scores["aggregation"] += 5
+            if categorical_cols > 0:
+                scores["chart_generator"] += 5
+        
+        # Default boost for deep analysis (it's the most versatile)
+        scores["deep_analysis"] += 10
+        
+        # Normalize scores to percentages
+        total = sum(scores.values()) or 1
+        percentages = {k: round((v / total) * 100) for k, v in scores.items()}
+        
+        # Select the best model
+        selected = max(scores, key=scores.get)
+        
+        # Build alternatives list sorted by score
+        alternatives = []
+        for model_id, score in sorted(scores.items(), key=lambda x: x[1], reverse=True):
+            model_info = cls.MODELS[model_id]
+            alternatives.append({
+                "id": model_id,
+                "name": model_info["name"],
+                "score": percentages[model_id],
+                "description": model_info["description"],
+                "icon": model_info["icon"]
+            })
+        
+        # Generate reason for selection
+        selected_model = cls.MODELS[selected]
+        reason = f"Selected {selected_model['name']} ({percentages[selected]}% match) - best for {', '.join(selected_model['best_for'][:2])}"
+        
+        return {
+            "selected": selected,
+            "selected_name": selected_model["name"],
+            "selected_score": percentages[selected],
+            "reason": reason,
+            "alternatives": alternatives,
+            "query_type": cls._detect_query_type(query_lower)
+        }
+    
+    @staticmethod
+    def _detect_query_type(query: str) -> str:
+        """Detect the type of query"""
+        if any(k in query for k in ["chart", "graph", "plot", "visualize"]):
+            return "visualization"
+        elif any(k in query for k in ["sum", "total", "average", "count"]):
+            return "quantitative"
+        elif any(k in query for k in ["trend", "pattern", "anomaly"]):
+            return "pattern_detection"
+        elif any(k in query for k in ["summary", "describe", "overview"]):
+            return "exploratory"
+        else:
+            return "analytical"
+
+
 # Chat endpoints
 class AnalysisMethods:
     """Pre-built analysis methods for fallback"""
