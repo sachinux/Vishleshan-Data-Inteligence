@@ -1193,13 +1193,18 @@ Example:
         # Calculate confidence score (only if successful)
         if analysis_success and result_data:
             confidence_score = 50
-            if result_data.get("data"):
+            if result_data.get("data") is not None:
                 confidence_score += 20
             if analysis.get("chart_type"):
                 confidence_score += 15
             if analysis.get("plan"):
                 confidence_score += 10
-            if len(result_data.get("data", [])) > 0:
+            # Handle different result types
+            result_data_value = result_data.get("data")
+            if isinstance(result_data_value, (list, dict)):
+                if len(result_data_value) > 0:
+                    confidence_score += 5
+            elif result_data_value is not None:  # Scalar value
                 confidence_score += 5
             confidence_score = min(confidence_score, 100)
         else:
