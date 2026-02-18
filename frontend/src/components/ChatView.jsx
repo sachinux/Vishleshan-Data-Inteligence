@@ -802,6 +802,9 @@ export const ChatView = ({
                         onClarify={handleClarify}
                         clarifying={clarifying}
                         onExpandDetail={handleExpandDetail}
+                        onRetry={handleRetry}
+                        onSwitchMethod={handleSwitchMethod}
+                        retrying={retrying}
                       />
                     </div>
                   ))}
