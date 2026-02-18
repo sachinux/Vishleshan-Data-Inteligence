@@ -60,13 +60,30 @@ export const WorkspaceView = ({
   importGoogleSheet,
   loading,
   onDatasetDeleted,
+  workspaces,
+  onCreateWorkspace,
+  onSelectWorkspace,
 }) => {
   const [googleSheetUrl, setGoogleSheetUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [deletingDataset, setDeletingDataset] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [showWorkspaceSelect, setShowWorkspaceSelect] = useState(false);
+  const [creatingWorkspace, setCreatingWorkspace] = useState(false);
   const fileInputRef = useRef(null);
+
+  const handleCreateWorkspace = async () => {
+    setCreatingWorkspace(true);
+    try {
+      await onCreateWorkspace();
+      toast.success("Workspace created!");
+    } catch (error) {
+      toast.error("Failed to create workspace");
+    } finally {
+      setCreatingWorkspace(false);
+    }
+  };
 
   const handleDeleteDataset = async () => {
     if (!deletingDataset) return;
