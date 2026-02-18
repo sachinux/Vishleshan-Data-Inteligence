@@ -452,11 +452,26 @@ export const ChatView = ({
             ask questions, and generate AI-powered insights.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <Button 
+              size="lg"
+              className="gap-2 px-6 bg-foreground text-background hover:bg-foreground/90"
+              onClick={handleCreateWorkspace}
+              disabled={creatingWorkspace}
+              data-testid="empty-create-workspace-analysis"
+            >
+              {creatingWorkspace ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Plus className="h-5 w-5" />
+              )}
+              Create Workspace
+            </Button>
             <Popover open={showWorkspaceSelect} onOpenChange={setShowWorkspaceSelect}>
               <PopoverTrigger asChild>
                 <Button 
+                  variant="outline"
                   size="lg"
-                  className="gap-2 px-6 bg-foreground text-background hover:bg-foreground/90"
+                  className="gap-2 px-6"
                   data-testid="empty-select-workspace-analysis"
                 >
                   <FolderOpen className="h-5 w-5" />
