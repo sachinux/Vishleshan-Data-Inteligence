@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import "@/App.css";
+import ./pp.css";
 import axios from "axios";
-import { Toaster } from "@/components/ui/sonner";
-import { WorkspaceView } from "@/components/WorkspaceView";
-import { ChatView } from "@/components/ChatView";
-import { StoryboardView } from "@/components/StoryboardView";
-import { DataGridView } from "@/components/DataGridView";
-import { Sidebar } from "@/components/Sidebar";
-import { RightSidebar } from "@/components/RightSidebar";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from ./omponents/ui/sonner";
+import { WorkspaceView } from ./omponents/WorkspaceView";
+import { ChatView } from./@/components/ChatView";
+import { StoryboardView } from./@/components/StoryboardView";
+import { DataGridView } from./@/components/DataGridView";
+import { Sidebar } from ./omponents/Sidebar";
+import { RightSidebar } from ./omponents/RightSidebar";
+import { ThemeProvider } from ./omponents/ThemeProvider";
 import { Database, MessageSquare, LayoutDashboard } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
